@@ -128,8 +128,8 @@ export function Sidebar({ role, hospitalName }: SidebarProps) {
       {/* Logo & Hospital Name */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-tory-blue rounded-lg flex items-center justify-center">
-            <span className="text-white text-lg font-bold">M</span>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+            <img src="/logo.png" alt="Momentum EMR" className="w-full h-full object-contain" />
           </div>
           <div>
             <h2 className="font-bold text-sm text-tory-blue">Momentum EMR</h2>

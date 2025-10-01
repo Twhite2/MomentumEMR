@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 
-export default async function DashboardLayout({
+export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;

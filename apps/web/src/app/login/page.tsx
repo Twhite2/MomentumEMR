@@ -46,8 +46,8 @@ export default function LoginPage() {
           {/* Hospital Branding */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-tory-blue rounded-lg flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">M</span>
+              <div className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden">
+                <img src="/logo.png" alt="Momentum EMR" className="w-full h-full object-contain" />
               </div>
             </div>
             <h1 className="text-2xl font-bold text-tory-blue">Momentum EMR</h1>
