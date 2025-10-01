@@ -1,0 +1,563 @@
+// Momentum EMR/EHR Database Schema
+// Multi-tenant Electronic Medical Records system
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===================================
+// ENUMS
+// ===================================
+
+enum UserRole {
+  admin
+  doctor
+  nurse
+  pharmacist
+  cashier
+  patient
+  lab_tech
+}
+
+enum PatientType {
+  hmo
+  corporate
+  self_pay
+}
+
+enum AppointmentType {
+  OPD
+  IPD
+  surgery
+  lab
+  follow_up
+}
+
+enum AppointmentStatus {
+  scheduled
+  checked_in
+  completed
+  cancelled
+}
+
+enum PrescriptionStatus {
+  active
+  completed
+}
+
+enum InvoiceStatus {
+  pending
+  paid
+  cancelled
+  refunded
+}
+
+enum NotificationType {
+  lab_order
+  prescription_issued
+  inventory_low
+  appointment_reminder
+  lab_result_ready
+  payment_due
+}
+
+enum DeliveryMethod {
+  email
+  sms
+  push
+  in_app
+}
+
+enum NotificationStatus {
+  pending
+  sent
+  read
+  failed
+}
+
+enum LabOrderType {
+  Lab_Test
+  X_ray
+  CT_Scan
+  MRI
+  Ultrasound
+  Pathology
+}
+
+enum LabOrderStatus {
+  pending
+  in_progress
+  completed
+  cancelled
+}
+
+enum DashboardType {
+  patient_volume
+  revenue
+  drug_statistics
+  consultation_metrics
+  operational
+}
+
+enum ReportType {
+  daily_summary
+  weekly_revenue
+  monthly_patient_volume
+  drug_usage
+  consultation_times
+}
+
+enum ReportStatus {
+  generating
+  completed
+  failed
+}
+
+// ===================================
+// MODELS
+// ===================================
+
+model Hospital {
+  id                Int      @id @default(autoincrement())
+  name              String
+  address           String?  @db.Text
+  contactEmail      String?  @map("contact_email")
+  phoneNumber       String?  @map("phone_number")
+  subscriptionPlan  String?  @map("subscription_plan")
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users                User[]
+  patients             Patient[]
+  hmo                  Hmo[]
+  corporateClients     CorporateClient[]
+  appointments         Appointment[]
+  medicalRecords       MedicalRecord[]
+  prescriptions        Prescription[]
+  inventory            Inventory[]
+  invoices             Invoice[]
+  notifications        Notification[]
+  patientSurveys       PatientSurvey[]
+  labOrders            LabOrder[]
+  analyticsDashboards  AnalyticsDashboard[]
+  analyticsReports     AnalyticsReport[]
+  analyticsMetrics     AnalyticsMetric[]
+
+  @@map("hospitals")
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  hospitalId     Int       @map("hospital_id")
+  name           String
+  email          String    @unique
+  hashedPassword String    @map("hashed_password")
+  role           UserRole
+  active         Boolean   @default(true)
+  lastLogin      DateTime? @map("last_login")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  hospital                Hospital              @relation(fields: [hospitalId], references: [id])
+  appointments            Appointment[]
+  medicalRecords          MedicalRecord[]
+  prescriptions           Prescription[]
+  labOrdersOrdered        LabOrder[]            @relation("OrderedBy")
+  labResultsUploaded      LabResult[]           @relation("UploadedBy")
+  notificationsReceived   Notification[]        @relation("NotificationRecipient")
+  notificationsSent       Notification[]        @relation("NotificationSender")
+  analyticsDashboards     AnalyticsDashboard[]  @relation("DashboardCreator")
+  analyticsReports        AnalyticsReport[]     @relation("ReportGenerator")
+
+  @@index([hospitalId])
+  @@index([email])
+  @@map("users")
+}
+
+model Patient {
+  id                  Int          @id @default(autoincrement())
+  hospitalId          Int          @map("hospital_id")
+  patientType         PatientType  @default(self_pay) @map("patient_type")
+  corporateClientId   Int?         @map("corporate_client_id")
+  firstName           String       @map("first_name")
+  lastName            String       @map("last_name")
+  dob                 DateTime     @db.Date
+  gender              String?
+  contactInfo         Json?        @map("contact_info")
+  address             String?      @db.Text
+  emergencyContact    String?      @map("emergency_contact") @db.Text
+  insuranceId         Int?         @map("insurance_id")
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  hospital        Hospital          @relation(fields: [hospitalId], references: [id])
+  corporateClient CorporateClient?  @relation(fields: [corporateClientId], references: [id])
+  hmo             Hmo?              @relation(fields: [insuranceId], references: [id])
+  appointments    Appointment[]
+  medicalRecords  MedicalRecord[]
+  prescriptions   Prescription[]
+  invoices        Invoice[]
+  patientSurveys  PatientSurvey[]
+  labOrders       LabOrder[]
+
+  @@index([hospitalId])
+  @@index([corporateClientId])
+  @@index([insuranceId])
+  @@map("patients")
+}
+
+model Hmo {
+  id               Int      @id @default(autoincrement())
+  hospitalId       Int      @map("hospital_id")
+  policyName       String   @map("policy_name")
+  provider         String?
+  coverageDetails  Json?    @map("coverage_details")
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  hospital Hospital  @relation(fields: [hospitalId], references: [id])
+  patients Patient[]
+
+  @@index([hospitalId])
+  @@map("hmo")
+}
+
+model CorporateClient {
+  id              Int       @id @default(autoincrement())
+  hospitalId      Int       @map("hospital_id")
+  companyName     String    @map("company_name")
+  contactPerson   String?   @map("contact_person")
+  contactEmail    String?   @map("contact_email")
+  contactPhone    String?   @map("contact_phone")
+  billingAddress  String?   @map("billing_address") @db.Text
+  paymentTerms    String?   @map("payment_terms")
+  discountRate    Decimal?  @map("discount_rate") @db.Decimal(5, 2)
+  creditLimit     Decimal?  @map("credit_limit") @db.Decimal(15, 2)
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  hospital Hospital  @relation(fields: [hospitalId], references: [id])
+  patients Patient[]
+
+  @@index([hospitalId])
+  @@map("corporate_clients")
+}
+
+model Appointment {
+  id              Int               @id @default(autoincrement())
+  hospitalId      Int               @map("hospital_id")
+  patientId       Int               @map("patient_id")
+  doctorId        Int               @map("doctor_id")
+  department      String?
+  appointmentType AppointmentType   @map("appointment_type")
+  status          AppointmentStatus
+  startTime       DateTime          @map("start_time")
+  endTime         DateTime?         @map("end_time")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+  patient  Patient  @relation(fields: [patientId], references: [id])
+  doctor   User     @relation(fields: [doctorId], references: [id])
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([startTime])
+  @@map("appointments")
+}
+
+model MedicalRecord {
+  id          Int      @id @default(autoincrement())
+  hospitalId  Int      @map("hospital_id")
+  patientId   Int      @map("patient_id")
+  doctorId    Int      @map("doctor_id")
+  visitDate   DateTime @map("visit_date") @db.Date
+  diagnosis   String?  @db.Text
+  notes       String?  @db.Text
+  attachments Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+  patient  Patient  @relation(fields: [patientId], references: [id])
+  doctor   User     @relation(fields: [doctorId], references: [id])
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([doctorId])
+  @@map("medical_records")
+}
+
+model Prescription {
+  id            Int                  @id @default(autoincrement())
+  hospitalId    Int                  @map("hospital_id")
+  patientId     Int                  @map("patient_id")
+  doctorId      Int                  @map("doctor_id")
+  treatmentPlan String?              @map("treatment_plan") @db.Text
+  status        PrescriptionStatus?
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+
+  // Relations
+  hospital          Hospital            @relation(fields: [hospitalId], references: [id])
+  patient           Patient             @relation(fields: [patientId], references: [id])
+  doctor            User                @relation(fields: [doctorId], references: [id])
+  prescriptionItems PrescriptionItem[]
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([doctorId])
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id             Int     @id @default(autoincrement())
+  prescriptionId Int     @map("prescription_id")
+  drugName       String  @map("drug_name")
+  dosage         String?
+  frequency      String?
+  duration       String?
+  notes          String? @db.Text
+
+  // Relations
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+
+  @@index([prescriptionId])
+  @@map("prescription_items")
+}
+
+model Inventory {
+  id             Int       @id @default(autoincrement())
+  hospitalId     Int       @map("hospital_id")
+  itemName       String    @map("item_name")
+  itemCode       String?   @unique @map("item_code")
+  stockQuantity  Int       @default(0) @map("stock_quantity")
+  reorderLevel   Int       @default(10) @map("reorder_level")
+  unitPrice      Decimal?  @map("unit_price") @db.Decimal(10, 2)
+  expiryDate     DateTime? @map("expiry_date") @db.Date
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+
+  @@index([hospitalId])
+  @@index([stockQuantity])
+  @@map("inventory")
+}
+
+model Invoice {
+  id            Int           @id @default(autoincrement())
+  hospitalId    Int           @map("hospital_id")
+  patientId     Int           @map("patient_id")
+  totalAmount   Decimal       @map("total_amount") @db.Decimal(10, 2)
+  status        InvoiceStatus
+  paymentMethod String?       @map("payment_method")
+  hmoId         Int?          @map("hmo_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  hospital Hospital  @relation(fields: [hospitalId], references: [id])
+  patient  Patient   @relation(fields: [patientId], references: [id])
+  payments Payment[]
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model Payment {
+  id             Int      @id @default(autoincrement())
+  invoiceId      Int      @map("invoice_id")
+  amountPaid     Decimal  @map("amount_paid") @db.Decimal(10, 2)
+  paymentDate    DateTime @map("payment_date")
+  paymentGateway String?  @map("payment_gateway")
+  transactionRef String?  @unique @map("transaction_ref")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+  @@map("payments")
+}
+
+model Notification {
+  id               Int                 @id @default(autoincrement())
+  hospitalId       Int                 @map("hospital_id")
+  userId           Int?                @map("user_id")
+  senderId         Int?                @map("sender_id")
+  notificationType NotificationType    @map("notification_type")
+  referenceId      Int?                @map("reference_id")
+  referenceTable   String?             @map("reference_table")
+  deliveryMethod   DeliveryMethod      @map("delivery_method")
+  message          String              @db.Text
+  status           NotificationStatus
+  createdAt        DateTime            @default(now()) @map("created_at")
+  sentAt           DateTime?           @map("sent_at")
+  readAt           DateTime?           @map("read_at")
+
+  // Relations
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+  user     User?    @relation("NotificationRecipient", fields: [userId], references: [id])
+  sender   User?    @relation("NotificationSender", fields: [senderId], references: [id])
+
+  @@index([hospitalId])
+  @@index([userId])
+  @@index([status])
+  @@map("notifications")
+}
+
+model PatientSurvey {
+  id          Int      @id @default(autoincrement())
+  hospitalId  Int      @map("hospital_id")
+  patientId   Int      @map("patient_id")
+  surveyData  Json     @map("survey_data")
+  submittedAt DateTime @default(now()) @map("submitted_at")
+
+  // Relations
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+  patient  Patient  @relation(fields: [patientId], references: [id])
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@map("patient_surveys")
+}
+
+model LabOrder {
+  id          Int            @id @default(autoincrement())
+  hospitalId  Int            @map("hospital_id")
+  patientId   Int            @map("patient_id")
+  orderedBy   Int            @map("ordered_by")
+  orderType   LabOrderType   @map("order_type")
+  description String?        @db.Text
+  status      LabOrderStatus?
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  hospital   Hospital    @relation(fields: [hospitalId], references: [id])
+  patient    Patient     @relation(fields: [patientId], references: [id])
+  doctor     User        @relation("OrderedBy", fields: [orderedBy], references: [id])
+  labResults LabResult[]
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([orderedBy])
+  @@index([status])
+  @@map("lab_orders")
+}
+
+model LabResult {
+  id            Int      @id @default(autoincrement())
+  labOrderId    Int      @map("lab_order_id")
+  uploadedBy    Int      @map("uploaded_by")
+  fileUrl       String?  @map("file_url") @db.Text
+  resultNotes   String?  @map("result_notes") @db.Text
+  finalized     Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  labOrder        LabOrder           @relation(fields: [labOrderId], references: [id])
+  uploader        User               @relation("UploadedBy", fields: [uploadedBy], references: [id])
+  labResultValues LabResultValue[]
+
+  @@index([labOrderId])
+  @@index([uploadedBy])
+  @@map("lab_results")
+}
+
+model LabResultValue {
+  id          Int      @id @default(autoincrement())
+  labResultId Int      @map("lab_result_id")
+  testName    String   @map("test_name")
+  resultValue String?  @map("result_value")
+  unit        String?
+  normalRange String?  @map("normal_range")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  labResult LabResult @relation(fields: [labResultId], references: [id], onDelete: Cascade)
+
+  @@index([labResultId])
+  @@map("lab_result_values")
+}
+
+model AnalyticsDashboard {
+  id            Int            @id @default(autoincrement())
+  hospitalId    Int            @map("hospital_id")
+  dashboardName String         @map("dashboard_name")
+  dashboardType DashboardType? @map("dashboard_type")
+  config        Json?
+  createdBy     Int?           @map("created_by")
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+  creator  User?    @relation("DashboardCreator", fields: [createdBy], references: [id])
+
+  @@index([hospitalId])
+  @@map("analytics_dashboards")
+}
+
+model AnalyticsReport {
+  id                Int           @id @default(autoincrement())
+  hospitalId        Int           @map("hospital_id")
+  reportType        ReportType?   @map("report_type")
+  reportPeriodStart DateTime      @map("report_period_start") @db.Date
+  reportPeriodEnd   DateTime      @map("report_period_end") @db.Date
+  generatedBy       Int?          @map("generated_by")
+  reportData        Json?         @map("report_data")
+  fileUrl           String?       @map("file_url") @db.Text
+  status            ReportStatus?
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  hospital  Hospital @relation(fields: [hospitalId], references: [id])
+  generator User?    @relation("ReportGenerator", fields: [generatedBy], references: [id])
+
+  @@index([hospitalId])
+  @@index([status])
+  @@map("analytics_reports")
+}
+
+model AnalyticsMetric {
+  id             Int         @id @default(autoincrement())
+  hospitalId     Int         @map("hospital_id")
+  metricDate     DateTime    @map("metric_date") @db.Date
+  metricType     String      @map("metric_type")
+  metricValue    Decimal?    @map("metric_value") @db.Decimal(15, 2)
+  metricUnit     String?     @map("metric_unit")
+  patientType    PatientType? @map("patient_type")
+  additionalData Json?       @map("additional_data")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+
+  @@index([hospitalId])
+  @@index([metricDate])
+  @@index([metricType])
+  @@map("analytics_metrics")
+}

@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Momentum EMR Color Variables - From PROJECT.md */
+:root {
+  --amaranth: #e7265e;
+  --red-ribbon: #eb0146;
+  --green-haze: #08b358;
+  --tory-blue: #1253b2; /* primary */
+  --saffron: #f8be29;
+  --spindle: #c7d7ed;
+  --danube: #729ad2;
+  --froly: #f57da0;
+  --padua: #b0e7c9;
+  
+  --primary: #1253b2;
+  --primary-foreground: #ffffff;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --border: #e5e5e5;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  
+  h1 {
+    @apply text-h1;
+  }
+  
+  h2 {
+    @apply text-h2;
+  }
+  
+  h3 {
+    @apply text-h3;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--danube);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tory-blue);
+}

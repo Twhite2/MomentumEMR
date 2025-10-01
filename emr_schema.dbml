@@ -1,0 +1,289 @@
+// EMR/EHR Database Schema in DBML
+// Multi-tenant Electronic Medical Records system
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table hospitals {
+  id integer [primary key]
+  name varchar [not null]
+  address text
+  contact_email varchar
+  phone_number varchar
+  subscription_plan varchar
+  active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table users {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  name varchar [not null]
+  email varchar [unique, not null]
+  hashed_password varchar [not null]
+  role varchar [not null, note: 'ENUM: admin, doctor, nurse, pharmacist, cashier, patient']
+  active boolean [default: true]
+  last_login timestamp
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table patients {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  patient_type varchar [not null, default: 'self_pay', note: 'hmo, corporate, self_pay']
+  corporate_client_id integer [ref: > corporate_clients.id, note: 'Required for corporate patients']
+  first_name varchar [not null]
+  last_name varchar [not null]
+  dob date [not null]
+  gender varchar
+  contact_info jsonb [note: 'Phone, email, etc.']
+  address text
+  emergency_contact text
+  insurance_id integer [ref: > hmo.id, note: 'Required for HMO patients']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table hmo {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  policy_name varchar [not null]
+  provider varchar
+  coverage_details jsonb
+  active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table corporate_clients {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  company_name varchar [not null]
+  contact_person varchar
+  contact_email varchar
+  contact_phone varchar
+  billing_address text
+  payment_terms varchar [note: 'e.g., NET30, NET60']
+  discount_rate decimal [note: 'Percentage discount for corporate rates']
+  credit_limit decimal [note: 'Maximum outstanding balance allowed']
+  active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table appointments {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  patient_id integer [not null, ref: > patients.id]
+  doctor_id integer [not null, ref: > users.id]
+  department varchar
+  appointment_type varchar [note: 'ENUM: OPD, IPD, surgery, lab, follow-up']
+  status varchar [note: 'ENUM: scheduled, checked-in, completed, cancelled']
+  start_time timestamp [not null]
+  end_time timestamp
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table medical_records {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  patient_id integer [not null, ref: > patients.id]
+  doctor_id integer [not null, ref: > users.id]
+  visit_date date [not null]
+  diagnosis text
+  notes text
+  attachments jsonb [note: 'Links to scans, x-rays, lab reports']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table prescriptions {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  patient_id integer [not null, ref: > patients.id]
+  doctor_id integer [not null, ref: > users.id]
+  treatment_plan text
+  status varchar [note: 'active, completed']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table prescription_items {
+  id integer [primary key]
+  prescription_id integer [not null, ref: > prescriptions.id]
+  drug_name varchar [not null]
+  dosage varchar
+  frequency varchar
+  duration varchar
+  notes text
+}
+
+Table inventory {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  item_name varchar [not null]
+  item_code varchar [unique]
+  stock_quantity integer [default: 0]
+  reorder_level integer [default: 10]
+  unit_price decimal(10,2)
+  expiry_date date
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table invoices {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  patient_id integer [not null, ref: > patients.id]
+  total_amount decimal(10,2) [not null]
+  status varchar [note: 'ENUM: pending, paid, cancelled, refunded']
+  payment_method varchar
+  hmo_id integer [note: 'Health Maintenance Organization ID']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table payments {
+  id integer [primary key]
+  invoice_id integer [not null, ref: > invoices.id]
+  amount_paid decimal(10,2) [not null]
+  payment_date timestamp [not null]
+  payment_gateway varchar [note: 'Paystack, Flutterwave, etc.']
+  transaction_ref varchar [unique]
+  created_at timestamp [default: `now()`]
+}
+
+Table notifications {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  user_id integer [ref: > users.id, note: 'Recipient of notification']
+  sender_id integer [ref: > users.id, note: 'Who triggered the notification']
+  notification_type varchar [note: 'ENUM: lab_order, prescription_issued, inventory_low, appointment_reminder, lab_result_ready, payment_due, etc.']
+  reference_id integer [note: 'ID of related record (lab_order.id, prescription.id, etc.)']
+  reference_table varchar [note: 'Which table the reference_id points to (lab_orders, prescriptions, etc.)']
+  delivery_method varchar [note: 'ENUM: email, sms, push, in_app']
+  message text [not null]
+  status varchar [note: 'ENUM: pending, sent, read, failed']
+  created_at timestamp [default: `now()`]
+  sent_at timestamp
+  read_at timestamp
+}
+
+Table patient_surveys {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  patient_id integer [not null, ref: > patients.id]
+  survey_data jsonb [note: 'Survey responses and feedback']
+  submitted_at timestamp [default: `now()`]
+}
+
+Table lab_orders {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  patient_id integer [not null, ref: > patients.id]
+  ordered_by integer [not null, ref: > users.id, note: 'Doctor who ordered the test']
+  order_type varchar [not null, note: 'ENUM: Lab Test, X-ray, CT Scan, MRI, Ultrasound, Pathology']
+  description text
+  status varchar [note: 'ENUM: pending, in_progress, completed, cancelled']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table lab_results {
+  id integer [primary key]
+  lab_order_id integer [not null, ref: > lab_orders.id]
+  uploaded_by integer [not null, ref: > users.id, note: 'Lab tech/radiologist who uploaded results']
+  file_url text [note: 'Link to stored result file (DICOM, PDF, etc.)']
+  result_notes text [note: 'Summary and interpretation of results']
+  finalized boolean [default: false, note: 'True when reviewed/approved by doctor']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table lab_result_values {
+  id integer [primary key]
+  lab_result_id integer [not null, ref: > lab_results.id]
+  test_name varchar [not null]
+  result_value varchar
+  unit varchar
+  normal_range varchar [note: 'Expected normal range for this test']
+  created_at timestamp [default: `now()`]
+}
+
+Table analytics_dashboards {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  dashboard_name varchar [not null]
+  dashboard_type varchar [note: 'ENUM: patient_volume, revenue, drug_statistics, consultation_metrics, operational']
+  config jsonb [note: 'Dashboard configuration and widget settings']
+  created_by integer [ref: > users.id]
+  active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table analytics_reports {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  report_type varchar [note: 'ENUM: daily_summary, weekly_revenue, monthly_patient_volume, drug_usage, consultation_times']
+  report_period_start date [not null]
+  report_period_end date [not null]
+  generated_by integer [ref: > users.id]
+  report_data jsonb [note: 'Aggregated statistics and metrics']
+  file_url text [note: 'Link to generated PDF/Excel report']
+  status varchar [note: 'ENUM: generating, completed, failed']
+  created_at timestamp [default: `now()`]
+}
+
+Table analytics_metrics {
+  id integer [primary key]
+  hospital_id integer [not null, ref: > hospitals.id]
+  metric_date date [not null]
+  metric_type varchar [note: 'patient_count, revenue_total, avg_consultation_time, top_prescribed_drugs, patient_type_breakdown, hmo_revenue, corporate_revenue, self_pay_revenue']
+  metric_value decimal(15,2)
+  metric_unit varchar [note: 'count, minutes, currency, percentage']
+  patient_type varchar [note: 'hmo, corporate, self_pay - for patient type specific metrics']
+  additional_data jsonb [note: 'Breakdown data, categories, corporate client details, etc.']
+  created_at timestamp [default: `now()`]
+}
+
+// Additional relationships for better clarity
+Ref: appointments.patient_id > patients.id
+Ref: appointments.doctor_id > users.id
+Ref: medical_records.patient_id > patients.id
+Ref: medical_records.doctor_id > users.id
+Ref: prescriptions.patient_id > patients.id
+Ref: prescriptions.doctor_id > users.id
+Ref: invoices.patient_id > patients.id
+Ref: patient_surveys.patient_id > patients.id
+Ref: notifications.user_id > users.id
+Ref: notifications.sender_id > users.id
+
+// Analytics relationships
+Ref: analytics_dashboards.hospital_id > hospitals.id
+Ref: analytics_dashboards.created_by > users.id
+Ref: analytics_reports.hospital_id > hospitals.id
+Ref: analytics_reports.generated_by > users.id
+Ref: analytics_metrics.hospital_id > hospitals.id
+
+// Laboratory & Imaging relationships
+Ref: lab_orders.patient_id > patients.id
+Ref: lab_orders.ordered_by > users.id
+Ref: lab_results.lab_order_id > lab_orders.id
+Ref: lab_results.uploaded_by > users.id
+Ref: lab_result_values.lab_result_id > lab_results.id
+
+// Multi-tenant relationships - all tables reference hospitals
+Ref: users.hospital_id > hospitals.id
+Ref: patients.hospital_id > hospitals.id
+Ref: appointments.hospital_id > hospitals.id
+Ref: medical_records.hospital_id > hospitals.id
+Ref: prescriptions.hospital_id > hospitals.id
+Ref: inventory.hospital_id > hospitals.id
+Ref: invoices.hospital_id > hospitals.id
+Ref: notifications.hospital_id > hospitals.id
+Ref: patient_surveys.hospital_id > hospitals.id
+Ref: hmo.hospital_id > hospitals.id
+Ref: corporate_clients.hospital_id > hospitals.id
+Ref: lab_orders.hospital_id > hospitals.id
