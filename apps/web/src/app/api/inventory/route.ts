@@ -21,33 +21,40 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [
-        { drugName: { contains: search, mode: 'insensitive' } },
-        { genericName: { contains: search, mode: 'insensitive' } },
+        { itemName: { contains: search, mode: 'insensitive' } },
+        { itemCode: { contains: search, mode: 'insensitive' } },
       ];
     }
 
+    let lowStockFilter = false;
     if (lowStock === 'true') {
-      where.quantity = { lte: prisma.inventory.fields.reorderLevel };
+      lowStockFilter = true;
     }
 
     if (expired === 'true') {
       where.expiryDate = { lte: new Date() };
     }
-
-    const [items, total] = await Promise.all([
-      prisma.inventory.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { drugName: 'asc' },
-      }),
-      prisma.inventory.count({ where }),
-    ]);
+    
+    const allItems = await prisma.inventory.findMany({
+      where,
+      orderBy: { itemName: 'asc' },
+    });
+    
+    // Filter low stock items if needed
+    let filteredItems = allItems;
+    if (lowStockFilter) {
+      filteredItems = allItems.filter(item => item.stockQuantity <= item.reorderLevel);
+    }
+    
+    const total = filteredItems.length;
+    
+    // Apply pagination after filtering
+    const items = filteredItems.slice(skip, skip + limit);
 
     // Add status flags
     const itemsWithStatus = items.map((item) => {
       const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
-      const isLowStock = item.quantity <= item.reorderLevel;
+      const isLowStock = item.stockQuantity <= item.reorderLevel;
       const daysToExpiry = item.expiryDate
         ? Math.ceil(
             (new Date(item.expiryDate).getTime() - new Date().getTime()) /
@@ -86,19 +93,16 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      drugName,
-      genericName,
-      category,
-      quantity,
+      itemName,
+      itemCode,
+      stockQuantity,
       unitPrice,
       reorderLevel,
       expiryDate,
-      batchNumber,
-      manufacturer,
     } = body;
 
     // Validation
-    if (!drugName || !category || quantity === undefined || !unitPrice) {
+    if (!itemName || stockQuantity === undefined || !unitPrice) {
       return apiResponse({ error: 'Missing required fields' }, 400);
     }
 
@@ -106,15 +110,12 @@ export async function POST(request: NextRequest) {
     const item = await prisma.inventory.create({
       data: {
         hospitalId,
-        drugName,
-        genericName: genericName || null,
-        category,
-        quantity: parseInt(quantity),
+        itemName,
+        itemCode: itemCode || null,
+        stockQuantity: parseInt(stockQuantity),
         unitPrice: parseFloat(unitPrice),
         reorderLevel: reorderLevel ? parseInt(reorderLevel) : 10,
         expiryDate: expiryDate ? new Date(expiryDate) : null,
-        batchNumber: batchNumber || null,
-        manufacturer: manufacturer || null,
       },
     });
 
