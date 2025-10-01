@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, Select } from '@momentum/ui';
 import {
@@ -47,15 +47,19 @@ export default function UserDetailPage() {
       const response = await axios.get(`/api/users/${userId}`);
       return response.data;
     },
-    onSuccess: (data) => {
+  });
+
+  // Update form data when user data is loaded
+  useEffect(() => {
+    if (user) {
       setFormData({
-        name: data.name,
-        email: data.email,
-        role: data.role,
+        name: user.name,
+        email: user.email,
+        role: user.role,
         password: '',
       });
-    },
-  });
+    }
+  }, [user]);
 
   // Update user mutation
   const updateUser = useMutation({

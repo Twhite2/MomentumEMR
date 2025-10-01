@@ -1,5 +1,4 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { UserRole } from '@momentum/database';
 import AdminDashboard from '@/components/dashboard/admin-dashboard';
@@ -11,7 +10,7 @@ import LabTechDashboard from '@/components/dashboard/lab-tech-dashboard';
 import PatientDashboard from '@/components/dashboard/patient-dashboard';
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session) {
     redirect('/login');

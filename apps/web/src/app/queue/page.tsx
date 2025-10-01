@@ -58,7 +58,9 @@ export default function QueuePage() {
       toast.info('Queue updated');
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+    };
   }, [queryClient]);
 
   const moveToInProgress = (appointmentId: number) => {

@@ -149,7 +149,7 @@ export class NotificationService {
         },
       });
 
-      const notifications: NotificationData[] = pharmacists.map((user) => ({
+      const notifications: NotificationData[] = pharmacists.map((user: any) => ({
         userId: user.id,
         hospitalId: item.hospitalId,
         type: 'low_stock_alert',
@@ -191,7 +191,7 @@ export class NotificationService {
         },
       });
 
-      const notifications: NotificationData[] = users.map((user) => ({
+      const notifications: NotificationData[] = users.map((user: any) => ({
         userId: user.id,
         hospitalId: item.hospitalId,
         type: daysToExpiry <= 0 ? 'medication_expired' : 'medication_expiring',
