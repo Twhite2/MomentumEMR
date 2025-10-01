@@ -1,8 +1,9 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { Bell, Search, User, LogOut, Settings } from 'lucide-react';
+import { Search, User, LogOut, Settings } from 'lucide-react';
 import { useState } from 'react';
+import NotificationsDropdown from './notifications-dropdown';
 
 interface HeaderProps {
   userName: string;
@@ -34,10 +35,7 @@ export function Header({ userName, userRole }: HeaderProps) {
         {/* Right Section */}
         <div className="flex items-center gap-4">
           {/* Notifications */}
-          <button className="relative p-2 hover:bg-spindle rounded-lg transition-colors">
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-ribbon rounded-full"></span>
-          </button>
+          <NotificationsDropdown />
 
           {/* User Menu */}
           <div className="relative">
