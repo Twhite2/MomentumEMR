@@ -3,6 +3,7 @@
 import { signOut } from 'next-auth/react';
 import { Search, User, LogOut, Settings } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import NotificationsDropdown from './notifications-dropdown';
 
 interface HeaderProps {
@@ -12,9 +13,15 @@ interface HeaderProps {
 
 export function Header({ userName, userRole }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const router = useRouter();
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/login' });
+  };
+
+  const navigateTo = (path: string) => {
+    setShowUserMenu(false);
+    router.push(path);
   };
 
   return (
@@ -58,15 +65,15 @@ export function Header({ userName, userRole }: HeaderProps) {
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-white border border-border rounded-lg shadow-lg py-1">
                 <button
-                  onClick={() => setShowUserMenu(false)}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-spindle transition-colors"
+                  onClick={() => navigateTo('/profile')}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-spindle transition-colors text-left"
                 >
                   <User className="w-4 h-4" />
                   Profile
                 </button>
                 <button
-                  onClick={() => setShowUserMenu(false)}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-spindle transition-colors"
+                  onClick={() => navigateTo('/settings')}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-spindle transition-colors text-left"
                 >
                   <Settings className="w-4 h-4" />
                   Settings
@@ -74,7 +81,7 @@ export function Header({ userName, userRole }: HeaderProps) {
                 <hr className="my-1" />
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-ribbon hover:bg-red-ribbon/10 transition-colors"
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-ribbon hover:bg-red-ribbon/10 transition-colors text-left"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out

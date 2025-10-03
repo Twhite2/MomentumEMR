@@ -5,8 +5,15 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/invoices - List invoices
 export async function GET(request: NextRequest) {
   try {
+    console.log('[INVOICES API] Starting GET request...');
     const session = await requireRole(['admin', 'cashier', 'doctor']);
+    console.log('[INVOICES API] Session:', { 
+      userId: session.user.id, 
+      role: session.user.role, 
+      hospitalId: session.user.hospitalId 
+    });
     const hospitalId = parseInt(session.user.hospitalId);
+    console.log('[INVOICES API] Parsed hospitalId:', hospitalId);
 
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');
@@ -52,6 +59,7 @@ export async function GET(request: NextRequest) {
       prisma.invoice.count({ where }),
     ]);
 
+    console.log('[INVOICES API] Found invoices:', invoices.length);
     return apiResponse({
       invoices,
       pagination: {
@@ -62,6 +70,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    console.error('[INVOICES API] Error:', error);
     return handleApiError(error);
   }
 }

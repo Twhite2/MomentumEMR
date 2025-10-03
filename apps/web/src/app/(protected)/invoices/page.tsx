@@ -53,8 +53,19 @@ export default function InvoicesPage() {
       });
       if (status) params.append('status', status);
 
-      const response = await axios.get(`/api/invoices?${params}`);
-      return response.data;
+      try {
+        const response = await axios.get(`/api/invoices?${params}`);
+        return response.data;
+      } catch (err: any) {
+        const errorDetails = {
+          status: err.response?.status,
+          statusText: err.response?.statusText,
+          data: err.response?.data,
+          message: err.message,
+        };
+        console.error('Invoice fetch error details:', errorDetails);
+        throw new Error(err.response?.data?.error || err.message);
+      }
     },
   });
 
@@ -148,7 +159,11 @@ export default function InvoicesPage() {
           </div>
         ) : error ? (
           <div className="p-8 text-center">
-            <p className="text-red-ribbon">Failed to load invoices</p>
+            <p className="text-red-ribbon font-semibold">Failed to load invoices</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              {error instanceof Error ? error.message : 'Unknown error'}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">Check browser console for details</p>
           </div>
         ) : data?.invoices.length === 0 ? (
           <div className="p-8 text-center">

@@ -174,9 +174,11 @@ export default function SurveysPage() {
                   2 weeks ago
                 </td>
                 <td className="p-4">
-                  <Button variant="outline" size="sm">
-                    View Results
-                  </Button>
+                  <Link href="/surveys/1">
+                    <Button variant="outline" size="sm">
+                      View Results
+                    </Button>
+                  </Link>
                 </td>
               </tr>
               
@@ -204,9 +206,11 @@ export default function SurveysPage() {
                   1 month ago
                 </td>
                 <td className="p-4">
-                  <Button variant="outline" size="sm">
-                    View Results
-                  </Button>
+                  <Link href="/surveys/2">
+                    <Button variant="outline" size="sm">
+                      View Results
+                    </Button>
+                  </Link>
                 </td>
               </tr>
 
@@ -234,9 +238,11 @@ export default function SurveysPage() {
                   3 months ago
                 </td>
                 <td className="p-4">
-                  <Button variant="outline" size="sm">
-                    View Results
-                  </Button>
+                  <Link href="/surveys/3">
+                    <Button variant="outline" size="sm">
+                      View Results
+                    </Button>
+                  </Link>
                 </td>
               </tr>
             </tbody>
