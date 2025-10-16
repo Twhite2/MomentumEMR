@@ -205,9 +205,17 @@ export default function PharmacyPage() {
                           </p>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        {new Date(prescription.createdAt).toLocaleDateString()}
+                      <div className="text-right">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(prescription.createdAt).toLocaleDateString()}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(prescription.createdAt).toLocaleTimeString([], { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>

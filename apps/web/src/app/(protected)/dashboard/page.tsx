@@ -8,6 +8,7 @@ import PharmacistDashboard from '@/components/dashboard/pharmacist-dashboard';
 import CashierDashboard from '@/components/dashboard/cashier-dashboard';
 import LabTechDashboard from '@/components/dashboard/lab-tech-dashboard';
 import PatientDashboard from '@/components/dashboard/patient-dashboard';
+import SuperAdminDashboard from '@/app/(protected)/super-admin/page';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -18,14 +19,14 @@ export default async function DashboardPage() {
 
   const role = session.user.role;
 
-  // Route super_admin to their dedicated page
+  // Show super admin dashboard directly (no redirect)
   if (role === 'super_admin') {
-    redirect('/super-admin');
+    return <SuperAdminDashboard />;
   }
 
   // Route to appropriate dashboard based on role
   const dashboardComponents: Record<UserRole, React.ComponentType<any>> = {
-    super_admin: AdminDashboard, // Fallback, but should redirect above
+    super_admin: SuperAdminDashboard, // Fallback, but handled above
     admin: AdminDashboard,
     doctor: DoctorDashboard,
     nurse: NurseDashboard,
