@@ -59,7 +59,7 @@ export default function UsersPage() {
   const getRoleColor = (role: string) => {
     const colors: Record<string, string> = {
       admin: 'bg-red-ribbon/10 text-red-ribbon',
-      doctor: 'bg-tory-blue/10 text-tory-blue',
+      doctor: 'bg-primary/10 text-primary',
       nurse: 'bg-green-haze/10 text-green-haze',
       pharmacist: 'bg-amaranth/10 text-amaranth',
       lab_tech: 'bg-danube/10 text-danube',
@@ -173,7 +173,7 @@ export default function UsersPage() {
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
             <p className="text-muted-foreground mt-4">Loading users...</p>
           </div>
         ) : error ? (
@@ -212,8 +212,8 @@ export default function UsersPage() {
                     >
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-bold text-tory-blue">
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-bold text-primary">
                               {user.name
                                 .split(' ')
                                 .map((n) => n[0])
@@ -297,3 +297,4 @@ export default function UsersPage() {
     </div>
   );
 }
+

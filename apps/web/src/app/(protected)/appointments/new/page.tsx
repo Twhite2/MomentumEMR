@@ -226,10 +226,10 @@ export default function NewAppointmentPage() {
 
           {/* Summary */}
           {formData.date && formData.startTime && (
-            <div className="p-4 bg-tory-blue/5 border border-tory-blue/20 rounded-lg">
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-5 h-5 text-tory-blue" />
-                <h3 className="font-semibold text-tory-blue">Appointment Summary</h3>
+                <Calendar className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold text-primary">Appointment Summary</h3>
               </div>
               <p className="text-sm text-muted-foreground">
                 {formData.date && new Date(formData.date).toLocaleDateString('en-US', {
@@ -268,3 +268,4 @@ export default function NewAppointmentPage() {
     </div>
   );
 }
+

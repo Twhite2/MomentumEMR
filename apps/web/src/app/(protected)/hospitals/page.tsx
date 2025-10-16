@@ -39,7 +39,7 @@ export default function HospitalsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-tory-blue flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
             <Building2 className="w-8 h-8" />
             Hospital Management
           </h1>
@@ -61,11 +61,11 @@ export default function HospitalsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Hospitals</p>
-              <p className="text-2xl font-bold text-tory-blue mt-1">
+              <p className="text-2xl font-bold text-primary mt-1">
                 {hospitals?.length || 0}
               </p>
             </div>
-            <Building2 className="w-10 h-10 text-tory-blue/20" />
+            <Building2 className="w-10 h-10 text-primary/20" />
           </div>
         </div>
         <div className="bg-white p-6 rounded-lg border border-border">
@@ -114,8 +114,8 @@ export default function HospitalsPage() {
                 >
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center">
-                        <Building2 className="w-5 h-5 text-tory-blue" />
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-primary" />
                       </div>
                       <div>
                         <p className="font-medium">{hospital.name}</p>
@@ -144,7 +144,7 @@ export default function HospitalsPage() {
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-tory-blue/10 text-tory-blue">
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
                       {hospital.subscriptionPlan}
                     </span>
                   </td>
@@ -177,3 +177,4 @@ export default function HospitalsPage() {
     </div>
   );
 }
+

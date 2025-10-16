@@ -50,7 +50,7 @@ export default function LoginPage() {
                 <img src="/logo.png" alt="Momentum EMR" className="w-full h-full object-contain" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-tory-blue">Momentum EMR</h1>
+            <h1 className="text-2xl font-bold text-primary">Momentum EMR</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Electronic Medical Records System
             </p>
@@ -93,7 +93,7 @@ export default function LoginPage() {
                 <input
                   id="remember"
                   type="checkbox"
-                  className="h-4 w-4 text-tory-blue focus:ring-tory-blue border-border rounded"
+                  className="h-4 w-4 text-primary focus:ring-tory-blue border-border rounded"
                 />
                 <label htmlFor="remember" className="ml-2 text-sm text-muted-foreground">
                   Remember me
@@ -101,7 +101,7 @@ export default function LoginPage() {
               </div>
               <a
                 href="/forgot-password"
-                className="text-sm text-tory-blue hover:underline"
+                className="text-sm text-primary hover:underline"
               >
                 Forgot Password?
               </a>
@@ -130,7 +130,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center text-xs text-muted-foreground">
             <p>© 2025 Momentum Healthcare Solutions. All rights reserved.</p>
             <p className="mt-1">
-              Need help? <a href="/support" className="text-tory-blue hover:underline">Contact Support</a>
+              Need help? <a href="/support" className="text-primary hover:underline">Contact Support</a>
             </p>
           </div>
         </div>
@@ -148,3 +148,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

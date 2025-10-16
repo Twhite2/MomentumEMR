@@ -12,7 +12,7 @@ interface StatCardProps {
 }
 
 const colorClasses = {
-  blue: 'bg-tory-blue/10 text-tory-blue',
+  blue: 'bg-primary/10 text-primary',
   green: 'bg-green-haze/10 text-green-haze',
   yellow: 'bg-saffron/10 text-saffron',
   red: 'bg-red-ribbon/10 text-red-ribbon',
@@ -43,3 +43,4 @@ export function StatCard({ title, value, icon: Icon, trend, color = 'blue' }: St
     </div>
   );
 }
+

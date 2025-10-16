@@ -119,7 +119,7 @@ export default function PrescriptionsPage() {
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
             <p className="text-muted-foreground mt-4">Loading prescriptions...</p>
           </div>
         ) : error ? (
@@ -243,3 +243,4 @@ export default function PrescriptionsPage() {
     </div>
   );
 }
+

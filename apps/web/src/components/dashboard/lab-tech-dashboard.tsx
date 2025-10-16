@@ -60,10 +60,10 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
                 <p className="text-xs text-muted-foreground mt-1">Order #LAB-2025-046</p>
                 <p className="text-xs text-muted-foreground">Ordered: 4 hours ago</p>
               </div>
-              <span className="text-xs bg-spindle text-tory-blue px-2 py-1 rounded">Pending</span>
+              <span className="text-xs bg-spindle text-primary px-2 py-1 rounded">Pending</span>
             </div>
             <div className="mt-3 flex gap-2">
-              <button className="text-xs bg-tory-blue text-white px-3 py-1.5 rounded hover:bg-tory-blue/90">
+              <button className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90">
                 Start Test
               </button>
             </div>
@@ -79,7 +79,7 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
               <span className="text-xs bg-green-haze text-white px-2 py-1 rounded">Ready to Upload</span>
             </div>
             <div className="mt-3">
-              <button className="text-xs bg-tory-blue text-white px-3 py-1.5 rounded hover:bg-tory-blue/90 flex items-center gap-1">
+              <button className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90 flex items-center gap-1">
                 <Upload className="w-3 h-3" />
                 Upload Results
               </button>
@@ -90,3 +90,4 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
     </div>
   );
 }
+

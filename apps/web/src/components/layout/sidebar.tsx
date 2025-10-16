@@ -145,7 +145,7 @@ export function Sidebar({ role, hospitalName }: SidebarProps) {
             <img src="/logo.png" alt="Momentum EMR" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h2 className="font-bold text-sm text-tory-blue">Momentum EMR</h2>
+            <h2 className="font-bold text-sm text-primary">Momentum EMR</h2>
             <p className="text-xs text-muted-foreground truncate">{hospitalName}</p>
           </div>
         </div>
@@ -166,8 +166,8 @@ export function Sidebar({ role, hospitalName }: SidebarProps) {
                     flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     ${
                       isActive
-                        ? 'bg-tory-blue text-white'
-                        : 'text-muted-foreground hover:bg-spindle hover:text-tory-blue'
+                        ? 'bg-primary text-white'
+                        : 'text-muted-foreground hover:bg-spindle hover:text-primary'
                     }
                   `}
                 >
@@ -189,3 +189,4 @@ export function Sidebar({ role, hospitalName }: SidebarProps) {
     </aside>
   );
 }
+

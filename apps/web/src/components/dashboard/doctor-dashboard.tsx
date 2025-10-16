@@ -63,8 +63,8 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
           <h2 className="text-lg font-semibold mb-4">Today's Schedule</h2>
           <div className="space-y-3">
             <div className="flex items-start gap-3 p-3 border border-border rounded-lg hover:bg-spindle/30 transition-colors cursor-pointer">
-              <div className="flex-shrink-0 w-12 h-12 bg-tory-blue/10 rounded-lg flex items-center justify-center">
-                <Clock className="w-5 h-5 text-tory-blue" />
+              <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Clock className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
@@ -105,7 +105,7 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <p className="font-medium text-sm">Ahmed Ibrahim</p>
-                  <span className="text-xs bg-spindle text-tory-blue px-2 py-1 rounded">
+                  <span className="text-xs bg-spindle text-primary px-2 py-1 rounded">
                     Upcoming
                   </span>
                 </div>
@@ -133,7 +133,7 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
               <p className="text-xs text-muted-foreground">
                 Complete Blood Count • Uploaded 10 min ago
               </p>
-              <button className="text-xs text-tory-blue hover:underline mt-2">
+              <button className="text-xs text-primary hover:underline mt-2">
                 View Results →
               </button>
             </div>
@@ -146,7 +146,7 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
               <p className="text-xs text-muted-foreground">
                 Chest X-Ray • Uploaded 1 hour ago
               </p>
-              <button className="text-xs text-tory-blue hover:underline mt-2">
+              <button className="text-xs text-primary hover:underline mt-2">
                 View Results →
               </button>
             </div>
@@ -158,7 +158,7 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
               <p className="text-xs text-muted-foreground">
                 Pending approval • Uploaded yesterday
               </p>
-              <button className="text-xs text-tory-blue hover:underline mt-2">
+              <button className="text-xs text-primary hover:underline mt-2">
                 View & Approve →
               </button>
             </div>
@@ -170,7 +170,7 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
       <div className="bg-white rounded-lg border border-border p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Pharmacy Inventory Status</h2>
-          <Pill className="w-5 h-5 text-tory-blue" />
+          <Pill className="w-5 h-5 text-primary" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-green-haze/5 border border-green-haze/20 rounded-lg">
@@ -212,19 +212,19 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
       <div className="bg-white rounded-lg border border-border p-6">
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="/patients" className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center cursor-pointer">
+          <Link href="/patients" className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
             <FileText className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Open Patient File</p>
           </Link>
-          <Link href="/prescriptions" className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center cursor-pointer">
+          <Link href="/prescriptions" className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
             <Pill className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Create Prescription</p>
           </Link>
-          <Link href="/lab-orders" className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center cursor-pointer">
+          <Link href="/lab-orders" className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
             <TestTube className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Request Lab Order</p>
           </Link>
-          <Link href="/appointments" className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center cursor-pointer">
+          <Link href="/appointments" className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
             <Calendar className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">View Full Schedule</p>
           </Link>
@@ -233,3 +233,4 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
     </div>
   );
 }
+

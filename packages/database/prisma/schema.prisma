@@ -131,6 +131,13 @@ model Hospital {
   phoneNumber       String?  @map("phone_number")
   subscriptionPlan  String?  @map("subscription_plan")
   active            Boolean  @default(true)
+  
+  // Branding fields
+  logoUrl           String?  @map("logo_url")
+  primaryColor      String?  @default("#0F4C81") @map("primary_color")
+  secondaryColor    String?  @default("#4A90E2") @map("secondary_color")
+  tagline           String?
+  
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 

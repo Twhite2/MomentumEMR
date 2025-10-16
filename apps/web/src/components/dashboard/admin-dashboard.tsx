@@ -79,7 +79,7 @@ export default function AdminDashboard({ session }: AdminDashboardProps) {
               <span className="font-semibold">45%</span>
             </div>
             <div className="w-full bg-muted h-2 rounded-full">
-              <div className="bg-tory-blue h-2 rounded-full" style={{ width: '45%' }}></div>
+              <div className="bg-primary h-2 rounded-full" style={{ width: '45%' }}></div>
             </div>
 
             <div className="flex items-center justify-between">
@@ -157,19 +157,19 @@ export default function AdminDashboard({ session }: AdminDashboardProps) {
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link href="/users" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center cursor-pointer">
-            <Users className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+            <Users className="w-6 h-6 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">Manage Users</p>
           </Link>
           <Link href="/appointments" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center cursor-pointer">
-            <Calendar className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+            <Calendar className="w-6 h-6 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">View Schedule</p>
           </Link>
           <Link href="/inventory" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center cursor-pointer">
-            <Package className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+            <Package className="w-6 h-6 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">Check Inventory</p>
           </Link>
           <Link href="/analytics" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center cursor-pointer">
-            <TrendingUp className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+            <TrendingUp className="w-6 h-6 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">View Reports</p>
           </Link>
         </div>
@@ -177,3 +177,4 @@ export default function AdminDashboard({ session }: AdminDashboardProps) {
     </div>
   );
 }
+

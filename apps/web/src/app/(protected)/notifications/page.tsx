@@ -148,7 +148,7 @@ export default function NotificationsPage() {
           </div>
           <div className="bg-white rounded-lg border border-border p-4">
             <p className="text-sm text-muted-foreground">Unread</p>
-            <p className="text-2xl font-bold text-tory-blue">{data.unreadCount}</p>
+            <p className="text-2xl font-bold text-primary">{data.unreadCount}</p>
           </div>
         </div>
       )}
@@ -183,7 +183,7 @@ export default function NotificationsPage() {
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
             <p className="text-muted-foreground mt-4">Loading notifications...</p>
           </div>
         ) : data?.notifications.length === 0 ? (
@@ -200,7 +200,7 @@ export default function NotificationsPage() {
                 <div
                   key={notification.id}
                   className={`p-6 hover:bg-muted/30 transition-colors ${
-                    !notification.read ? 'bg-tory-blue/5' : ''
+                    !notification.read ? 'bg-primary/5' : ''
                   }`}
                 >
                   <div className="flex items-start gap-4">
@@ -216,7 +216,7 @@ export default function NotificationsPage() {
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold">{notification.title}</h3>
                             {!notification.read && (
-                              <span className="w-2 h-2 bg-tory-blue rounded-full"></span>
+                              <span className="w-2 h-2 bg-primary rounded-full"></span>
                             )}
                           </div>
                           <p className="text-muted-foreground mt-1">{notification.message}</p>
@@ -303,3 +303,4 @@ export default function NotificationsPage() {
     </div>
   );
 }
+

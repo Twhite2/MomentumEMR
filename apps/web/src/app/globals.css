@@ -7,14 +7,19 @@
   --amaranth: #e7265e;
   --red-ribbon: #eb0146;
   --green-haze: #08b358;
-  --tory-blue: #1253b2; /* primary */
+  --tory-blue: #1253b2; /* default primary */
   --saffron: #f8be29;
   --spindle: #c7d7ed;
   --danube: #729ad2;
   --froly: #f57da0;
   --padua: #b0e7c9;
   
-  --primary: #1253b2;
+  /* Dynamic hospital theme colors - can be overridden by HospitalThemeProvider */
+  --color-primary: #1253b2; /* Default: tory-blue */
+  --color-secondary: #729ad2; /* Default: danube */
+  
+  --primary: var(--color-primary);
+  --secondary: var(--color-secondary);
   --primary-foreground: #ffffff;
   --background: #ffffff;
   --foreground: #1a1a1a;

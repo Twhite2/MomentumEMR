@@ -20,11 +20,11 @@ const config: Config = {
         padua: '#b0e7c9',
         
         primary: {
-          DEFAULT: '#1253b2',
+          DEFAULT: 'var(--color-primary)', // Dynamic hospital theme color
           foreground: '#ffffff',
         },
         secondary: {
-          DEFAULT: '#729ad2',
+          DEFAULT: 'var(--color-secondary)', // Dynamic hospital theme color
           foreground: '#ffffff',
         },
         success: {

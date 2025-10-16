@@ -10,7 +10,7 @@ export default function SuperAdminDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-tory-blue">Momentum Super Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold text-primary">Momentum Super Admin Dashboard</h1>
         <p className="text-muted-foreground mt-1">
           Platform-wide overview and hospital management
         </p>
@@ -22,10 +22,10 @@ export default function SuperAdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Hospitals</p>
-              <p className="text-3xl font-bold text-tory-blue mt-1">24</p>
+              <p className="text-3xl font-bold text-primary mt-1">24</p>
               <p className="text-xs text-green-600 mt-1">+3 this month</p>
             </div>
-            <Building2 className="w-12 h-12 text-tory-blue/20" />
+            <Building2 className="w-12 h-12 text-primary/20" />
           </div>
         </div>
 
@@ -54,12 +54,12 @@ export default function SuperAdminDashboard() {
 
       {/* Business Analytics Section */}
       <div className="bg-white rounded-lg border border-border p-6">
-        <h2 className="text-xl font-semibold text-tory-blue mb-4">Business Analytics</h2>
+        <h2 className="text-xl font-semibold text-primary mb-4">Business Analytics</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Patient Type Breakdown */}
           <div className="border border-border rounded-lg p-4">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <PieChart className="w-5 h-5 text-tory-blue" />
+              <PieChart className="w-5 h-5 text-primary" />
               Patient Type Breakdown
             </h3>
             <div className="space-y-3">
@@ -69,7 +69,7 @@ export default function SuperAdminDashboard() {
                   <span className="font-semibold">45%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-tory-blue h-2 rounded-full" style={{ width: '45%' }}></div>
+                  <div className="bg-primary h-2 rounded-full" style={{ width: '45%' }}></div>
                 </div>
               </div>
               <div>
@@ -96,7 +96,7 @@ export default function SuperAdminDashboard() {
           {/* Patient Age Distribution */}
           <div className="border border-border rounded-lg p-4">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Users className="w-5 h-5 text-tory-blue" />
+              <Users className="w-5 h-5 text-primary" />
               Patient Age Distribution
             </h3>
             <div className="space-y-3">
@@ -106,7 +106,7 @@ export default function SuperAdminDashboard() {
                   <span className="font-semibold">18%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-tory-blue h-2 rounded-full" style={{ width: '18%' }}></div>
+                  <div className="bg-primary h-2 rounded-full" style={{ width: '18%' }}></div>
                 </div>
               </div>
               <div>
@@ -145,12 +145,12 @@ export default function SuperAdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-lg border border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center">
-              <Activity className="w-5 h-5 text-tory-blue" />
+            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <Activity className="w-5 h-5 text-primary" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Avg Cost/Patient</p>
-              <p className="text-lg font-bold text-tory-blue">₦45,000</p>
+              <p className="text-lg font-bold text-primary">₦45,000</p>
             </div>
           </div>
         </div>
@@ -194,14 +194,14 @@ export default function SuperAdminDashboard() {
 
       {/* Monthly Hospital Signups Chart */}
       <div className="bg-white rounded-lg border border-border p-6">
-        <h2 className="text-xl font-semibold text-tory-blue mb-4">Monthly Hospital Signups</h2>
+        <h2 className="text-xl font-semibold text-primary mb-4">Monthly Hospital Signups</h2>
         <div className="h-64 flex items-end justify-between gap-2">
           {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, idx) => {
             const height = Math.random() * 80 + 20;
             return (
               <div key={month} className="flex-1 flex flex-col items-center gap-2">
                 <div
-                  className="w-full bg-tory-blue rounded-t-lg hover:bg-tory-blue/80 transition-colors cursor-pointer"
+                  className="w-full bg-primary rounded-t-lg hover:bg-primary/80 transition-colors cursor-pointer"
                   style={{ height: `${height}%` }}
                   title={`${month}: ${Math.floor(height / 10)} hospitals`}
                 ></div>
@@ -215,13 +215,13 @@ export default function SuperAdminDashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/hospitals">
-          <div className="bg-white p-6 rounded-lg border border-border hover:border-tory-blue transition-colors cursor-pointer">
+          <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-tory-blue/10 rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-tory-blue" />
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-tory-blue">Manage Hospitals</h3>
+                <h3 className="font-semibold text-primary">Manage Hospitals</h3>
                 <p className="text-sm text-muted-foreground">View, suspend, or activate</p>
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function SuperAdminDashboard() {
                 <CreditCard className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-tory-blue">Subscription Plans</h3>
+                <h3 className="font-semibold text-primary">Subscription Plans</h3>
                 <p className="text-sm text-muted-foreground">Manage pricing & features</p>
               </div>
             </div>
@@ -249,7 +249,7 @@ export default function SuperAdminDashboard() {
                 <BarChart3 className="w-6 h-6 text-orange-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-tory-blue">Aggregated Reports</h3>
+                <h3 className="font-semibold text-primary">Aggregated Reports</h3>
                 <p className="text-sm text-muted-foreground">View detailed analytics</p>
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function SuperAdminDashboard() {
       {/* Recent Hospitals */}
       <div className="bg-white rounded-lg border border-border">
         <div className="p-6 border-b border-border flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-tory-blue">Recent Hospital Registrations</h2>
+          <h2 className="text-xl font-semibold text-primary">Recent Hospital Registrations</h2>
           <Link href="/hospitals">
             <Button variant="outline" size="sm">View All</Button>
           </Link>
@@ -274,8 +274,8 @@ export default function SuperAdminDashboard() {
             <div key={idx} className="p-4 hover:bg-muted/30 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                    <Building2 className="w-5 h-5 text-tory-blue" />
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <p className="font-semibold">{hospital.name}</p>
@@ -299,3 +299,4 @@ export default function SuperAdminDashboard() {
     </div>
   );
 }
+

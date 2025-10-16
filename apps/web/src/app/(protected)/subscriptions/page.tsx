@@ -82,7 +82,7 @@ export default function SubscriptionsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-tory-blue flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
             <CreditCard className="w-8 h-8" />
             Subscription Plans
           </h1>
@@ -100,7 +100,7 @@ export default function SubscriptionsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg border border-border">
           <p className="text-sm text-muted-foreground">Total Revenue (Monthly)</p>
-          <p className="text-3xl font-bold text-tory-blue mt-1">
+          <p className="text-3xl font-bold text-primary mt-1">
             {formatCurrency(plans.reduce((sum, plan) => sum + plan.price * plan.hospitals, 0))}
           </p>
         </div>
@@ -112,7 +112,7 @@ export default function SubscriptionsPage() {
         </div>
         <div className="bg-white p-6 rounded-lg border border-border">
           <p className="text-sm text-muted-foreground">Subscribed Hospitals</p>
-          <p className="text-3xl font-bold text-tory-blue mt-1">
+          <p className="text-3xl font-bold text-primary mt-1">
             {plans.reduce((sum, plan) => sum + plan.hospitals, 0)}
           </p>
         </div>
@@ -125,18 +125,18 @@ export default function SubscriptionsPage() {
             key={plan.id}
             className={`bg-white rounded-lg border-2 transition-all ${
               plan.name === 'Premium'
-                ? 'border-tory-blue shadow-lg scale-105'
+                ? 'border-primary shadow-lg scale-105'
                 : 'border-border'
             }`}
           >
             {/* Plan Header */}
             <div className="p-6 border-b border-border">
               {plan.name === 'Premium' && (
-                <span className="inline-block px-3 py-1 bg-tory-blue text-white text-xs font-semibold rounded-full mb-3">
+                <span className="inline-block px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full mb-3">
                   MOST POPULAR
                 </span>
               )}
-              <h3 className="text-2xl font-bold text-tory-blue">{plan.name}</h3>
+              <h3 className="text-2xl font-bold text-primary">{plan.name}</h3>
               <div className="mt-4">
                 <span className="text-4xl font-bold">{formatCurrency(plan.price)}</span>
                 <span className="text-muted-foreground">/{plan.interval}</span>
@@ -192,7 +192,7 @@ export default function SubscriptionsPage() {
       {/* Plan Comparison Table */}
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         <div className="p-6 border-b border-border">
-          <h2 className="text-xl font-semibold text-tory-blue">Feature Comparison</h2>
+          <h2 className="text-xl font-semibold text-primary">Feature Comparison</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -284,3 +284,4 @@ export default function SubscriptionsPage() {
     </div>
   );
 }
+

@@ -94,7 +94,7 @@ export default function FilesPage() {
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith('image/')) {
-      return <ImageIcon className="w-5 h-5 text-tory-blue" />;
+      return <ImageIcon className="w-5 h-5 text-primary" />;
     }
     if (mimeType === 'application/pdf') {
       return <FileText className="w-5 h-5 text-red-ribbon" />;
@@ -121,7 +121,7 @@ export default function FilesPage() {
 
   const getCategoryBadgeColor = (cat: string) => {
     const colors: Record<string, string> = {
-      patient_photos: 'bg-tory-blue/10 text-tory-blue',
+      patient_photos: 'bg-primary/10 text-primary',
       lab_results: 'bg-green-haze/10 text-green-haze',
       prescriptions: 'bg-amaranth/10 text-amaranth',
       medical_records: 'bg-danube/10 text-danube',
@@ -200,7 +200,7 @@ export default function FilesPage() {
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
             <p className="text-muted-foreground mt-4">Loading files...</p>
           </div>
         ) : data?.files.length === 0 ? (
@@ -340,3 +340,4 @@ export default function FilesPage() {
     </div>
   );
 }
+

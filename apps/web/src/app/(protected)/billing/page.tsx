@@ -14,7 +14,7 @@ export default function BillingPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-tory-blue flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
             <DollarSign className="w-8 h-8" />
             Billing & Invoices
           </h1>
@@ -36,10 +36,10 @@ export default function BillingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Revenue</p>
-              <p className="text-2xl font-bold text-tory-blue mt-1">₦2.4M</p>
+              <p className="text-2xl font-bold text-primary mt-1">₦2.4M</p>
               <p className="text-xs text-green-600 mt-1">+12% from last month</p>
             </div>
-            <TrendingUp className="w-10 h-10 text-tory-blue/20" />
+            <TrendingUp className="w-10 h-10 text-primary/20" />
           </div>
         </div>
 
@@ -108,13 +108,13 @@ export default function BillingPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/invoices">
-          <div className="bg-white p-6 rounded-lg border border-border hover:border-tory-blue transition-colors cursor-pointer">
+          <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-tory-blue/10 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-tory-blue" />
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <FileText className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-tory-blue">All Invoices</h3>
+                <h3 className="font-semibold text-primary">All Invoices</h3>
                 <p className="text-sm text-muted-foreground">View & manage all invoices</p>
               </div>
             </div>
@@ -128,7 +128,7 @@ export default function BillingPage() {
                 <AlertCircle className="w-6 h-6 text-orange-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-tory-blue">Pending Payments</h3>
+                <h3 className="font-semibold text-primary">Pending Payments</h3>
                 <p className="text-sm text-muted-foreground">Track unpaid invoices</p>
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function BillingPage() {
                 <TrendingUp className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-tory-blue">Revenue Reports</h3>
+                <h3 className="font-semibold text-primary">Revenue Reports</h3>
                 <p className="text-sm text-muted-foreground">View financial analytics</p>
               </div>
             </div>
@@ -153,7 +153,7 @@ export default function BillingPage() {
       {/* Recent Invoices Table */}
       <div className="bg-white rounded-lg border border-border">
         <div className="p-6 border-b border-border flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-tory-blue">Recent Invoices</h2>
+          <h2 className="text-lg font-semibold text-primary">Recent Invoices</h2>
           <Link href="/invoices">
             <Button variant="outline" size="sm">
               View All
@@ -176,3 +176,4 @@ export default function BillingPage() {
     </div>
   );
 }
+

@@ -7,14 +7,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-tory-blue text-white hover:bg-tory-blue/90',
-        secondary: 'bg-danube text-white hover:bg-danube/90',
+        primary: 'bg-primary text-white hover:opacity-90',
+        secondary: 'bg-secondary text-white hover:opacity-90',
         success: 'bg-green-haze text-white hover:bg-green-haze/90',
         warning: 'bg-saffron text-black hover:bg-saffron/90',
         destructive: 'bg-red-ribbon text-white hover:bg-red-ribbon/90',
-        outline: 'border border-tory-blue text-tory-blue hover:bg-spindle',
-        ghost: 'hover:bg-spindle hover:text-tory-blue',
-        link: 'underline-offset-4 hover:underline text-tory-blue',
+        outline: 'border border-primary text-primary hover:bg-spindle',
+        ghost: 'hover:bg-spindle hover:text-primary',
+        link: 'underline-offset-4 hover:underline text-primary',
       },
       size: {
         sm: 'h-8 px-3 text-xs',

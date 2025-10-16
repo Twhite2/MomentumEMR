@@ -8,18 +8,22 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
+    const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
     const userId = parseInt(session.user.id);
-    const hospitalId = parseInt(session.user.hospitalId);
+    const hospitalId = session.user.hospitalId ? parseInt(session.user.hospitalId) : null;
     const notificationId = parseInt(params.id);
 
     // Verify notification belongs to user
+    const findWhere: any = {
+      id: notificationId,
+      userId,
+    };
+    if (hospitalId !== null) {
+      findWhere.hospitalId = hospitalId;
+    }
+
     const notification = await prisma.notification.findFirst({
-      where: {
-        id: notificationId,
-        userId,
-        hospitalId,
-      },
+      where: findWhere,
     });
 
     if (!notification) {
@@ -29,7 +33,7 @@ export async function PATCH(
     // Mark as read
     const updated = await prisma.notification.update({
       where: { id: notificationId },
-      data: { read: true },
+      data: { readAt: new Date() },
     });
 
     return apiResponse(updated);
@@ -44,18 +48,22 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
+    const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
     const userId = parseInt(session.user.id);
-    const hospitalId = parseInt(session.user.hospitalId);
+    const hospitalId = session.user.hospitalId ? parseInt(session.user.hospitalId) : null;
     const notificationId = parseInt(params.id);
 
     // Verify notification belongs to user
+    const deleteWhere: any = {
+      id: notificationId,
+      userId,
+    };
+    if (hospitalId !== null) {
+      deleteWhere.hospitalId = hospitalId;
+    }
+
     const notification = await prisma.notification.findFirst({
-      where: {
-        id: notificationId,
-        userId,
-        hospitalId,
-      },
+      where: deleteWhere,
     });
 
     if (!notification) {

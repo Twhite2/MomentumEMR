@@ -59,7 +59,7 @@ export default function AppointmentsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'scheduled':
-        return 'bg-tory-blue/10 text-tory-blue';
+        return 'bg-primary/10 text-primary';
       case 'checked_in':
         return 'bg-saffron/10 text-saffron';
       case 'completed':
@@ -74,7 +74,7 @@ export default function AppointmentsPage() {
   const getAppointmentTypeColor = (type: string) => {
     switch (type) {
       case 'OPD':
-        return 'bg-tory-blue/10 text-tory-blue';
+        return 'bg-primary/10 text-primary';
       case 'IPD':
         return 'bg-danube/10 text-danube';
       case 'surgery':
@@ -159,7 +159,7 @@ export default function AppointmentsPage() {
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
             <p className="text-muted-foreground mt-4">Loading appointments...</p>
           </div>
         ) : error ? (
@@ -188,8 +188,8 @@ export default function AppointmentsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                          <User className="w-6 h-6 text-tory-blue" />
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                          <User className="w-6 h-6 text-primary" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg">
@@ -272,3 +272,4 @@ export default function AppointmentsPage() {
     </div>
   );
 }
+

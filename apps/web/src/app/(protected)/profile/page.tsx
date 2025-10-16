@@ -27,7 +27,7 @@ export default function ProfilePage() {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-tory-blue flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
           <User className="w-8 h-8" />
           My Profile
         </h1>
@@ -39,13 +39,13 @@ export default function ProfilePage() {
       {/* Profile Card */}
       <div className="bg-white rounded-lg border border-border p-6">
         <div className="flex items-center gap-6 mb-6">
-          <div className="w-24 h-24 bg-tory-blue rounded-full flex items-center justify-center">
+          <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center">
             <span className="text-white text-4xl font-bold">
               {session?.user?.name?.charAt(0).toUpperCase()}
             </span>
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-tory-blue">{session?.user?.name}</h2>
+            <h2 className="text-2xl font-bold text-primary">{session?.user?.name}</h2>
             <p className="text-muted-foreground capitalize">{session?.user?.role}</p>
             <p className="text-sm text-muted-foreground mt-1">
               {session?.user?.hospitalName}
@@ -146,7 +146,7 @@ export default function ProfilePage() {
 
       {/* Account Info */}
       <div className="bg-white rounded-lg border border-border p-6">
-        <h3 className="text-lg font-semibold text-tory-blue mb-4">Account Information</h3>
+        <h3 className="text-lg font-semibold text-primary mb-4">Account Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="w-4 h-4" />
@@ -161,3 +161,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

@@ -21,9 +21,9 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
         <div className="bg-white rounded-lg border p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Next Appointment</h2>
-            <Calendar className="w-5 h-5 text-tory-blue" />
+            <Calendar className="w-5 h-5 text-primary" />
           </div>
-          <div className="p-4 bg-tory-blue/5 border border-tory-blue/20 rounded-lg">
+          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
             <p className="font-medium">Dr. Sarah Johnson</p>
             <p className="text-sm text-muted-foreground mt-1">Cardiology Consultation</p>
             <p className="text-sm text-muted-foreground mt-2">
@@ -31,7 +31,7 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
             </p>
             <p className="text-sm text-muted-foreground">📍 City General Hospital, Room 204</p>
             <div className="mt-4 flex gap-2">
-              <button className="text-sm bg-tory-blue text-white px-4 py-2 rounded hover:bg-tory-blue/90">
+              <button className="text-sm bg-primary text-white px-4 py-2 rounded hover:bg-primary/90">
                 View Details
               </button>
               <button className="text-sm border border-border px-4 py-2 rounded hover:bg-muted">
@@ -51,14 +51,14 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
             <div className="p-3 border rounded-lg">
               <p className="font-medium text-sm">Complete Blood Count</p>
               <p className="text-xs text-muted-foreground mt-1">Date: Dec 25, 2025</p>
-              <button className="text-xs text-tory-blue hover:underline mt-2">
+              <button className="text-xs text-primary hover:underline mt-2">
                 Download PDF →
               </button>
             </div>
             <div className="p-3 border rounded-lg">
               <p className="font-medium text-sm">Chest X-Ray</p>
               <p className="text-xs text-muted-foreground mt-1">Date: Dec 20, 2025</p>
-              <button className="text-xs text-tory-blue hover:underline mt-2">
+              <button className="text-xs text-primary hover:underline mt-2">
                 View Images →
               </button>
             </div>
@@ -95,19 +95,19 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
       <div className="bg-white rounded-lg border p-6">
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center">
+          <button className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center">
             <Calendar className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Book Appointment</p>
           </button>
-          <button className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center">
+          <button className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center">
             <FileText className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Medical History</p>
           </button>
-          <button className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center">
+          <button className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center">
             <TestTube className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Lab Results</p>
           </button>
-          <button className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center">
+          <button className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center">
             <DollarSign className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Pay Bills</p>
           </button>
@@ -116,3 +116,4 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
     </div>
   );
 }
+

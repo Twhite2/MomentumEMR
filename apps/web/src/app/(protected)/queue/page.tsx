@@ -84,7 +84,7 @@ export default function QueuePage() {
       case 'waiting':
         return 'bg-saffron/10 text-saffron';
       case 'in_progress':
-        return 'bg-tory-blue/10 text-tory-blue';
+        return 'bg-primary/10 text-primary';
       case 'completed':
         return 'bg-green-haze/10 text-green-haze';
       default:
@@ -139,10 +139,10 @@ export default function QueuePage() {
         <div className="bg-white rounded-lg border border-border p-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm text-muted-foreground">In Progress</p>
-            <Users className="w-5 h-5 text-tory-blue" />
+            <Users className="w-5 h-5 text-primary" />
           </div>
           <p className="text-3xl font-bold">{inProgressCount}</p>
-          <p className="text-sm text-tory-blue mt-1">Being attended</p>
+          <p className="text-sm text-primary mt-1">Being attended</p>
         </div>
 
         <div className="bg-white rounded-lg border border-border p-6">
@@ -176,7 +176,7 @@ export default function QueuePage() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-lg font-bold text-tory-blue">
+                        <span className="text-lg font-bold text-primary">
                           #{item.position}
                         </span>
                         <h3 className="font-semibold">{item.patientName}</h3>
@@ -222,7 +222,7 @@ export default function QueuePage() {
         <div className="bg-white rounded-lg border border-border">
           <div className="p-4 border-b border-border">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Users className="w-5 h-5 text-tory-blue" />
+              <Users className="w-5 h-5 text-primary" />
               In Progress ({inProgressCount})
             </h2>
           </div>
@@ -232,7 +232,7 @@ export default function QueuePage() {
               .map((item) => (
                 <div
                   key={item.id}
-                  className="p-4 border border-tory-blue/50 bg-tory-blue/5 rounded-lg"
+                  className="p-4 border border-primary/50 bg-primary/5 rounded-lg"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -277,3 +277,4 @@ export default function QueuePage() {
     </div>
   );
 }
+

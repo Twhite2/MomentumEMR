@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input } from '@momentum/ui';
-import { Building2, ArrowLeft, Save, MapPin, Phone, Mail, Calendar } from 'lucide-react';
+import { Building2, ArrowLeft, Save, MapPin, Phone, Mail, Calendar, Palette, Upload, Image } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
@@ -17,6 +17,10 @@ interface Hospital {
   contactEmail: string;
   subscriptionPlan: string;
   active: boolean;
+  logoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  tagline?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,6 +46,10 @@ export default function HospitalDetailPage() {
     contactEmail: hospital?.contactEmail || '',
     subscriptionPlan: hospital?.subscriptionPlan || 'Basic',
     active: hospital?.active ?? true,
+    logoUrl: hospital?.logoUrl || '',
+    primaryColor: hospital?.primaryColor || '#1253b2',
+    secondaryColor: hospital?.secondaryColor || '#729ad2',
+    tagline: hospital?.tagline || '',
   });
 
   // Update form data when hospital data loads
@@ -53,6 +61,10 @@ export default function HospitalDetailPage() {
       contactEmail: hospital.contactEmail,
       subscriptionPlan: hospital.subscriptionPlan,
       active: hospital.active,
+      logoUrl: hospital.logoUrl || '',
+      primaryColor: hospital.primaryColor || '#1253b2',
+      secondaryColor: hospital.secondaryColor || '#729ad2',
+      tagline: hospital.tagline || '',
     });
   }
 
@@ -213,6 +225,120 @@ export default function HospitalDetailPage() {
             </label>
           </div>
         </form>
+      </div>
+
+      {/* Branding Section */}
+      <div className="bg-white rounded-lg border border-border p-6">
+        <h2 className="text-lg font-semibold text-tory-blue mb-4 flex items-center gap-2">
+          <Palette className="w-5 h-5" />
+          Hospital Branding
+        </h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          Customize the hospital's appearance on the login screen and throughout the system
+        </p>
+        
+        <div className="space-y-6">
+          {/* Logo Upload */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Hospital Logo</label>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-muted">
+                {formData.logoUrl ? (
+                  <img src={formData.logoUrl} alt="Logo" className="w-full h-full object-contain rounded-lg" />
+                ) : (
+                  <Image className="w-8 h-8 text-muted-foreground" />
+                )}
+              </div>
+              <div>
+                <Button variant="outline" size="sm" disabled={!isEditing}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Logo
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Recommended: 200x200px, PNG or SVG
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Tagline */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Tagline (Optional)</label>
+              <Input 
+                value={formData.tagline}
+                onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+                placeholder="Your Health, Our Priority"
+                disabled={!isEditing}
+              />
+            </div>
+
+            {/* Primary Color */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Primary Color</label>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="color" 
+                  value={formData.primaryColor}
+                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  className="h-10 w-20 border border-border rounded cursor-pointer"
+                  disabled={!isEditing}
+                />
+                <Input 
+                  value={formData.primaryColor}
+                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  placeholder="#0F4C81"
+                  className="flex-1"
+                  disabled={!isEditing}
+                />
+              </div>
+            </div>
+
+            {/* Secondary Color */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Secondary Color</label>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="color" 
+                  value={formData.secondaryColor}
+                  onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
+                  className="h-10 w-20 border border-border rounded cursor-pointer"
+                  disabled={!isEditing}
+                />
+                <Input 
+                  value={formData.secondaryColor}
+                  onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
+                  placeholder="#4A90E2"
+                  className="flex-1"
+                  disabled={!isEditing}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="mt-6 p-4 border border-border rounded-lg bg-muted/30">
+            <h4 className="text-sm font-semibold mb-3">Preview</h4>
+            <div className="bg-white p-6 rounded-lg border border-border">
+              <div className="flex items-center gap-3 mb-4">
+                {formData.logoUrl ? (
+                  <img src={formData.logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: formData.primaryColor }}>
+                    {hospital.name.charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <p className="font-bold text-lg" style={{ color: formData.primaryColor }}>{hospital.name}</p>
+                  {formData.tagline && <p className="text-sm text-muted-foreground">{formData.tagline}</p>}
+                </div>
+              </div>
+              <Button style={{ backgroundColor: formData.primaryColor }} className="text-white">
+                Sample Button
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Metadata */}

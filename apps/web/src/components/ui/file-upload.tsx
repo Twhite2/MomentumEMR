@@ -138,8 +138,8 @@ export default function FileUpload({
       <div
         className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
           dragActive
-            ? 'border-tory-blue bg-tory-blue/5'
-            : 'border-border hover:border-tory-blue'
+            ? 'border-primary bg-primary/5'
+            : 'border-border hover:border-primary'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -218,8 +218,8 @@ export default function FileUpload({
       )}
 
       {/* Info */}
-      <div className="flex items-start gap-2 p-3 bg-tory-blue/5 border border-tory-blue/20 rounded-lg">
-        <AlertCircle className="w-4 h-4 text-tory-blue flex-shrink-0 mt-0.5" />
+      <div className="flex items-start gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+        <AlertCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
         <p className="text-xs text-muted-foreground">
           Files are securely stored and can only be accessed by authorized personnel. Supported
           formats vary by category.
@@ -228,3 +228,4 @@ export default function FileUpload({
     </div>
   );
 }
+

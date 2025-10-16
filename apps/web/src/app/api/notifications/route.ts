@@ -5,9 +5,9 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/notifications - Get user's notifications
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
+    const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
     const userId = parseInt(session.user.id);
-    const hospitalId = parseInt(session.user.hospitalId);
+    const hospitalId = session.user.hospitalId ? parseInt(session.user.hospitalId) : null;
 
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
@@ -17,11 +17,20 @@ export async function GET(request: NextRequest) {
 
     const where: any = {
       userId,
-      hospitalId,
     };
 
+    // Super admin doesn't have hospitalId, so don't filter by it
+    if (hospitalId !== null) {
+      where.hospitalId = hospitalId;
+    }
+
     if (unreadOnly) {
-      where.read = false;
+      where.readAt = null; // Unread means readAt is null
+    }
+
+    const unreadWhere: any = { userId, readAt: null };
+    if (hospitalId !== null) {
+      unreadWhere.hospitalId = hospitalId;
     }
 
     const [notifications, total, unreadCount] = await Promise.all([
@@ -32,9 +41,7 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
       }),
       prisma.notification.count({ where }),
-      prisma.notification.count({
-        where: { userId, hospitalId, read: false },
-      }),
+      prisma.notification.count({ where: unreadWhere }),
     ]);
 
     return apiResponse({
@@ -55,35 +62,38 @@ export async function GET(request: NextRequest) {
 // POST /api/notifications/mark-read - Mark notifications as read
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
+    const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
     const userId = parseInt(session.user.id);
-    const hospitalId = parseInt(session.user.hospitalId);
+    const hospitalId = session.user.hospitalId ? parseInt(session.user.hospitalId) : null;
 
     const body = await request.json();
     const { notificationIds, markAllAsRead } = body;
 
     if (markAllAsRead) {
       // Mark all user's notifications as read
+      const markAllWhere: any = { userId, readAt: null };
+      if (hospitalId !== null) {
+        markAllWhere.hospitalId = hospitalId;
+      }
       await prisma.notification.updateMany({
-        where: {
-          userId,
-          hospitalId,
-          read: false,
-        },
+        where: markAllWhere,
         data: {
-          read: true,
+          readAt: new Date(),
         },
       });
     } else if (notificationIds && Array.isArray(notificationIds)) {
       // Mark specific notifications as read
+      const markSpecificWhere: any = {
+        id: { in: notificationIds.map((id: string) => parseInt(id)) },
+        userId,
+      };
+      if (hospitalId !== null) {
+        markSpecificWhere.hospitalId = hospitalId;
+      }
       await prisma.notification.updateMany({
-        where: {
-          id: { in: notificationIds.map((id: string) => parseInt(id)) },
-          userId,
-          hospitalId,
-        },
+        where: markSpecificWhere,
         data: {
-          read: true,
+          readAt: new Date(),
         },
       });
     } else {

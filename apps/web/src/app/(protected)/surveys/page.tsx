@@ -14,7 +14,7 @@ export default function SurveysPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-tory-blue flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
             <MessageSquare className="w-8 h-8" />
             Patient Surveys & Feedback
           </h1>
@@ -34,9 +34,9 @@ export default function SurveysPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Surveys</p>
-              <p className="text-2xl font-bold text-tory-blue mt-1">24</p>
+              <p className="text-2xl font-bold text-primary mt-1">24</p>
             </div>
-            <MessageSquare className="w-10 h-10 text-tory-blue/20" />
+            <MessageSquare className="w-10 h-10 text-primary/20" />
           </div>
         </div>
 
@@ -54,9 +54,9 @@ export default function SurveysPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Responses</p>
-              <p className="text-2xl font-bold text-tory-blue mt-1">1,547</p>
+              <p className="text-2xl font-bold text-primary mt-1">1,547</p>
             </div>
-            <TrendingUp className="w-10 h-10 text-tory-blue/20" />
+            <TrendingUp className="w-10 h-10 text-primary/20" />
           </div>
         </div>
 
@@ -95,37 +95,37 @@ export default function SurveysPage() {
 
       {/* Survey Templates */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-lg border border-border hover:border-tory-blue transition-colors cursor-pointer">
+        <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-tory-blue/10 rounded-lg flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-tory-blue" />
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+              <MessageSquare className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-tory-blue">Patient Satisfaction</h3>
+              <h3 className="font-semibold text-primary">Patient Satisfaction</h3>
               <p className="text-sm text-muted-foreground">Post-visit feedback</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-border hover:border-tory-blue transition-colors cursor-pointer">
+        <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-600/10 rounded-lg flex items-center justify-center">
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-tory-blue">Service Quality</h3>
+              <h3 className="font-semibold text-primary">Service Quality</h3>
               <p className="text-sm text-muted-foreground">Rate hospital services</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-border hover:border-tory-blue transition-colors cursor-pointer">
+        <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-orange-600/10 rounded-lg flex items-center justify-center">
               <BarChart3 className="w-6 h-6 text-orange-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-tory-blue">Custom Survey</h3>
+              <h3 className="font-semibold text-primary">Custom Survey</h3>
               <p className="text-sm text-muted-foreground">Create from scratch</p>
             </div>
           </div>
@@ -135,7 +135,7 @@ export default function SurveysPage() {
       {/* Surveys List */}
       <div className="bg-white rounded-lg border border-border">
         <div className="p-6 border-b border-border">
-          <h2 className="text-lg font-semibold text-tory-blue">All Surveys</h2>
+          <h2 className="text-lg font-semibold text-primary">All Surveys</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -166,7 +166,7 @@ export default function SurveysPage() {
                 </td>
                 <td className="p-4">
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-tory-blue" />
+                    <TrendingUp className="w-4 h-4 text-primary" />
                     <span className="font-semibold">247</span>
                   </div>
                 </td>
@@ -198,7 +198,7 @@ export default function SurveysPage() {
                 </td>
                 <td className="p-4">
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-tory-blue" />
+                    <TrendingUp className="w-4 h-4 text-primary" />
                     <span className="font-semibold">156</span>
                   </div>
                 </td>
@@ -252,3 +252,4 @@ export default function SurveysPage() {
     </div>
   );
 }
+

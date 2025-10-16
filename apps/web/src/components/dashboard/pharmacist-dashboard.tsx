@@ -39,7 +39,7 @@ export default function PharmacistDashboard({ session }: PharmacistDashboardProp
               <p className="font-medium text-sm">Prescription #RX-2025-001</p>
               <p className="text-xs text-muted-foreground mt-1">Patient: John Doe</p>
               <p className="text-xs text-muted-foreground">Items: 3 medications</p>
-              <button className="text-xs text-tory-blue hover:underline mt-2">Dispense →</button>
+              <button className="text-xs text-primary hover:underline mt-2">Dispense →</button>
             </div>
           </div>
         </div>
@@ -61,3 +61,4 @@ export default function PharmacistDashboard({ session }: PharmacistDashboardProp
     </div>
   );
 }
+

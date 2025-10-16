@@ -65,7 +65,7 @@ export default function InventoryPage() {
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       Antibiotic: 'bg-green-haze/10 text-green-haze',
-      Analgesic: 'bg-tory-blue/10 text-tory-blue',
+      Analgesic: 'bg-primary/10 text-primary',
       Antiviral: 'bg-amaranth/10 text-amaranth',
       Vaccine: 'bg-danube/10 text-danube',
       Supplement: 'bg-saffron/10 text-saffron',
@@ -195,7 +195,7 @@ export default function InventoryPage() {
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
             <p className="text-muted-foreground mt-4">Loading inventory...</p>
           </div>
         ) : error ? (
@@ -353,3 +353,4 @@ export default function InventoryPage() {
     </div>
   );
 }
+

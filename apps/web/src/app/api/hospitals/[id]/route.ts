@@ -13,12 +13,20 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admins can view hospital details
-    if (session.user.role !== 'admin') {
+    const hospitalId = parseInt(params.id);
+
+    // Super admins can view any hospital, hospital admins can only view their own
+    const isSuperAdmin = session.user.role === 'super_admin';
+    const isHospitalAdmin = session.user.role === 'admin';
+    
+    if (!isSuperAdmin && !isHospitalAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const hospitalId = parseInt(params.id);
+    // Hospital admins can only view their own hospital
+    if (isHospitalAdmin && parseInt(session.user.hospitalId as any) !== hospitalId) {
+      return NextResponse.json({ error: 'Forbidden - You can only view your own hospital' }, { status: 403 });
+    }
 
     const hospital = await prisma.hospital.findUnique({
       where: { id: hospitalId },
@@ -49,12 +57,21 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admins can update hospitals
-    if (session.user.role !== 'admin') {
+    const hospitalId = parseInt(params.id);
+
+    // Super admins can update any hospital
+    // Hospital admins (role: 'admin') can only update their own hospital
+    const isSuperAdmin = session.user.role === 'super_admin';
+    const isHospitalAdmin = session.user.role === 'admin';
+    
+    if (!isSuperAdmin && !isHospitalAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const hospitalId = parseInt(params.id);
+    // Hospital admins can only update their own hospital
+    if (isHospitalAdmin && parseInt(session.user.hospitalId as any) !== hospitalId) {
+      return NextResponse.json({ error: 'Forbidden - You can only update your own hospital' }, { status: 403 });
+    }
     const data = await request.json();
 
     const hospital = await prisma.hospital.update({
@@ -66,8 +83,12 @@ export async function PUT(
         contactEmail: data.contactEmail,
         subscriptionPlan: data.subscriptionPlan,
         active: data.active,
+        logoUrl: data.logoUrl,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        tagline: data.tagline,
       },
-    });
+    }) as any;
 
     return NextResponse.json(hospital);
   } catch (error) {
@@ -90,8 +111,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admins can delete hospitals
-    if (session.user.role !== 'admin') {
+    // Only super admins can delete hospitals
+    if (session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

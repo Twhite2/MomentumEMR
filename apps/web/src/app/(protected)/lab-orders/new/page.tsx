@@ -141,10 +141,10 @@ export default function NewLabOrderPage() {
           </div>
 
           {/* Summary */}
-          <div className="p-4 bg-tory-blue/5 border border-tory-blue/20 rounded-lg">
+          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <TestTube className="w-5 h-5 text-tory-blue" />
-              <h3 className="font-semibold text-tory-blue">Order Summary</h3>
+              <TestTube className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-primary">Order Summary</h3>
             </div>
             <p className="text-sm text-muted-foreground">
               Test type: <span className="font-medium text-foreground">{formData.orderType.replace('_', ' ')}</span>
@@ -181,3 +181,4 @@ export default function NewLabOrderPage() {
     </div>
   );
 }
+

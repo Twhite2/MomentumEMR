@@ -63,7 +63,7 @@ export default function PatientsPage() {
   const getPatientTypeColor = (type: string) => {
     switch (type) {
       case 'hmo':
-        return 'bg-tory-blue/10 text-tory-blue';
+        return 'bg-primary/10 text-primary';
       case 'corporate':
         return 'bg-danube/10 text-danube';
       case 'self_pay':
@@ -140,7 +140,7 @@ export default function PatientsPage() {
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
             <p className="text-muted-foreground mt-4">Loading patients...</p>
           </div>
         ) : error ? (
@@ -188,8 +188,8 @@ export default function PatientsPage() {
                     <tr key={patient.id} className="hover:bg-muted/50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                            <span className="text-tory-blue font-medium">
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                            <span className="text-primary font-medium">
                               {patient.firstName.charAt(0)}
                               {patient.lastName.charAt(0)}
                             </span>
@@ -289,3 +289,4 @@ export default function PatientsPage() {
     </div>
   );
 }
+

@@ -14,7 +14,7 @@ export default function PharmacyPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-tory-blue flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
             <Pill className="w-8 h-8" />
             Pharmacy
           </h1>
@@ -57,9 +57,9 @@ export default function PharmacyPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Revenue</p>
-              <p className="text-2xl font-bold text-tory-blue mt-1">₦245K</p>
+              <p className="text-2xl font-bold text-primary mt-1">₦245K</p>
             </div>
-            <Pill className="w-10 h-10 text-tory-blue/20" />
+            <Pill className="w-10 h-10 text-primary/20" />
           </div>
         </div>
       </div>
@@ -81,13 +81,13 @@ export default function PharmacyPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/prescriptions">
-          <div className="bg-white p-6 rounded-lg border border-border hover:border-tory-blue transition-colors cursor-pointer">
+          <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-tory-blue/10 rounded-lg flex items-center justify-center">
-                <Pill className="w-6 h-6 text-tory-blue" />
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Pill className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-tory-blue">View Prescriptions</h3>
+                <h3 className="font-semibold text-primary">View Prescriptions</h3>
                 <p className="text-sm text-muted-foreground">Manage all prescriptions</p>
               </div>
             </div>
@@ -95,13 +95,13 @@ export default function PharmacyPage() {
         </Link>
 
         <Link href="/inventory">
-          <div className="bg-white p-6 rounded-lg border border-border hover:border-tory-blue transition-colors cursor-pointer">
+          <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-orange-600/10 rounded-lg flex items-center justify-center">
                 <Package className="w-6 h-6 text-orange-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-tory-blue">Inventory</h3>
+                <h3 className="font-semibold text-primary">Inventory</h3>
                 <p className="text-sm text-muted-foreground">Check stock levels</p>
               </div>
             </div>
@@ -109,13 +109,13 @@ export default function PharmacyPage() {
         </Link>
 
         <Link href="/invoices">
-          <div className="bg-white p-6 rounded-lg border border-border hover:border-tory-blue transition-colors cursor-pointer">
+          <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-green-600/10 rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-tory-blue">Billing</h3>
+                <h3 className="font-semibold text-primary">Billing</h3>
                 <p className="text-sm text-muted-foreground">View invoices & payments</p>
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function PharmacyPage() {
       {/* Recent Activity */}
       <div className="bg-white rounded-lg border border-border">
         <div className="p-6 border-b border-border">
-          <h2 className="text-lg font-semibold text-tory-blue">Recent Prescriptions</h2>
+          <h2 className="text-lg font-semibold text-primary">Recent Prescriptions</h2>
         </div>
         <div className="p-6">
           <div className="text-center text-muted-foreground py-8">
@@ -141,3 +141,4 @@ export default function PharmacyPage() {
     </div>
   );
 }
+

@@ -64,7 +64,7 @@ export default function LabOrdersPage() {
       case 'pending':
         return 'bg-saffron/10 text-saffron';
       case 'in_progress':
-        return 'bg-tory-blue/10 text-tory-blue';
+        return 'bg-primary/10 text-primary';
       case 'completed':
         return 'bg-green-haze/10 text-green-haze';
       case 'cancelled':
@@ -77,7 +77,7 @@ export default function LabOrdersPage() {
   const getOrderTypeColor = (type: string) => {
     const colors: Record<string, string> = {
       Lab_Test: 'bg-green-haze/10 text-green-haze',
-      X_ray: 'bg-tory-blue/10 text-tory-blue',
+      X_ray: 'bg-primary/10 text-primary',
       CT_Scan: 'bg-danube/10 text-danube',
       MRI: 'bg-amaranth/10 text-amaranth',
       Ultrasound: 'bg-saffron/10 text-saffron',
@@ -153,7 +153,7 @@ export default function LabOrdersPage() {
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
             <p className="text-muted-foreground mt-4">Loading lab orders...</p>
           </div>
         ) : error ? (
@@ -182,8 +182,8 @@ export default function LabOrdersPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="w-12 h-12 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                          <TestTube className="w-6 h-6 text-tory-blue" />
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                          <TestTube className="w-6 h-6 text-primary" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg">
@@ -281,3 +281,4 @@ export default function LabOrdersPage() {
     </div>
   );
 }
+

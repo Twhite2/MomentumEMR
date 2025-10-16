@@ -34,7 +34,7 @@ export function Header({ userName, userRole }: HeaderProps) {
             <input
               type="text"
               placeholder="Search patients, appointments, records..."
-              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
             />
           </div>
         </div>
@@ -50,7 +50,7 @@ export function Header({ userName, userRole }: HeaderProps) {
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex items-center gap-3 p-2 hover:bg-spindle rounded-lg transition-colors"
             >
-              <div className="w-8 h-8 bg-tory-blue rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
                   {userName.charAt(0).toUpperCase()}
                 </span>
@@ -94,3 +94,4 @@ export function Header({ userName, userRole }: HeaderProps) {
     </header>
   );
 }
+

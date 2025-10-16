@@ -83,7 +83,7 @@ export default function NewUserPage() {
           {/* Basic Information */}
           <div>
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-tory-blue" />
+              <UserPlus className="w-5 h-5 text-primary" />
               User Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -154,8 +154,8 @@ export default function NewUserPage() {
           </div>
 
           {/* Role Information */}
-          <div className="p-4 bg-tory-blue/5 border border-tory-blue/20 rounded-lg">
-            <h3 className="font-semibold text-tory-blue mb-2">Role Permissions</h3>
+          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+            <h3 className="font-semibold text-primary mb-2">Role Permissions</h3>
             <div className="text-sm text-muted-foreground">
               {formData.role === 'admin' && (
                 <p>Full system access including user management and system configuration.</p>
@@ -226,3 +226,4 @@ export default function NewUserPage() {
     </div>
   );
 }
+

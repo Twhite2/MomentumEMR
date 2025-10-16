@@ -176,7 +176,7 @@ export default function NotificationsDropdown() {
                     <div
                       key={notification.id}
                       className={`p-4 hover:bg-muted/50 transition-colors cursor-pointer relative ${
-                        !notification.read ? 'bg-tory-blue/5' : ''
+                        !notification.read ? 'bg-primary/5' : ''
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
@@ -208,7 +208,7 @@ export default function NotificationsDropdown() {
                           </div>
                         </div>
                         {!notification.read && (
-                          <div className="w-2 h-2 bg-tory-blue rounded-full flex-shrink-0 mt-1" />
+                          <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1" />
                         )}
                       </div>
                     </div>
@@ -238,3 +238,4 @@ export default function NotificationsDropdown() {
     </div>
   );
 }
+
