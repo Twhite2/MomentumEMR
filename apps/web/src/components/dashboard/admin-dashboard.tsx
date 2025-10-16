@@ -3,6 +3,7 @@
 import { StatCard } from './stat-card';
 import { Users, Calendar, DollarSign, UserPlus, Package, TrendingUp } from 'lucide-react';
 import { Session } from 'next-auth';
+import Link from 'next/link';
 
 interface AdminDashboardProps {
   session: Session;
@@ -31,32 +32,40 @@ export default function AdminDashboard({ session }: AdminDashboardProps) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Patients"
-          value={stats.totalPatients.toLocaleString()}
-          icon={Users}
-          color="blue"
-          trend={{ value: 12, isPositive: true }}
-        />
-        <StatCard
-          title="Total Staff"
-          value={stats.totalStaff}
-          icon={UserPlus}
-          color="purple"
-        />
-        <StatCard
-          title="Today's Appointments"
-          value={stats.todayAppointments}
-          icon={Calendar}
-          color="green"
-        />
-        <StatCard
-          title="Revenue Today"
-          value={`₦${(stats.revenueToday / 1000).toFixed(0)}K`}
-          icon={DollarSign}
-          color="yellow"
-          trend={{ value: 8, isPositive: true }}
-        />
+        <Link href="/patients">
+          <StatCard
+            title="Total Patients"
+            value={stats.totalPatients.toLocaleString()}
+            icon={Users}
+            color="blue"
+            trend={{ value: 12, isPositive: true }}
+          />
+        </Link>
+        <Link href="/users">
+          <StatCard
+            title="Total Staff"
+            value={stats.totalStaff}
+            icon={UserPlus}
+            color="purple"
+          />
+        </Link>
+        <Link href="/appointments">
+          <StatCard
+            title="Today's Appointments"
+            value={stats.todayAppointments}
+            icon={Calendar}
+            color="green"
+          />
+        </Link>
+        <Link href="/billing">
+          <StatCard
+            title="Revenue Today"
+            value={`₦${(stats.revenueToday / 1000).toFixed(0)}K`}
+            icon={DollarSign}
+            color="yellow"
+            trend={{ value: 8, isPositive: true }}
+          />
+        </Link>
       </div>
 
       {/* Analytics Section */}
@@ -147,22 +156,22 @@ export default function AdminDashboard({ session }: AdminDashboardProps) {
       <div className="bg-white rounded-lg border border-border p-6">
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+          <Link href="/users" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center cursor-pointer">
             <Users className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
             <p className="text-sm font-medium">Manage Users</p>
-          </button>
-          <button className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+          </Link>
+          <Link href="/appointments" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center cursor-pointer">
             <Calendar className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
             <p className="text-sm font-medium">View Schedule</p>
-          </button>
-          <button className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+          </Link>
+          <Link href="/inventory" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center cursor-pointer">
             <Package className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
             <p className="text-sm font-medium">Check Inventory</p>
-          </button>
-          <button className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+          </Link>
+          <Link href="/analytics" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center cursor-pointer">
             <TrendingUp className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
             <p className="text-sm font-medium">View Reports</p>
-          </button>
+          </Link>
         </div>
       </div>
     </div>

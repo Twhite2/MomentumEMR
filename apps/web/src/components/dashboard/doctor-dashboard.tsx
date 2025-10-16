@@ -3,6 +3,7 @@
 import { StatCard } from './stat-card';
 import { Calendar, TestTube, UserCheck, FileText, Pill, Clock } from 'lucide-react';
 import { Session } from 'next-auth';
+import Link from 'next/link';
 
 interface DoctorDashboardProps {
   session: Session;
@@ -30,24 +31,30 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard
-          title="Today's Appointments"
-          value={stats.todayAppointments}
-          icon={Calendar}
-          color="blue"
-        />
-        <StatCard
-          title="Pending Lab Results"
-          value={stats.pendingLabResults}
-          icon={TestTube}
-          color="yellow"
-        />
-        <StatCard
-          title="Follow-ups Due"
-          value={stats.followUpsDue}
-          icon={UserCheck}
-          color="purple"
-        />
+        <Link href="/appointments">
+          <StatCard
+            title="Today's Appointments"
+            value={stats.todayAppointments}
+            icon={Calendar}
+            color="blue"
+          />
+        </Link>
+        <Link href="/lab-orders">
+          <StatCard
+            title="Pending Lab Results"
+            value={stats.pendingLabResults}
+            icon={TestTube}
+            color="yellow"
+          />
+        </Link>
+        <Link href="/patients">
+          <StatCard
+            title="Follow-ups Due"
+            value={stats.followUpsDue}
+            icon={UserCheck}
+            color="purple"
+          />
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -205,22 +212,22 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
       <div className="bg-white rounded-lg border border-border p-6">
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center">
+          <Link href="/patients" className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center cursor-pointer">
             <FileText className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Open Patient File</p>
-          </button>
-          <button className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center">
+          </Link>
+          <Link href="/prescriptions" className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center cursor-pointer">
             <Pill className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Create Prescription</p>
-          </button>
-          <button className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center">
+          </Link>
+          <Link href="/lab-orders" className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center cursor-pointer">
             <TestTube className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">Request Lab Order</p>
-          </button>
-          <button className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center">
+          </Link>
+          <Link href="/appointments" className="p-4 border border-tory-blue text-tory-blue rounded-lg hover:bg-tory-blue hover:text-white transition-colors text-center cursor-pointer">
             <Calendar className="w-6 h-6 mx-auto mb-2" />
             <p className="text-sm font-medium">View Full Schedule</p>
-          </button>
+          </Link>
         </div>
       </div>
     </div>

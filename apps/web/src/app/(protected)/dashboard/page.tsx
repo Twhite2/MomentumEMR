@@ -18,8 +18,14 @@ export default async function DashboardPage() {
 
   const role = session.user.role;
 
+  // Route super_admin to their dedicated page
+  if (role === 'super_admin') {
+    redirect('/super-admin');
+  }
+
   // Route to appropriate dashboard based on role
   const dashboardComponents: Record<UserRole, React.ComponentType<any>> = {
+    super_admin: AdminDashboard, // Fallback, but should redirect above
     admin: AdminDashboard,
     doctor: DoctorDashboard,
     nurse: NurseDashboard,

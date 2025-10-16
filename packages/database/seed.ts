@@ -57,10 +57,23 @@ async function main() {
     },
   });
 
-  // 2. Create Users for Hospital 1
+  // 2. Create Users
   console.log('👥 Creating users...');
   const hashedPassword = await bcrypt.hash('password123', 10);
 
+  // Super Admin (Platform-level admin for Momentum)
+  const superAdmin = await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id, // Associated with first hospital but has global access
+      name: 'Momentum Super Admin',
+      email: 'superadmin@momentum.com',
+      hashedPassword,
+      role: UserRole.super_admin,
+      active: true,
+    },
+  });
+
+  // Hospital Admin (Hospital-level admin)
   const admin = await prisma.user.create({
     data: {
       hospitalId: hospital1.id,

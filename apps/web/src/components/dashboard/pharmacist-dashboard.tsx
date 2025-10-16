@@ -3,6 +3,7 @@
 import { StatCard } from './stat-card';
 import { Pill, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { Session } from 'next-auth';
+import Link from 'next/link';
 
 interface PharmacistDashboardProps {
   session: Session;
@@ -22,8 +23,12 @@ export default function PharmacistDashboard({ session }: PharmacistDashboardProp
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <StatCard title="Pending Prescriptions" value={stats.pendingPrescriptions} icon={Pill} color="blue" />
-        <StatCard title="Stock Alerts" value={stats.stockAlerts} icon={AlertTriangle} color="red" />
+        <Link href="/prescriptions">
+          <StatCard title="Pending Prescriptions" value={stats.pendingPrescriptions} icon={Pill} color="blue" />
+        </Link>
+        <Link href="/inventory">
+          <StatCard title="Stock Alerts" value={stats.stockAlerts} icon={AlertTriangle} color="red" />
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

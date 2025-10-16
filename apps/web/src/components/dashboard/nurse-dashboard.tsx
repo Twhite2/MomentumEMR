@@ -3,6 +3,7 @@
 import { StatCard } from './stat-card';
 import { Bed, Activity, ClipboardCheck, Users } from 'lucide-react';
 import { Session } from 'next-auth';
+import Link from 'next/link';
 
 interface NurseDashboardProps {
   session: Session;
@@ -23,9 +24,15 @@ export default function NurseDashboard({ session }: NurseDashboardProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard title="Patients in Ward" value={stats.patientsInWard} icon={Bed} color="blue" />
-        <StatCard title="Bed Occupancy" value={`${stats.bedOccupancy}%`} icon={Activity} color="yellow" />
-        <StatCard title="Outstanding Tasks" value={stats.outstandingTasks} icon={ClipboardCheck} color="red" />
+        <Link href="/patients">
+          <StatCard title="Patients in Ward" value={stats.patientsInWard} icon={Bed} color="blue" />
+        </Link>
+        <Link href="/patients">
+          <StatCard title="Bed Occupancy" value={`${stats.bedOccupancy}%`} icon={Activity} color="yellow" />
+        </Link>
+        <Link href="/appointments">
+          <StatCard title="Outstanding Tasks" value={stats.outstandingTasks} icon={ClipboardCheck} color="red" />
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

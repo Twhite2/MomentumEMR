@@ -38,11 +38,30 @@ const navItems: NavItem[] = [
     icon: LayoutDashboard,
     roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'cashier', 'lab_tech', 'patient'],
   },
+  // Super Admin specific navigation
+  {
+    label: 'Super Admin',
+    href: '/super-admin',
+    icon: LayoutDashboard,
+    roles: ['super_admin'],
+  },
   {
     label: 'Hospitals',
     href: '/hospitals',
     icon: Building2,
-    roles: ['admin'], // Momentum Super Admin only
+    roles: ['super_admin'],
+  },
+  {
+    label: 'Subscriptions',
+    href: '/subscriptions',
+    icon: DollarSign,
+    roles: ['super_admin'],
+  },
+  {
+    label: 'Analytics',
+    href: '/analytics',
+    icon: BarChart3,
+    roles: ['super_admin', 'admin', 'doctor'],
   },
   {
     label: 'Users & Staff',
@@ -99,16 +118,10 @@ const navItems: NavItem[] = [
     roles: ['admin', 'cashier', 'patient'],
   },
   {
-    label: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-    roles: ['admin', 'doctor'],
-  },
-  {
     label: 'Notifications',
     href: '/notifications',
     icon: Bell,
-    roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'cashier', 'lab_tech', 'patient'],
+    roles: ['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'cashier', 'lab_tech', 'patient'],
   },
   {
     label: 'Surveys',

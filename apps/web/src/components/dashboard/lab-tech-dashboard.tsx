@@ -3,6 +3,7 @@
 import { StatCard } from './stat-card';
 import { TestTube, CheckCircle, Upload } from 'lucide-react';
 import { Session } from 'next-auth';
+import Link from 'next/link';
 
 interface LabTechDashboardProps {
   session: Session;
@@ -22,8 +23,12 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <StatCard title="Pending Lab Orders" value={stats.pendingOrders} icon={TestTube} color="yellow" />
-        <StatCard title="Completed Today" value={stats.completedToday} icon={CheckCircle} color="green" />
+        <Link href="/lab-orders">
+          <StatCard title="Pending Lab Orders" value={stats.pendingOrders} icon={TestTube} color="yellow" />
+        </Link>
+        <Link href="/lab-orders">
+          <StatCard title="Completed Today" value={stats.completedToday} icon={CheckCircle} color="green" />
+        </Link>
       </div>
 
       <div className="bg-white rounded-lg border p-6">
