@@ -1,9 +1,11 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { Search, User, LogOut, Settings } from 'lucide-react';
-import { useState } from 'react';
+import { Search, User, LogOut, Settings, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import NotificationsDropdown from './notifications-dropdown';
 
 interface HeaderProps {
@@ -13,6 +15,9 @@ interface HeaderProps {
 
 export function Header({ userName, userRole }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -24,18 +29,165 @@ export function Header({ userName, userRole }: HeaderProps) {
     router.push(path);
   };
 
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Search query
+  const { data: searchResults, isLoading } = useQuery({
+    queryKey: ['global-search', searchQuery],
+    queryFn: async () => {
+      if (!searchQuery || searchQuery.length < 2) return null;
+      const response = await axios.get(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+      return response.data;
+    },
+    enabled: searchQuery.length >= 2,
+  });
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setShowSearchResults(value.length >= 2);
+  };
+
+  const handleSearchResultClick = (path: string) => {
+    router.push(path);
+    setSearchQuery('');
+    setShowSearchResults(false);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setShowSearchResults(false);
+  };
+
   return (
     <header className="h-16 bg-white border-b border-border sticky top-0 z-10">
       <div className="h-full px-6 flex items-center justify-between">
         {/* Search Bar */}
-        <div className="flex-1 max-w-xl">
+        <div className="flex-1 max-w-xl" ref={searchRef}>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search patients, appointments, records..."
-              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              value={searchQuery}
+              onChange={handleSearchChange}
             />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <div className="absolute top-full mt-2 w-full bg-white border border-border rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+                {isLoading ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                    Searching...
+                  </div>
+                ) : searchResults ? (
+                  <>
+                    {/* Patients */}
+                    {searchResults.patients?.length > 0 && (
+                      <div className="p-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">
+                          Patients
+                        </p>
+                        {searchResults.patients.map((patient: any) => (
+                          <button
+                            key={patient.id}
+                            onClick={() => handleSearchResultClick(`/patients/${patient.id}`)}
+                            className="w-full text-left px-3 py-2 hover:bg-spindle rounded text-sm"
+                          >
+                            <p className="font-medium">
+                              {patient.firstName} {patient.lastName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {patient.patientType} • {patient.gender}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Appointments */}
+                    {searchResults.appointments?.length > 0 && (
+                      <div className="p-2 border-t border-border">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">
+                          Appointments
+                        </p>
+                        {searchResults.appointments.map((appointment: any) => (
+                          <button
+                            key={appointment.id}
+                            onClick={() => handleSearchResultClick(`/appointments/${appointment.id}`)}
+                            className="w-full text-left px-3 py-2 hover:bg-spindle rounded text-sm"
+                          >
+                            <p className="font-medium">
+                              {appointment.patient.firstName} {appointment.patient.lastName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(appointment.startTime).toLocaleString()}
+                              {appointment.doctor && ` • ${appointment.doctor.name}`}
+                              {appointment.department && ` • ${appointment.department}`}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Medical Records */}
+                    {searchResults.medicalRecords?.length > 0 && (
+                      <div className="p-2 border-t border-border">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">
+                          Medical Records
+                        </p>
+                        {searchResults.medicalRecords.map((record: any) => (
+                          <button
+                            key={record.id}
+                            onClick={() => handleSearchResultClick(`/medical-records/${record.id}`)}
+                            className="w-full text-left px-3 py-2 hover:bg-spindle rounded text-sm"
+                          >
+                            <p className="font-medium">
+                              {record.diagnosis || 'Medical Visit'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {record.patient.firstName} {record.patient.lastName} • {new Date(record.visitDate).toLocaleDateString()}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* No Results */}
+                    {!searchResults.patients?.length && 
+                     !searchResults.appointments?.length && 
+                     !searchResults.medicalRecords?.length && (
+                      <div className="p-4 text-center text-muted-foreground">
+                        No results found for "{searchQuery}"
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    Type to search...
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
