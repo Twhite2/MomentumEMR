@@ -44,8 +44,7 @@ export async function GET(request: NextRequest) {
       // Pending revenue
       prisma.invoice.aggregate({
         where: { ...where, status: { in: ['pending', 'partial'] } },
-        _sum: { totalAmount: true },
-        _sum: { paidAmount: true },
+        _sum: { totalAmount: true, paidAmount: true },
       }),
       // Invoice counts
       prisma.invoice.count({ where }),
@@ -70,7 +69,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate outstanding balance
     const outstandingBalance =
-      (pendingRevenue._sum.totalAmount || 0) - (pendingRevenue._sum.paidAmount || 0);
+      Number(pendingRevenue._sum.totalAmount || 0) - Number(pendingRevenue._sum.paidAmount || 0);
 
     // Get revenue by patient type
     const revenueByPatientType = await prisma.invoice.groupBy({
@@ -88,7 +87,7 @@ export async function GET(request: NextRequest) {
 
     const revenueByType = patients.reduce((acc: any, patient) => {
       const revenue = revenueByPatientType.find((r) => r.patientId === patient.id);
-      const amount = revenue?._sum.paidAmount || 0;
+      const amount = Number(revenue?._sum.paidAmount || 0);
       acc[patient.patientType] = (acc[patient.patientType] || 0) + amount;
       return acc;
     }, {});
@@ -113,14 +112,14 @@ export async function GET(request: NextRequest) {
 
     return apiResponse({
       summary: {
-        totalRevenue: totalRevenue._sum.totalAmount || 0,
-        paidRevenue: paidRevenue._sum.paidAmount || 0,
+        totalRevenue: Number(totalRevenue._sum.totalAmount || 0),
+        paidRevenue: Number(paidRevenue._sum.paidAmount || 0),
         outstandingBalance,
         invoiceCount,
         paidInvoiceCount,
         pendingInvoiceCount,
         collectionRate: totalRevenue._sum.totalAmount
-          ? ((paidRevenue._sum.paidAmount || 0) / totalRevenue._sum.totalAmount) * 100
+          ? (Number(paidRevenue._sum.paidAmount || 0) / Number(totalRevenue._sum.totalAmount)) * 100
           : 0,
       },
       revenueByPatientType: revenueByType,

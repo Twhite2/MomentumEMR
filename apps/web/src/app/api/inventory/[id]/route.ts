@@ -5,9 +5,10 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/inventory/[id] - Get inventory item details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'pharmacist']);
     const hospitalId = parseInt(session.user.hospitalId);
     const itemId = parseInt(params.id);
@@ -25,7 +26,7 @@ export async function GET(
 
     // Add status flags
     const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
-    const isLowStock = item.quantity <= item.reorderLevel;
+    const isLowStock = item.stockQuantity <= item.reorderLevel;
     const daysToExpiry = item.expiryDate
       ? Math.ceil(
           (new Date(item.expiryDate).getTime() - new Date().getTime()) /
@@ -48,24 +49,22 @@ export async function GET(
 // PUT /api/inventory/[id] - Update inventory item
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'pharmacist']);
     const hospitalId = parseInt(session.user.hospitalId);
     const itemId = parseInt(params.id);
 
     const body = await request.json();
     const {
-      drugName,
-      genericName,
-      category,
-      quantity,
+      itemName,
+      itemCode,
+      stockQuantity,
       unitPrice,
       reorderLevel,
       expiryDate,
-      batchNumber,
-      manufacturer,
     } = body;
 
     // Verify item exists
@@ -81,15 +80,12 @@ export async function PUT(
     const item = await prisma.inventory.update({
       where: { id: itemId },
       data: {
-        drugName,
-        genericName,
-        category,
-        quantity: quantity !== undefined ? parseInt(quantity) : undefined,
+        itemName: itemName !== undefined ? itemName : undefined,
+        itemCode: itemCode !== undefined ? itemCode : undefined,
+        stockQuantity: stockQuantity !== undefined ? parseInt(stockQuantity) : undefined,
         unitPrice: unitPrice !== undefined ? parseFloat(unitPrice) : undefined,
         reorderLevel: reorderLevel !== undefined ? parseInt(reorderLevel) : undefined,
         expiryDate: expiryDate ? new Date(expiryDate) : undefined,
-        batchNumber,
-        manufacturer,
       },
     });
 
@@ -102,9 +98,10 @@ export async function PUT(
 // DELETE /api/inventory/[id] - Delete inventory item
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const itemId = parseInt(params.id);

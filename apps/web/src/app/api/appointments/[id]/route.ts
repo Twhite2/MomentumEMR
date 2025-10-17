@@ -5,9 +5,10 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/appointments/[id] - Get appointment details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'doctor', 'nurse', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
     const appointmentId = parseInt(params.id);
@@ -42,9 +43,10 @@ export async function GET(
 // PUT /api/appointments/[id] - Update appointment
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'doctor', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
     const appointmentId = parseInt(params.id);
@@ -91,9 +93,10 @@ export async function PUT(
 // DELETE /api/appointments/[id] - Cancel appointment
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'doctor', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
     const appointmentId = parseInt(params.id);

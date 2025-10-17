@@ -14,10 +14,13 @@ export async function GET(request: NextRequest) {
     });
 
     const totalItems = inventory.length;
-    const totalValue = inventory.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+    const totalValue = inventory.reduce((sum, item) => {
+      const price = item.unitPrice ? Number(item.unitPrice) : 0;
+      return sum + item.stockQuantity * price;
+    }, 0);
 
     // Calculate stock status
-    const lowStockItems = inventory.filter((item) => item.quantity <= item.reorderLevel);
+    const lowStockItems = inventory.filter((item) => item.stockQuantity <= item.reorderLevel);
     const expiredItems = inventory.filter(
       (item) => item.expiryDate && new Date(item.expiryDate) < new Date()
     );
@@ -29,37 +32,30 @@ export async function GET(request: NextRequest) {
       return daysToExpiry > 0 && daysToExpiry <= 90;
     });
 
-    // Group by category
-    const byCategory = inventory.reduce((acc: any, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = { count: 0, value: 0 };
-      }
-      acc[item.category].count++;
-      acc[item.category].value += item.quantity * item.unitPrice;
-      return acc;
-    }, {});
-
     // Get top value items
     const topValueItems = inventory
-      .map((item) => ({
-        id: item.id,
-        drugName: item.drugName,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        totalValue: item.quantity * item.unitPrice,
-      }))
+      .map((item) => {
+        const price = item.unitPrice ? Number(item.unitPrice) : 0;
+        return {
+          id: item.id,
+          itemName: item.itemName,
+          stockQuantity: item.stockQuantity,
+          unitPrice: price,
+          totalValue: item.stockQuantity * price,
+        };
+      })
       .sort((a, b) => b.totalValue - a.totalValue)
       .slice(0, 10);
 
-    // Calculate turnover (items with low quantity / reorder level ratio)
+    // Calculate turnover (items with low stockQuantity / reorder level ratio)
     const slowMovingItems = inventory
-      .filter((item) => item.quantity > item.reorderLevel * 2)
+      .filter((item) => item.stockQuantity > item.reorderLevel * 2)
       .map((item) => ({
         id: item.id,
-        drugName: item.drugName,
-        quantity: item.quantity,
+        itemName: item.itemName,
+        stockQuantity: item.stockQuantity,
         reorderLevel: item.reorderLevel,
-        ratio: item.quantity / item.reorderLevel,
+        ratio: item.stockQuantity / item.reorderLevel,
       }))
       .sort((a, b) => b.ratio - a.ratio)
       .slice(0, 10);
@@ -73,27 +69,24 @@ export async function GET(request: NextRequest) {
         expiringSoonCount: expiringSoonItems.length,
         averageItemValue: totalItems > 0 ? totalValue / totalItems : 0,
       },
-      distribution: {
-        byCategory,
-      },
       alerts: {
         lowStock: lowStockItems.slice(0, 10).map((item) => ({
           id: item.id,
-          drugName: item.drugName,
-          quantity: item.quantity,
+          itemName: item.itemName,
+          stockQuantity: item.stockQuantity,
           reorderLevel: item.reorderLevel,
         })),
         expired: expiredItems.slice(0, 10).map((item) => ({
           id: item.id,
-          drugName: item.drugName,
+          itemName: item.itemName,
           expiryDate: item.expiryDate,
-          quantity: item.quantity,
+          stockQuantity: item.stockQuantity,
         })),
         expiringSoon: expiringSoonItems.slice(0, 10).map((item) => ({
           id: item.id,
-          drugName: item.drugName,
+          itemName: item.itemName,
           expiryDate: item.expiryDate,
-          quantity: item.quantity,
+          stockQuantity: item.stockQuantity,
           daysToExpiry: Math.ceil(
             (new Date(item.expiryDate!).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
           ),

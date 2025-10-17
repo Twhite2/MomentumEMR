@@ -6,9 +6,10 @@ import bcrypt from 'bcryptjs';
 // GET /api/users/[id] - Get user details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(params.id);
@@ -42,9 +43,10 @@ export async function GET(
 // PUT /api/users/[id] - Update user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(params.id);
@@ -107,9 +109,10 @@ export async function PUT(
 // DELETE /api/users/[id] - Delete user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(params.id);

@@ -5,9 +5,10 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // PATCH /api/notifications/[id] - Mark single notification as read
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
     const userId = parseInt(session.user.id);
     const hospitalId = session.user.hospitalId ? parseInt(session.user.hospitalId) : null;
@@ -45,9 +46,10 @@ export async function PATCH(
 // DELETE /api/notifications/[id] - Delete notification
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
     const userId = parseInt(session.user.id);
     const hospitalId = session.user.hospitalId ? parseInt(session.user.hospitalId) : null;

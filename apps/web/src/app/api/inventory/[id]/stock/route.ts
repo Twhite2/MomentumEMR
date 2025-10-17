@@ -5,9 +5,10 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // POST /api/inventory/[id]/stock - Adjust stock (add or remove)
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'pharmacist']);
     const hospitalId = parseInt(session.user.hospitalId);
     const itemId = parseInt(params.id);
@@ -41,20 +42,20 @@ export async function POST(
     // Calculate new quantity
     let newQuantity: number;
     if (type === 'in') {
-      newQuantity = item.quantity + quantityNum;
+      newQuantity = item.stockQuantity + quantityNum;
     } else {
       // type === 'out'
-      if (item.quantity < quantityNum) {
+      if (item.stockQuantity < quantityNum) {
         return apiResponse({ error: 'Insufficient stock' }, 400);
       }
-      newQuantity = item.quantity - quantityNum;
+      newQuantity = item.stockQuantity - quantityNum;
     }
 
     // Update quantity
     const updatedItem = await prisma.inventory.update({
       where: { id: itemId },
       data: {
-        quantity: newQuantity,
+        stockQuantity: newQuantity,
       },
     });
 
@@ -63,7 +64,7 @@ export async function POST(
       adjustment: {
         type,
         quantity: quantityNum,
-        previousQuantity: item.quantity,
+        previousQuantity: item.stockQuantity,
         newQuantity,
         notes: notes || null,
       },

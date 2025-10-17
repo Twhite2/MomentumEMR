@@ -5,9 +5,10 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/patients/[id] - Get patient details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'doctor', 'nurse', 'cashier', 'lab_tech']);
     const hospitalId = parseInt(session.user.hospitalId);
     const patientId = parseInt(params.id);
@@ -78,9 +79,10 @@ export async function GET(
 // PUT /api/patients/[id] - Update patient
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
     const patientId = parseInt(params.id);
@@ -138,9 +140,10 @@ export async function PUT(
 // DELETE /api/patients/[id] - Soft delete patient (set inactive)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const patientId = parseInt(params.id);

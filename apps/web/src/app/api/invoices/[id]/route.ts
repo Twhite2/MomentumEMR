@@ -5,9 +5,10 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/invoices/[id] - Get invoice details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'cashier', 'doctor', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
     const invoiceId = parseInt(params.id);
@@ -19,29 +20,11 @@ export async function GET(
       },
       include: {
         patient: true,
-        appointment: {
-          include: {
-            doctor: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
         invoiceItems: {
           orderBy: { id: 'asc' },
         },
         payments: {
           orderBy: { paymentDate: 'desc' },
-          include: {
-            processedBy: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
         },
       },
     });
@@ -59,9 +42,10 @@ export async function GET(
 // PUT /api/invoices/[id] - Update invoice
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'cashier']);
     const hospitalId = parseInt(session.user.hospitalId);
     const invoiceId = parseInt(params.id);
@@ -101,9 +85,10 @@ export async function PUT(
 // DELETE /api/invoices/[id] - Delete invoice
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const invoiceId = parseInt(params.id);

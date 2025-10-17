@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
         hospitalId,
         name,
         email,
-        password: hashedPassword,
+        hashedPassword: hashedPassword,
         role,
         active: true,
       },

@@ -107,7 +107,8 @@ export async function GET(request: NextRequest) {
           return acc;
         }, {}),
         byGender: patientsByGender.reduce((acc: any, item) => {
-          acc[item.gender] = item._count;
+          const gender = item.gender || 'unknown';
+          acc[gender] = item._count;
           return acc;
         }, {}),
         byAge: ageDistribution,

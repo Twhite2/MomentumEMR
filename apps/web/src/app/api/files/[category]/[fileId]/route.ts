@@ -8,9 +8,10 @@ const LOCAL_UPLOAD_DIR = path.join(process.cwd(), 'uploads');
 // GET /api/files/[category]/[fileId] - Serve local file
 export async function GET(
   request: NextRequest,
-  { params }: { params: { category: string; fileId: string } }
+  context: { params: Promise<{ category: string; fileId: string }> }
 ) {
   try {
+    const params = await context.params;
     const { category, fileId } = params;
 
     // Security: Prevent directory traversal
@@ -44,7 +45,8 @@ export async function GET(
 
     const contentType = contentTypes[ext] || 'application/octet-stream';
 
-    return new Response(fileBuffer, {
+    // Convert Buffer to Uint8Array for Response compatibility
+    return new Response(new Uint8Array(fileBuffer), {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=31536000',

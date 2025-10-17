@@ -6,9 +6,10 @@ import crypto from 'crypto';
 // POST /api/hospitals/[id]/send-setup-link - Resend password setup link to hospital admin
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await auth();
 
     if (!session) {

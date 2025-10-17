@@ -5,9 +5,10 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // POST /api/lab-orders/[id]/results - Upload lab result
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['lab_tech']);
     const hospitalId = parseInt(session.user.hospitalId);
     const labOrderId = parseInt(params.id);

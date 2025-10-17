@@ -4,9 +4,10 @@ import { prisma } from '@momentum/database';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await auth();
 
     if (!session) {

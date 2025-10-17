@@ -103,7 +103,8 @@ export async function GET(request: NextRequest) {
     // Transform subscription data
     const subscriptionDistribution = hospitalsByPlan.reduce(
       (acc, plan) => {
-        acc[plan.subscriptionPlan] = plan._count.id;
+        const planName = plan.subscriptionPlan || 'Basic';
+        acc[planName] = plan._count.id;
         return acc;
       },
       {} as Record<string, number>
@@ -127,7 +128,8 @@ export async function GET(request: NextRequest) {
     };
 
     const monthlyRevenue = hospitalsByPlan.reduce((total, plan) => {
-      const price = subscriptionPricing[plan.subscriptionPlan] || 0;
+      const planName = plan.subscriptionPlan || 'Basic';
+      const price = subscriptionPricing[planName] || 0;
       return total + price * plan._count.id;
     }, 0);
 

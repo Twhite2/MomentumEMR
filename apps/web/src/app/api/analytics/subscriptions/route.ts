@@ -101,14 +101,17 @@ export async function GET(request: NextRequest) {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )
         .slice(0, 10)
-        .map((h) => ({
-          id: h.id,
-          name: h.name,
-          plan: h.subscriptionPlan,
-          active: h.active,
-          revenue: h.active ? subscriptionPricing[h.subscriptionPlan] : 0,
-          createdAt: h.createdAt,
-        })),
+        .map((h) => {
+          const planName = h.subscriptionPlan || 'Basic';
+          return {
+            id: h.id,
+            name: h.name,
+            plan: planName,
+            active: h.active,
+            revenue: h.active ? subscriptionPricing[planName] : 0,
+            createdAt: h.createdAt,
+          };
+        }),
     });
   } catch (error) {
     console.error('Error fetching subscription analytics:', error);

@@ -5,19 +5,19 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // POST /api/invoices/[id]/payments - Record payment
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['admin', 'cashier']);
     const hospitalId = parseInt(session.user.hospitalId);
     const invoiceId = parseInt(params.id);
-    const processedBy = parseInt(session.user.id);
 
     const body = await request.json();
-    const { amount, paymentMethod, reference } = body;
+    const { amount, paymentGateway, transactionRef } = body;
 
     // Validation
-    if (!amount || !paymentMethod) {
+    if (!amount) {
       return apiResponse({ error: 'Missing required fields' }, 400);
     }
 
@@ -39,19 +39,21 @@ export async function POST(
     }
 
     // Calculate new paid amount
-    const newPaidAmount = invoice.paidAmount + paymentAmount;
+    const currentPaidAmount = Number(invoice.paidAmount);
+    const totalAmount = Number(invoice.totalAmount);
+    const newPaidAmount = currentPaidAmount + paymentAmount;
 
     // Check if payment exceeds total
-    if (newPaidAmount > invoice.totalAmount) {
+    if (newPaidAmount > totalAmount) {
       return apiResponse({ error: 'Payment amount exceeds invoice total' }, 400);
     }
 
     // Determine new status
     let newStatus = invoice.status;
-    if (newPaidAmount >= invoice.totalAmount) {
+    if (newPaidAmount >= totalAmount) {
       newStatus = 'paid';
     } else if (newPaidAmount > 0) {
-      newStatus = 'partial';
+      newStatus = 'pending'; // Partially paid invoices remain pending
     }
 
     // Create payment and update invoice in transaction
@@ -59,19 +61,10 @@ export async function POST(
       prisma.payment.create({
         data: {
           invoiceId,
-          amount: paymentAmount,
-          paymentMethod,
+          amountPaid: paymentAmount,
+          paymentGateway: paymentGateway || null,
           paymentDate: new Date(),
-          reference: reference || null,
-          processedBy,
-        },
-        include: {
-          processedBy: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          transactionRef: transactionRef || null,
         },
       }),
       prisma.invoice.update({

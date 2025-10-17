@@ -23,9 +23,12 @@ export const authOptions = {
             throw new Error('Invalid credentials');
           }
 
+          const email = credentials.email as string;
+          const password = credentials.password as string;
+
           console.log('🔍 [AUTH] Querying database for user...');
           const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
+            where: { email },
             include: {
               hospital: true,
             },
@@ -42,7 +45,7 @@ export const authOptions = {
           }
 
         if (!user) {
-          console.error('❌ [AUTH] No user found with email:', credentials.email);
+          console.error('❌ [AUTH] No user found with email:', email);
           throw new Error('No user found with this email');
         }
 
@@ -59,14 +62,14 @@ export const authOptions = {
         }
 
         const isPasswordValid = await bcrypt.compare(
-          credentials.password as string,
+          password,
           hashedPassword as string
         );
         
         console.log('🔐 [AUTH] Password valid:', isPasswordValid);
 
         if (!isPasswordValid) {
-          console.error('❌ [AUTH] Invalid password for user:', credentials.email);
+          console.error('❌ [AUTH] Invalid password for user:', email);
           throw new Error('Invalid password');
         }
 

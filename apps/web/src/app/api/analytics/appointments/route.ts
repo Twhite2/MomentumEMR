@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       prisma.appointment.count({
         where: {
           hospitalId,
-          appointmentDate: {
+          startTime: {
             gte: new Date(),
             lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           },
@@ -65,15 +65,15 @@ export async function GET(request: NextRequest) {
 
     const dailyAppointments = await prisma.$queryRaw`
       SELECT 
-        DATE(appointment_date) as date,
+        DATE(start_time) as date,
         COUNT(*) as count,
         COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed,
         COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled
       FROM appointments
       WHERE hospital_id = ${hospitalId}
-        AND appointment_date >= ${startDate ? new Date(startDate) : thirtyDaysAgo}
-        ${endDate ? prisma.$queryRaw`AND appointment_date <= ${new Date(endDate)}` : prisma.$queryRaw``}
-      GROUP BY DATE(appointment_date)
+        AND start_time >= ${startDate ? new Date(startDate) : thirtyDaysAgo}
+        ${endDate ? prisma.$queryRaw`AND start_time <= ${new Date(endDate)}` : prisma.$queryRaw``}
+      GROUP BY DATE(start_time)
       ORDER BY date DESC
       LIMIT 30
     `;
