@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button, Input } from '@momentum/ui';
 import { MessageSquare, Plus, Search, CheckCircle, Clock, TrendingUp, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SurveysPage() {
+  const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
 
   return (
@@ -19,57 +21,100 @@ export default function SurveysPage() {
             Patient Surveys & Feedback
           </h1>
           <p className="text-muted-foreground mt-1">
-            Collect patient feedback and measure satisfaction
+            {session?.user?.role === 'patient'
+              ? 'Share your feedback and help us improve'
+              : 'Collect patient feedback and measure satisfaction'}
           </p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Create Survey
-        </Button>
+        {session?.user?.role !== 'patient' && (
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Create Survey
+          </Button>
+        )}
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Surveys</p>
-              <p className="text-2xl font-bold text-primary mt-1">24</p>
+      {session?.user?.role === 'patient' ? (
+        /* Patient View - Personal Feedback Stats */
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Available Surveys</p>
+                <p className="text-2xl font-bold text-primary mt-1">3</p>
+                <p className="text-xs text-muted-foreground mt-1">Pending your feedback</p>
+              </div>
+              <MessageSquare className="w-10 h-10 text-primary/20" />
             </div>
-            <MessageSquare className="w-10 h-10 text-primary/20" />
           </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Active Surveys</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">8</p>
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Completed</p>
+                <p className="text-2xl font-bold text-green-600 mt-1">5</p>
+                <p className="text-xs text-muted-foreground mt-1">Thank you!</p>
+              </div>
+              <CheckCircle className="w-10 h-10 text-green-600/20" />
             </div>
-            <CheckCircle className="w-10 h-10 text-green-600/20" />
           </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Responses</p>
-              <p className="text-2xl font-bold text-primary mt-1">1,547</p>
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Your Avg. Rating</p>
+                <p className="text-2xl font-bold text-primary mt-1">4.5/5</p>
+                <p className="text-xs text-muted-foreground mt-1">Your feedback score</p>
+              </div>
+              <BarChart3 className="w-10 h-10 text-primary/20" />
             </div>
-            <TrendingUp className="w-10 h-10 text-primary/20" />
           </div>
         </div>
+      ) : (
+        /* Staff View - Company Survey Stats */
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Surveys</p>
+                <p className="text-2xl font-bold text-primary mt-1">24</p>
+              </div>
+              <MessageSquare className="w-10 h-10 text-primary/20" />
+            </div>
+          </div>
 
-        <div className="bg-white p-6 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Avg. Satisfaction</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">4.5/5</p>
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Active Surveys</p>
+                <p className="text-2xl font-bold text-green-600 mt-1">8</p>
+              </div>
+              <CheckCircle className="w-10 h-10 text-green-600/20" />
             </div>
-            <BarChart3 className="w-10 h-10 text-green-600/20" />
+          </div>
+
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Responses</p>
+                <p className="text-2xl font-bold text-primary mt-1">1,547</p>
+              </div>
+              <TrendingUp className="w-10 h-10 text-primary/20" />
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Avg. Satisfaction</p>
+                <p className="text-2xl font-bold text-green-600 mt-1">4.5/5</p>
+              </div>
+              <BarChart3 className="w-10 h-10 text-green-600/20" />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Search Bar */}
       <div className="bg-white p-4 rounded-lg border border-border">
@@ -93,46 +138,115 @@ export default function SurveysPage() {
         </div>
       </div>
 
-      {/* Survey Templates */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-primary" />
+      {/* Available Surveys / Survey Templates */}
+      {session?.user?.role === 'patient' ? (
+        /* Patient View - Available Surveys to Take */
+        <>
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold text-primary mb-4">Available Surveys</h2>
+            <div className="space-y-4">
+              <div className="p-4 border border-border rounded-lg hover:border-primary transition-colors cursor-pointer">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MessageSquare className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-primary">Post-Visit Patient Satisfaction</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Share your feedback about your recent appointment</p>
+                      <p className="text-xs text-muted-foreground mt-2">Est. time: 5 minutes</p>
+                    </div>
+                  </div>
+                  <Button variant="primary" size="sm">Take Survey</Button>
+                </div>
+              </div>
+
+              <div className="p-4 border border-border rounded-lg hover:border-primary transition-colors cursor-pointer">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-green-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-primary">Service Quality Rating</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Rate our hospital services and facilities</p>
+                      <p className="text-xs text-muted-foreground mt-2">Est. time: 3 minutes</p>
+                    </div>
+                  </div>
+                  <Button variant="primary" size="sm">Take Survey</Button>
+                </div>
+              </div>
+
+              <div className="p-4 border border-border rounded-lg hover:border-primary transition-colors cursor-pointer">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-blue-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MessageSquare className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-primary">Doctor Consultation Feedback</h3>
+                      <p className="text-sm text-muted-foreground mt-1">How was your experience with your doctor?</p>
+                      <p className="text-xs text-muted-foreground mt-2">Est. time: 2 minutes</p>
+                    </div>
+                  </div>
+                  <Button variant="primary" size="sm">Take Survey</Button>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-primary">Patient Satisfaction</h3>
-              <p className="text-sm text-muted-foreground">Post-visit feedback</p>
+          </div>
+
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold text-primary mb-4">Completed Surveys</h2>
+            <div className="text-center py-8 text-muted-foreground">
+              <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-20" />
+              <p>You have completed 5 surveys</p>
+              <p className="text-sm mt-2">Thank you for your valuable feedback!</p>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* Staff View - Survey Templates */
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-primary">Patient Satisfaction</h3>
+                <p className="text-sm text-muted-foreground">Post-visit feedback</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-600/10 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-primary">Service Quality</h3>
+                <p className="text-sm text-muted-foreground">Rate hospital services</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-orange-600/10 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-orange-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-primary">Custom Survey</h3>
+                <p className="text-sm text-muted-foreground">Create from scratch</p>
+              </div>
             </div>
           </div>
         </div>
+      )}
 
-        <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-600/10 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-primary">Service Quality</h3>
-              <p className="text-sm text-muted-foreground">Rate hospital services</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-600/10 rounded-lg flex items-center justify-center">
-              <BarChart3 className="w-6 h-6 text-orange-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-primary">Custom Survey</h3>
-              <p className="text-sm text-muted-foreground">Create from scratch</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Surveys List */}
+      {/* Surveys List - Staff Only */}
+      {session?.user?.role !== 'patient' && (
       <div className="bg-white rounded-lg border border-border">
         <div className="p-6 border-b border-border">
           <h2 className="text-lg font-semibold text-primary">All Surveys</h2>
@@ -249,6 +363,7 @@ export default function SurveysPage() {
           </table>
         </div>
       </div>
+      )}
     </div>
   );
 }

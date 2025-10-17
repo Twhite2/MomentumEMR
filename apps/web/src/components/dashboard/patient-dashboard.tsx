@@ -3,12 +3,16 @@
 import { StatCard } from './stat-card';
 import { Calendar, FileText, DollarSign, TestTube } from 'lucide-react';
 import { Session } from 'next-auth';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface PatientDashboardProps {
   session: Session;
 }
 
 export default function PatientDashboard({ session }: PatientDashboardProps) {
+  const router = useRouter();
+
   return (
     <div className="space-y-6">
       <div>
@@ -31,12 +35,16 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
             </p>
             <p className="text-sm text-muted-foreground">📍 City General Hospital, Room 204</p>
             <div className="mt-4 flex gap-2">
-              <button className="text-sm bg-primary text-white px-4 py-2 rounded hover:bg-primary/90">
-                View Details
-              </button>
-              <button className="text-sm border border-border px-4 py-2 rounded hover:bg-muted">
-                Reschedule
-              </button>
+              <Link href="/appointments">
+                <button className="text-sm bg-primary text-white px-4 py-2 rounded hover:bg-primary/90">
+                  View Details
+                </button>
+              </Link>
+              <Link href="/appointments">
+                <button className="text-sm border border-border px-4 py-2 rounded hover:bg-muted">
+                  Reschedule
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -48,20 +56,24 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
             <TestTube className="w-5 h-5 text-green-haze" />
           </div>
           <div className="space-y-3">
-            <div className="p-3 border rounded-lg">
-              <p className="font-medium text-sm">Complete Blood Count</p>
-              <p className="text-xs text-muted-foreground mt-1">Date: Dec 25, 2025</p>
-              <button className="text-xs text-primary hover:underline mt-2">
-                Download PDF →
-              </button>
-            </div>
-            <div className="p-3 border rounded-lg">
-              <p className="font-medium text-sm">Chest X-Ray</p>
-              <p className="text-xs text-muted-foreground mt-1">Date: Dec 20, 2025</p>
-              <button className="text-xs text-primary hover:underline mt-2">
-                View Images →
-              </button>
-            </div>
+            <Link href="/lab-results">
+              <div className="p-3 border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                <p className="font-medium text-sm">Complete Blood Count</p>
+                <p className="text-xs text-muted-foreground mt-1">Date: Dec 25, 2025</p>
+                <p className="text-xs text-primary hover:underline mt-2">
+                  Download PDF →
+                </p>
+              </div>
+            </Link>
+            <Link href="/lab-results">
+              <div className="p-3 border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                <p className="font-medium text-sm">Chest X-Ray</p>
+                <p className="text-xs text-muted-foreground mt-1">Date: Dec 20, 2025</p>
+                <p className="text-xs text-primary hover:underline mt-2">
+                  View Images →
+                </p>
+              </div>
+            </Link>
           </div>
         </div>
       </div>
@@ -95,22 +107,30 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
       <div className="bg-white rounded-lg border p-6">
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center">
-            <Calendar className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-sm font-medium">Book Appointment</p>
-          </button>
-          <button className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center">
-            <FileText className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-sm font-medium">Medical History</p>
-          </button>
-          <button className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center">
-            <TestTube className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-sm font-medium">Lab Results</p>
-          </button>
-          <button className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center">
-            <DollarSign className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-sm font-medium">Pay Bills</p>
-          </button>
+          <Link href="/appointments/new">
+            <div className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
+              <Calendar className="w-6 h-6 mx-auto mb-2" />
+              <p className="text-sm font-medium">Book Appointment</p>
+            </div>
+          </Link>
+          <Link href="/prescriptions">
+            <div className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
+              <FileText className="w-6 h-6 mx-auto mb-2" />
+              <p className="text-sm font-medium">Prescriptions</p>
+            </div>
+          </Link>
+          <Link href="/lab-results">
+            <div className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
+              <TestTube className="w-6 h-6 mx-auto mb-2" />
+              <p className="text-sm font-medium">Lab Results</p>
+            </div>
+          </Link>
+          <Link href="/billing">
+            <div className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
+              <DollarSign className="w-6 h-6 mx-auto mb-2" />
+              <p className="text-sm font-medium">Pay Bills</p>
+            </div>
+          </Link>
         </div>
       </div>
     </div>

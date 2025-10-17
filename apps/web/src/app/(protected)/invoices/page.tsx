@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button, Select } from '@momentum/ui';
 import { Plus, Receipt, User, DollarSign } from 'lucide-react';
 import Link from 'next/link';
@@ -41,6 +42,7 @@ interface InvoicesResponse {
 }
 
 export default function InvoicesPage() {
+  const { data: session } = useSession();
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
 
@@ -116,15 +118,19 @@ export default function InvoicesPage() {
         <div>
           <h1 className="text-3xl font-bold">Invoices</h1>
           <p className="text-muted-foreground mt-1">
-            Manage billing and payment records
+            {session?.user?.role === 'patient'
+              ? 'View your billing and payment records'
+              : 'Manage billing and payment records'}
           </p>
         </div>
-        <Link href="/invoices/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4 mr-2" />
-            New Invoice
-          </Button>
-        </Link>
+        {session?.user?.role !== 'patient' && (
+          <Link href="/invoices/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4 mr-2" />
+              New Invoice
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Filters */}

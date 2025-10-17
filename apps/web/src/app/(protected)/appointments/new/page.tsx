@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
 import { ArrowLeft, Save, Calendar } from 'lucide-react';
 import Link from 'next/link';
@@ -23,6 +24,7 @@ interface Doctor {
 export default function NewAppointmentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const preSelectedPatientId = searchParams.get('patientId');
 
   const [formData, setFormData] = useState({
@@ -85,8 +87,13 @@ export default function NewAppointmentPage() {
     const endDateTime = new Date(startDateTime);
     endDateTime.setMinutes(endDateTime.getMinutes() + parseInt(formData.duration));
 
+    // For patient users, use their patientId from session
+    const patientIdToUse = session?.user?.role === 'patient' 
+      ? (session.user as any).patientId 
+      : formData.patientId;
+
     const payload = {
-      patientId: formData.patientId,
+      patientId: patientIdToUse,
       doctorId: formData.doctorId,
       department: formData.department || null,
       appointmentType: formData.appointmentType,
@@ -113,7 +120,11 @@ export default function NewAppointmentPage() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold">Book Appointment</h1>
-          <p className="text-muted-foreground mt-1">Schedule a new patient appointment</p>
+          <p className="text-muted-foreground mt-1">
+            {session?.user?.role === 'patient' 
+              ? 'Schedule your appointment with a doctor'
+              : 'Schedule a new patient appointment'}
+          </p>
         </div>
       </div>
 
@@ -122,22 +133,26 @@ export default function NewAppointmentPage() {
         <div className="bg-white rounded-lg border border-border p-6 space-y-6">
           {/* Patient & Doctor Selection */}
           <div>
-            <h2 className="text-lg font-semibold mb-4">Patient & Doctor</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Select
-                label="Patient"
-                name="patientId"
-                value={formData.patientId}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select patient</option>
-                {patients?.patients.map((patient) => (
-                  <option key={patient.id} value={patient.id}>
-                    {patient.firstName} {patient.lastName} (ID: P-{patient.id.toString().padStart(6, '0')})
-                  </option>
-                ))}
-              </Select>
+            <h2 className="text-lg font-semibold mb-4">
+              {session?.user?.role === 'patient' ? 'Select Doctor' : 'Patient & Doctor'}
+            </h2>
+            <div className={`grid grid-cols-1 ${session?.user?.role === 'patient' ? '' : 'md:grid-cols-2'} gap-4`}>
+              {session?.user?.role !== 'patient' && (
+                <Select
+                  label="Patient"
+                  name="patientId"
+                  value={formData.patientId}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select patient</option>
+                  {patients?.patients.map((patient) => (
+                    <option key={patient.id} value={patient.id}>
+                      {patient.firstName} {patient.lastName} (ID: P-{patient.id.toString().padStart(6, '0')})
+                    </option>
+                  ))}
+                </Select>
+              )}
 
               <Select
                 label="Doctor"

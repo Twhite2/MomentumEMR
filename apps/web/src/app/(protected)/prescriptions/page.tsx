@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button, Select } from '@momentum/ui';
 import { Plus, Pill, User, Calendar } from 'lucide-react';
 import Link from 'next/link';
@@ -41,6 +42,7 @@ interface PrescriptionsResponse {
 }
 
 export default function PrescriptionsPage() {
+  const { data: session } = useSession();
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
 
@@ -84,14 +86,20 @@ export default function PrescriptionsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Prescriptions</h1>
-          <p className="text-muted-foreground mt-1">Manage medication orders and treatment plans</p>
+          <p className="text-muted-foreground mt-1">
+            {session?.user?.role === 'patient' 
+              ? 'View your medication orders and treatment plans'
+              : 'Manage medication orders and treatment plans'}
+          </p>
         </div>
-        <Link href="/prescriptions/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4 mr-2" />
-            New Prescription
-          </Button>
-        </Link>
+        {session?.user?.role !== 'patient' && (
+          <Link href="/prescriptions/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4 mr-2" />
+              New Prescription
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Filters */}
@@ -130,11 +138,13 @@ export default function PrescriptionsPage() {
           <div className="p-8 text-center">
             <Pill className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">No prescriptions found</p>
-            <Link href="/prescriptions/new">
-              <Button variant="primary" size="sm" className="mt-4">
-                Create First Prescription
-              </Button>
-            </Link>
+            {session?.user?.role !== 'patient' && (
+              <Link href="/prescriptions/new">
+                <Button variant="primary" size="sm" className="mt-4">
+                  Create First Prescription
+                </Button>
+              </Link>
+            )}
           </div>
         ) : (
           <>

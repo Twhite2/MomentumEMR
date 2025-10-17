@@ -151,6 +151,234 @@ async function main() {
     },
   });
 
+  // Additional Doctors
+  console.log('👨‍⚕️ Creating additional doctors...');
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Sylvia Aputazie',
+      email: 'aputaziesylvia@gmail.com',
+      hashedPassword,
+      role: UserRole.doctor,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Eneyi Odey',
+      email: 'vivieneneyiodey@gmail.com',
+      hashedPassword,
+      role: UserRole.doctor,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Glorious Kate Akpegah',
+      email: 'gloriouskateakpegah@gmail.com',
+      hashedPassword,
+      role: UserRole.doctor,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Hope Adeyi',
+      email: 'ayoigbala15@gmail.com',
+      hashedPassword,
+      role: UserRole.doctor,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Goroti Samuel',
+      email: 'gorotisunkanmi@gmail.com',
+      hashedPassword,
+      role: UserRole.doctor,
+      active: true,
+    },
+  });
+
+  // Additional Pharmacists
+  console.log('💊 Creating additional pharmacists...');
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Babalola Oluwafemi',
+      email: 'oluwafemibabalola99@gmail.com',
+      hashedPassword,
+      role: UserRole.pharmacist,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Shehu Arafah',
+      email: 'missarafah@gmail.com',
+      hashedPassword,
+      role: UserRole.pharmacist,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Sadiq Abdulkadir',
+      email: 'sadiqdahir323@gmail.com',
+      hashedPassword,
+      role: UserRole.pharmacist,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Tormene',
+      email: 'torinco2020@gmail.com',
+      hashedPassword,
+      role: UserRole.pharmacist,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Ukeme Udo',
+      email: 'ukemeudo72@gmail.com',
+      hashedPassword,
+      role: UserRole.pharmacist,
+      active: true,
+    },
+  });
+
+  // Additional Lab Scientists
+  console.log('🔬 Creating additional lab scientists...');
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Baridueh Badon',
+      email: 'baridueh@gmail.com',
+      hashedPassword,
+      role: UserRole.lab_tech,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Samuel Ajewole',
+      email: 'samuelajewolesa@gmail.com',
+      hashedPassword,
+      role: UserRole.lab_tech,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Nnorom Iheoma',
+      email: 'nnoromiheoma33@gmail.com',
+      hashedPassword,
+      role: UserRole.lab_tech,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Jumoke Johnson',
+      email: 'damilolaj442@gmail.com',
+      hashedPassword,
+      role: UserRole.lab_tech,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Oluwanifemi Lanre-Adigun',
+      email: 'nifemiadewura@gmail.com',
+      hashedPassword,
+      role: UserRole.lab_tech,
+      active: true,
+    },
+  });
+
+  // Patient Accounts
+  console.log('🧑‍🤝‍🧑 Creating patient accounts...');
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Olaide Olawuwo',
+      email: 'truorganicafricafoundation@gmail.com',
+      hashedPassword,
+      role: UserRole.patient,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Olajide Adara',
+      email: 'olajideadara@yahoo.com',
+      hashedPassword,
+      role: UserRole.patient,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'David Adeyinka',
+      email: 'adeyinkad46@gmail.com',
+      hashedPassword,
+      role: UserRole.patient,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Bello Ibrahim',
+      email: 'ayindebolaji97@gmail.com',
+      hashedPassword,
+      role: UserRole.patient,
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital1.id,
+      name: 'Igbayilola Ruth',
+      email: 'ruthigbayilola@gmail.com',
+      hashedPassword,
+      role: UserRole.patient,
+      active: true,
+    },
+  });
+
   // 3. Create HMO Policies
   console.log('🏥 Creating HMO policies...');
   const hmo1 = await prisma.hmo.create({
@@ -335,10 +563,40 @@ async function main() {
   });
 
   console.log('✅ Seed completed successfully!');
-  console.log('\n📝 Login credentials (all users):');
-  console.log('Email: [role]@citygeneralhospital.com');
-  console.log('Password: password123');
-  console.log('\nExample: admin@citygeneralhospital.com / password123');
+  console.log('\n📝 Login credentials (all users use password: password123):');
+  console.log('\n👑 Admin:');
+  console.log('   - admin@citygeneralhospital.com');
+  console.log('\n👨‍⚕️ Doctors (7 total):');
+  console.log('   - sarah.johnson@citygeneralhospital.com');
+  console.log('   - michael.chen@citygeneralhospital.com');
+  console.log('   - aputaziesylvia@gmail.com');
+  console.log('   - vivieneneyiodey@gmail.com');
+  console.log('   - gloriouskateakpegah@gmail.com');
+  console.log('   - ayoigbala15@gmail.com');
+  console.log('   - gorotisunkanmi@gmail.com');
+  console.log('\n💊 Pharmacists (6 total):');
+  console.log('   - david.brown@citygeneralhospital.com');
+  console.log('   - oluwafemibabalola99@gmail.com');
+  console.log('   - missarafah@gmail.com');
+  console.log('   - sadiqdahir323@gmail.com');
+  console.log('   - torinco2020@gmail.com');
+  console.log('   - ukemeudo72@gmail.com');
+  console.log('\n🔬 Lab Scientists (6 total):');
+  console.log('   - james.wilson@citygeneralhospital.com');
+  console.log('   - baridueh@gmail.com');
+  console.log('   - samuelajewolesa@gmail.com');
+  console.log('   - nnoromiheoma33@gmail.com');
+  console.log('   - damilolaj442@gmail.com');
+  console.log('   - nifemiadewura@gmail.com');
+  console.log('\n🧑‍🤝‍🧑 Patients (5 total):');
+  console.log('   - truorganicafricafoundation@gmail.com');
+  console.log('   - olajideadara@yahoo.com');
+  console.log('   - adeyinkad46@gmail.com');
+  console.log('   - ayindebolaji97@gmail.com');
+  console.log('   - ruthigbayilola@gmail.com');
+  console.log('\n👩‍⚕️ Nurses & Cashiers:');
+  console.log('   - emily.williams@citygeneralhospital.com (Nurse)');
+  console.log('   - lisa.anderson@citygeneralhospital.com (Cashier)');
 }
 
 main()

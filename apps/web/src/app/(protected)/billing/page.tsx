@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button, Input } from '@momentum/ui';
-import { DollarSign, Search, FileText, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
+import { DollarSign, Search, FileText, TrendingUp, AlertCircle, CheckCircle, CreditCard, Shield } from 'lucide-react';
 import Link from 'next/link';
 
 export default function BillingPage() {
+  const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
+  const isPatient = session?.user?.role === 'patient';
 
   return (
     <div className="space-y-6">
@@ -16,22 +19,64 @@ export default function BillingPage() {
         <div>
           <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
             <DollarSign className="w-8 h-8" />
-            Billing & Invoices
+            {isPatient ? 'My Bills & Insurance' : 'Billing & Invoices'}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Manage invoices, payments, and financial records
+            {isPatient 
+              ? 'View your medical bills and insurance coverage'
+              : 'Manage invoices, payments, and financial records'}
           </p>
         </div>
-        <Link href="/invoices/new">
-          <Button>
-            <FileText className="w-4 h-4 mr-2" />
-            Create Invoice
-          </Button>
-        </Link>
+        {!isPatient && (
+          <Link href="/invoices/new">
+            <Button>
+              <FileText className="w-4 h-4 mr-2" />
+              Create Invoice
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {isPatient ? (
+        /* Patient View - Insurance & Personal Bills */
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Insurance Plan</p>
+                <p className="text-lg font-bold text-primary mt-1">Premium Health Plus</p>
+                <p className="text-xs text-muted-foreground mt-1">HealthGuard Insurance</p>
+              </div>
+              <Shield className="w-10 h-10 text-green-haze/20" />
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Outstanding Balance</p>
+                <p className="text-2xl font-bold text-orange-600 mt-1">₦0</p>
+                <p className="text-xs text-green-600 mt-1">✓ All bills paid</p>
+              </div>
+              <DollarSign className="w-10 h-10 text-orange-600/20" />
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Paid This Year</p>
+                <p className="text-2xl font-bold text-primary mt-1">₦125,000</p>
+                <p className="text-xs text-muted-foreground mt-1">6 bills paid</p>
+              </div>
+              <CheckCircle className="w-10 h-10 text-primary/20" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Staff View - Company Financials */
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-lg border border-border">
           <div className="flex items-center justify-between">
             <div>
@@ -75,38 +120,72 @@ export default function BillingPage() {
             <AlertCircle className="w-10 h-10 text-red-600/20" />
           </div>
         </div>
-      </div>
-
-      {/* Search & Filters */}
-      <div className="bg-white p-4 rounded-lg border border-border">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <Input
-              type="text"
-              placeholder="Search by patient name, invoice number, or amount..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <select className="px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-tory-blue">
-            <option value="">All Status</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-            <option value="overdue">Overdue</option>
-          </select>
-          <select className="px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-tory-blue">
-            <option value="">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-          </select>
         </div>
-      </div>
+      )}
+
+      {/* Search & Filters - Only for staff */}
+      {!isPatient && (
+        <div className="bg-white p-4 rounded-lg border border-border">
+          <div className="flex items-center gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Input
+                type="text"
+                placeholder="Search by patient name, invoice number, or amount..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <select className="px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-tory-blue">
+              <option value="">All Status</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="overdue">Overdue</option>
+            </select>
+            <select className="px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-tory-blue">
+              <option value="">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {isPatient ? (
+        /* Patient Actions */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Link href="/invoices">
+            <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-primary">My Bills</h3>
+                  <p className="text-sm text-muted-foreground">View all medical bills</p>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          <div className="bg-white p-6 rounded-lg border border-border hover:border-green-600 transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-600/10 rounded-lg flex items-center justify-center">
+                <Shield className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-primary">Insurance Coverage</h3>
+                <p className="text-sm text-muted-foreground">View coverage details</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Staff Actions */
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/invoices">
           <div className="bg-white p-6 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
             <div className="flex items-center gap-4">
@@ -148,12 +227,13 @@ export default function BillingPage() {
             </div>
           </div>
         </Link>
-      </div>
+        </div>
+      )}
 
-      {/* Recent Invoices Table */}
+      {/* Recent Invoices/Bills Table */}
       <div className="bg-white rounded-lg border border-border">
         <div className="p-6 border-b border-border flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-primary">Recent Invoices</h2>
+          <h2 className="text-lg font-semibold text-primary">{isPatient ? 'Recent Bills' : 'Recent Invoices'}</h2>
           <Link href="/invoices">
             <Button variant="outline" size="sm">
               View All
@@ -163,13 +243,17 @@ export default function BillingPage() {
         <div className="p-6">
           <div className="text-center text-muted-foreground py-8">
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-20" />
-            <p>No invoices to display</p>
+            <p>{isPatient ? 'No bills to display' : 'No invoices to display'}</p>
             <p className="text-sm mt-2">
-              Invoices will appear here as they are created
+              {isPatient 
+                ? 'Your medical bills will appear here'
+                : 'Invoices will appear here as they are created'}
             </p>
-            <Link href="/invoices/new">
-              <Button className="mt-4">Create Your First Invoice</Button>
-            </Link>
+            {!isPatient && (
+              <Link href="/invoices/new">
+                <Button className="mt-4">Create Your First Invoice</Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
