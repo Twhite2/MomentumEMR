@@ -6,7 +6,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 export async function GET(request: NextRequest) {
   try {
     console.log('[INVOICES API] Starting GET request...');
-    const session = await requireRole(['admin', 'cashier', 'doctor']);
+    const session = await requireRole(['admin', 'cashier', 'doctor', 'patient']);
     console.log('[INVOICES API] Session:', { 
       userId: session.user.id, 
       role: session.user.role, 
@@ -25,7 +25,36 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const where: any = { hospitalId };
 
-    if (patientId) {
+    // If user is a patient, only show their own invoices
+    if (session.user.role === 'patient') {
+      const userId = parseInt(session.user.id);
+      
+      // Find the patient record linked to this user
+      const patient = await prisma.patient.findFirst({
+        where: {
+          hospitalId,
+          userId: userId,
+        },
+      });
+
+      if (!patient) {
+        console.log('[INVOICES API] No patient record found for user ID:', userId);
+        // Return empty list instead of error - patient profile might not be linked yet
+        return apiResponse({
+          invoices: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+          },
+          message: 'No patient record found. Please contact hospital staff to link your account.',
+        });
+      }
+      
+      console.log('[INVOICES API] Found patient ID:', patient.id);
+      where.patientId = patient.id;
+    } else if (patientId) {
       where.patientId = parseInt(patientId);
     }
 

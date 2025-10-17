@@ -6,11 +6,22 @@ import { useSession } from 'next-auth/react';
 import { Button, Input } from '@momentum/ui';
 import { DollarSign, Search, FileText, TrendingUp, AlertCircle, CheckCircle, CreditCard, Shield } from 'lucide-react';
 import Link from 'next/link';
+import axios from 'axios';
 
 export default function BillingPage() {
   const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
   const isPatient = session?.user?.role === 'patient';
+
+  // Fetch patient data if user is a patient
+  const { data: patientData } = useQuery({
+    queryKey: ['patient-me'],
+    queryFn: async () => {
+      const response = await axios.get('/api/patients/me');
+      return response.data;
+    },
+    enabled: isPatient,
+  });
 
   return (
     <div className="space-y-6">
@@ -44,9 +55,31 @@ export default function BillingPage() {
           <div className="bg-white p-6 rounded-lg border border-border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Insurance Plan</p>
-                <p className="text-lg font-bold text-primary mt-1">Premium Health Plus</p>
-                <p className="text-xs text-muted-foreground mt-1">HealthGuard Insurance</p>
+                <p className="text-sm text-muted-foreground">Payment Type</p>
+                {patientData?.patientType === 'hmo' ? (
+                  <>
+                    <p className="text-lg font-bold text-primary mt-1">
+                      {patientData?.hmo?.policyName || 'HMO Insurance'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {patientData?.hmo?.provider || 'Insurance Provider'}
+                    </p>
+                  </>
+                ) : patientData?.patientType === 'corporate' ? (
+                  <>
+                    <p className="text-lg font-bold text-primary mt-1">
+                      Corporate Client
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {patientData?.corporateClient?.companyName || 'Corporate Account'}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg font-bold text-primary mt-1">Self Pay</p>
+                    <p className="text-xs text-muted-foreground mt-1">Pay out of pocket</p>
+                  </>
+                )}
               </div>
               <Shield className="w-10 h-10 text-green-haze/20" />
             </div>
@@ -164,24 +197,26 @@ export default function BillingPage() {
                   <FileText className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-primary">My Bills</h3>
-                  <p className="text-sm text-muted-foreground">View all medical bills</p>
+                  <h3 className="font-semibold text-primary">View All My Bills</h3>
+                  <p className="text-sm text-muted-foreground">See complete billing history</p>
                 </div>
               </div>
             </div>
           </Link>
 
-          <div className="bg-white p-6 rounded-lg border border-border hover:border-green-600 transition-colors cursor-pointer">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-600/10 rounded-lg flex items-center justify-center">
-                <Shield className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-primary">Insurance Coverage</h3>
-                <p className="text-sm text-muted-foreground">View coverage details</p>
+          <Link href="/invoices?status=paid">
+            <div className="bg-white p-6 rounded-lg border border-border hover:border-green-600 transition-colors cursor-pointer">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-green-600/10 rounded-lg flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-primary">Payment History</h3>
+                  <p className="text-sm text-muted-foreground">View all paid bills</p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       ) : (
         /* Staff Actions */

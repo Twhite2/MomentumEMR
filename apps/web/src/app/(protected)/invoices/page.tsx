@@ -175,11 +175,18 @@ export default function InvoicesPage() {
           <div className="p-8 text-center">
             <Receipt className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">No invoices found</p>
-            <Link href="/invoices/new">
-              <Button variant="primary" size="sm" className="mt-4">
-                Create First Invoice
-              </Button>
-            </Link>
+            <p className="text-sm text-muted-foreground mt-2">
+              {session?.user?.role === 'patient'
+                ? 'Your medical bills will appear here once generated'
+                : 'Create your first invoice to get started'}
+            </p>
+            {session?.user?.role !== 'patient' && (
+              <Link href="/invoices/new">
+                <Button variant="primary" size="sm" className="mt-4">
+                  Create First Invoice
+                </Button>
+              </Link>
+            )}
           </div>
         ) : (
           <>
@@ -264,15 +271,17 @@ export default function InvoicesPage() {
                         >
                           {invoice.status.toUpperCase()}
                         </span>
-                        <Link
-                          href={`/patients/${invoice.patient.id}`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Button variant="ghost" size="sm">
-                            <User className="w-4 h-4 mr-2" />
-                            View Patient
-                          </Button>
-                        </Link>
+                        {session?.user?.role !== 'patient' && (
+                          <Link
+                            href={`/patients/${invoice.patient.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button variant="ghost" size="sm">
+                              <User className="w-4 h-4 mr-2" />
+                              View Patient
+                            </Button>
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -79,6 +79,8 @@ export function Header({ userName, userRole }: HeaderProps) {
               type="text"
               placeholder={userRole === 'super_admin' 
                 ? "Search hospitals, subscriptions..."
+                : userRole === 'patient'
+                ? "Search bills, prescriptions, lab results, appointments..."
                 : "Search patients, appointments, records..."
               }
               className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
@@ -198,11 +200,83 @@ export function Header({ userName, userRole }: HeaderProps) {
                       </div>
                     )}
 
+                    {/* Invoices */}
+                    {searchResults.invoices?.length > 0 && (
+                      <div className="p-2 border-t border-border">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">
+                          Bills / Invoices
+                        </p>
+                        {searchResults.invoices.map((invoice: any) => (
+                          <button
+                            key={invoice.id}
+                            onClick={() => handleSearchResultClick(`/invoices/${invoice.id}`)}
+                            className="w-full text-left px-3 py-2 hover:bg-spindle rounded text-sm"
+                          >
+                            <p className="font-medium">
+                              Invoice #{invoice.id.toString().padStart(6, '0')}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {invoice.patient?.firstName} {invoice.patient?.lastName} • ₦{invoice.totalAmount.toLocaleString()} • {invoice.status}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Prescriptions */}
+                    {searchResults.prescriptions?.length > 0 && (
+                      <div className="p-2 border-t border-border">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">
+                          Prescriptions
+                        </p>
+                        {searchResults.prescriptions.map((prescription: any) => (
+                          <button
+                            key={prescription.id}
+                            onClick={() => handleSearchResultClick(`/prescriptions/${prescription.id}`)}
+                            className="w-full text-left px-3 py-2 hover:bg-spindle rounded text-sm"
+                          >
+                            <p className="font-medium">
+                              {prescription.prescriptionItems?.[0]?.drugName || prescription.treatmentPlan || 'Prescription'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {prescription.patient?.firstName} {prescription.patient?.lastName} • {new Date(prescription.createdAt).toLocaleDateString()}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Lab Orders */}
+                    {searchResults.labOrders?.length > 0 && (
+                      <div className="p-2 border-t border-border">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">
+                          Lab Tests / Results
+                        </p>
+                        {searchResults.labOrders.map((labOrder: any) => (
+                          <button
+                            key={labOrder.id}
+                            onClick={() => handleSearchResultClick(`/lab-orders/${labOrder.id}`)}
+                            className="w-full text-left px-3 py-2 hover:bg-spindle rounded text-sm"
+                          >
+                            <p className="font-medium">
+                              {labOrder.orderType} {labOrder.description && `- ${labOrder.description}`}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {labOrder.patient?.firstName} {labOrder.patient?.lastName} • {labOrder.status} • {new Date(labOrder.createdAt).toLocaleDateString()}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                     {/* No Results */}
                     {!searchResults.hospitals?.length && 
                      !searchResults.patients?.length && 
                      !searchResults.appointments?.length && 
-                     !searchResults.medicalRecords?.length && (
+                     !searchResults.medicalRecords?.length &&
+                     !searchResults.invoices?.length &&
+                     !searchResults.prescriptions?.length &&
+                     !searchResults.labOrders?.length && (
                       <div className="p-4 text-center text-muted-foreground">
                         No results found for "{searchQuery}"
                       </div>

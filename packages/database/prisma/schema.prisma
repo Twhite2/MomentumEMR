@@ -177,11 +177,13 @@ model User {
 
   // Relations
   hospital                Hospital              @relation(fields: [hospitalId], references: [id])
+  patientProfile          Patient?
   appointments            Appointment[]
   medicalRecords          MedicalRecord[]
   prescriptions           Prescription[]
   labOrdersOrdered        LabOrder[]            @relation("OrderedBy")
   labResultsUploaded      LabResult[]           @relation("UploadedBy")
+  labResultsReleased      LabResult[]           @relation("ReleasedBy")
   notificationsReceived   Notification[]        @relation("NotificationRecipient")
   notificationsSent       Notification[]        @relation("NotificationSender")
   analyticsDashboards     AnalyticsDashboard[]  @relation("DashboardCreator")
@@ -196,6 +198,7 @@ model User {
 model Patient {
   id                  Int          @id @default(autoincrement())
   hospitalId          Int          @map("hospital_id")
+  userId              Int?         @unique @map("user_id")
   patientType         PatientType  @default(self_pay) @map("patient_type")
   corporateClientId   Int?         @map("corporate_client_id")
   firstName           String       @map("first_name")
@@ -211,6 +214,7 @@ model Patient {
 
   // Relations
   hospital        Hospital          @relation(fields: [hospitalId], references: [id])
+  user            User?             @relation(fields: [userId], references: [id])
   corporateClient CorporateClient?  @relation(fields: [corporateClientId], references: [id])
   hmo             Hmo?              @relation(fields: [insuranceId], references: [id])
   appointments    Appointment[]
@@ -221,6 +225,7 @@ model Patient {
   labOrders       LabOrder[]
 
   @@index([hospitalId])
+  @@index([userId])
   @@index([corporateClientId])
   @@index([insuranceId])
   @@map("patients")
@@ -498,22 +503,28 @@ model LabOrder {
 }
 
 model LabResult {
-  id            Int      @id @default(autoincrement())
-  labOrderId    Int      @map("lab_order_id")
-  uploadedBy    Int      @map("uploaded_by")
-  fileUrl       String?  @map("file_url") @db.Text
-  resultNotes   String?  @map("result_notes") @db.Text
-  finalized     Boolean  @default(false)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id                 Int       @id @default(autoincrement())
+  labOrderId         Int       @map("lab_order_id")
+  uploadedBy         Int       @map("uploaded_by")
+  fileUrl            String?   @map("file_url") @db.Text
+  resultNotes        String?   @map("result_notes") @db.Text
+  finalized          Boolean   @default(false)
+  releasedToPatient  Boolean   @default(false) @map("released_to_patient")
+  releasedAt         DateTime? @map("released_at")
+  releasedBy         Int?      @map("released_by")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
 
   // Relations
   labOrder        LabOrder           @relation(fields: [labOrderId], references: [id])
   uploader        User               @relation("UploadedBy", fields: [uploadedBy], references: [id])
+  releaser        User?              @relation("ReleasedBy", fields: [releasedBy], references: [id])
   labResultValues LabResultValue[]
 
   @@index([labOrderId])
   @@index([uploadedBy])
+  @@index([releasedBy])
+  @@index([releasedToPatient])
   @@map("lab_results")
 }
 

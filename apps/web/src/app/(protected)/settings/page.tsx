@@ -12,6 +12,7 @@ export default function SettingsPage() {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('general');
+  const isPatient = session?.user?.role === 'patient';
   const [brandingData, setBrandingData] = useState({
     name: '',
     tagline: '',
@@ -128,16 +129,18 @@ export default function SettingsPage() {
             >
               Privacy
             </button>
-            <button
-              onClick={() => setActiveTab('branding')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                activeTab === 'branding'
-                  ? 'bg-primary text-white'
-                  : 'text-muted-foreground hover:bg-muted'
-              }`}
-            >
-              Branding
-            </button>
+            {!isPatient && (
+              <button
+                onClick={() => setActiveTab('branding')}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'branding'
+                    ? 'bg-primary text-white'
+                    : 'text-muted-foreground hover:bg-muted'
+                }`}
+              >
+                Branding
+              </button>
+            )}
           </div>
         </div>
 
@@ -193,32 +196,60 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between py-3 border-b border-border">
                     <div>
-                      <p className="font-medium">New Appointments</p>
+                      <p className="font-medium">{isPatient ? 'Appointment Reminders' : 'New Appointments'}</p>
                       <p className="text-sm text-muted-foreground">
-                        Get notified when new appointments are scheduled
+                        {isPatient 
+                          ? 'Get notified about your upcoming appointments'
+                          : 'Get notified when new appointments are scheduled'}
                       </p>
                     </div>
                     <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b border-border">
-                    <div>
-                      <p className="font-medium">Patient Updates</p>
-                      <p className="text-sm text-muted-foreground">
-                        Notifications about patient record changes
-                      </p>
+                  {isPatient && (
+                    <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div>
+                        <p className="font-medium">Test Results</p>
+                        <p className="text-sm text-muted-foreground">
+                          Notifications when lab results are released
+                        </p>
+                      </div>
+                      <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
                     </div>
-                    <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex items-center justify-between py-3 border-b border-border">
-                    <div>
-                      <p className="font-medium">Low Stock Alerts</p>
-                      <p className="text-sm text-muted-foreground">
-                        Alert when inventory items are running low
-                      </p>
+                  )}
+                  {isPatient && (
+                    <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div>
+                        <p className="font-medium">Billing Updates</p>
+                        <p className="text-sm text-muted-foreground">
+                          Notifications about new bills and payments
+                        </p>
+                      </div>
+                      <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
                     </div>
-                    <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex items-center justify-between py-3 border-b border-border">
+                  )}
+                  {!isPatient && (
+                    <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div>
+                        <p className="font-medium">Patient Updates</p>
+                        <p className="text-sm text-muted-foreground">
+                          Notifications about patient record changes
+                        </p>
+                      </div>
+                      <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
+                    </div>
+                  )}
+                  {!isPatient && (
+                    <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div>
+                        <p className="font-medium">Low Stock Alerts</p>
+                        <p className="text-sm text-muted-foreground">
+                          Alert when inventory items are running low
+                        </p>
+                      </div>
+                      <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between py-3">
                     <div>
                       <p className="font-medium">Email Notifications</p>
                       <p className="text-sm text-muted-foreground">
@@ -268,7 +299,7 @@ export default function SettingsPage() {
           )}
 
           {/* Branding Settings */}
-          {activeTab === 'branding' && (
+          {activeTab === 'branding' && !isPatient && (
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
@@ -403,33 +434,53 @@ export default function SettingsPage() {
                   Privacy Settings
                 </h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between py-3 border-b border-border">
-                    <div>
-                      <p className="font-medium">Profile Visibility</p>
-                      <p className="text-sm text-muted-foreground">
-                        Control who can see your profile information
-                      </p>
+                  {!isPatient && (
+                    <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div>
+                        <p className="font-medium">Profile Visibility</p>
+                        <p className="text-sm text-muted-foreground">
+                          Control who can see your profile information
+                        </p>
+                      </div>
+                      <select className="px-3 py-2 border border-border rounded-md text-sm">
+                        <option>Everyone</option>
+                        <option>Hospital Staff Only</option>
+                        <option>Private</option>
+                      </select>
                     </div>
-                    <select className="px-3 py-2 border border-border rounded-md text-sm">
-                      <option>Everyone</option>
-                      <option>Hospital Staff Only</option>
-                      <option>Private</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between py-3 border-b border-border">
-                    <div>
-                      <p className="font-medium">Activity Status</p>
-                      <p className="text-sm text-muted-foreground">
-                        Show when you're online
-                      </p>
+                  )}
+                  {isPatient && (
+                    <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div>
+                        <p className="font-medium">Medical Record Access</p>
+                        <p className="text-sm text-muted-foreground">
+                          Your medical records are only accessible to authorized hospital staff
+                        </p>
+                      </div>
+                      <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                        <Lock className="w-4 h-4" />
+                        Protected
+                      </span>
                     </div>
-                    <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
-                  </div>
+                  )}
+                  {!isPatient && (
+                    <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div>
+                        <p className="font-medium">Activity Status</p>
+                        <p className="text-sm text-muted-foreground">
+                          Show when you're online
+                        </p>
+                      </div>
+                      <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
+                    </div>
+                  )}
                   <div className="flex items-center justify-between py-3">
                     <div>
                       <p className="font-medium">Data Sharing</p>
                       <p className="text-sm text-muted-foreground">
-                        Share anonymized data for research purposes
+                        {isPatient
+                          ? 'Share anonymized health data for medical research'
+                          : 'Share anonymized data for research purposes'}
                       </p>
                     </div>
                     <input type="checkbox" className="h-5 w-5 text-primary" />

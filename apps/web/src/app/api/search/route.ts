@@ -18,7 +18,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         session.user.role === 'super_admin'
           ? { hospitals: [], subscriptions: [] }
-          : { patients: [], appointments: [], medicalRecords: [] }
+          : session.user.role === 'patient'
+          ? { appointments: [], medicalRecords: [], invoices: [], prescriptions: [], labOrders: [] }
+          : { patients: [], appointments: [], medicalRecords: [], invoices: [], prescriptions: [], labOrders: [] }
       );
     }
 
@@ -79,8 +81,24 @@ export async function GET(request: NextRequest) {
       hospitalFilter.hospitalId = parseInt(session.user.hospitalId);
     }
 
-    // Search patients
-    const patients = await prisma.patient.findMany({
+    // PATIENT ROLE: Only search their own records
+    const isPatient = session.user.role === 'patient';
+    let patientId: number | null = null;
+
+    if (isPatient) {
+      // Get patient ID for this user
+      const patientRecord = await prisma.patient.findFirst({
+        where: {
+          hospitalId: parseInt(session.user.hospitalId),
+          userId: parseInt(session.user.id),
+        },
+        select: { id: true },
+      });
+      patientId = patientRecord?.id || null;
+    }
+
+    // Search patients (staff only)
+    const patients = !isPatient ? await prisma.patient.findMany({
       where: {
         ...hospitalFilter,
         OR: [
@@ -118,28 +136,47 @@ export async function GET(request: NextRequest) {
         gender: true,
       },
       take: 5,
-    });
+    }) : [];
 
-    // Search appointments by patient name
+    // Search appointments (filter by patient if patient role)
     const appointments = await prisma.appointment.findMany({
       where: {
         ...hospitalFilter,
-        patient: {
-          OR: [
+        ...(isPatient && patientId ? { patientId } : {}),
+        OR: [
+          {
+            appointmentType: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          {
+            department: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          ...(isPatient ? [] : [
             {
-              firstName: {
-                contains: searchTerm,
-                mode: 'insensitive',
+              patient: {
+                OR: [
+                  {
+                    firstName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                  {
+                    lastName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                ],
               },
             },
-            {
-              lastName: {
-                contains: searchTerm,
-                mode: 'insensitive',
-              },
-            },
-          ],
-        },
+          ]),
+        ],
       },
       select: {
         id: true,
@@ -165,10 +202,11 @@ export async function GET(request: NextRequest) {
       take: 5,
     });
 
-    // Search medical records
+    // Search medical records (filter by patient if patient role)
     const medicalRecords = await prisma.medicalRecord.findMany({
       where: {
         ...hospitalFilter,
+        ...(isPatient && patientId ? { patientId } : {}),
         OR: [
           {
             diagnosis: {
@@ -182,24 +220,26 @@ export async function GET(request: NextRequest) {
               mode: 'insensitive',
             },
           },
-          {
-            patient: {
-              OR: [
-                {
-                  firstName: {
-                    contains: searchTerm,
-                    mode: 'insensitive',
+          ...(isPatient ? [] : [
+            {
+              patient: {
+                OR: [
+                  {
+                    firstName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
                   },
-                },
-                {
-                  lastName: {
-                    contains: searchTerm,
-                    mode: 'insensitive',
+                  {
+                    lastName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
+          ]),
         ],
       },
       select: {
@@ -220,10 +260,188 @@ export async function GET(request: NextRequest) {
       take: 5,
     });
 
+    // Search invoices (bills) - filter by patient if patient role
+    const invoices = await prisma.invoice.findMany({
+      where: {
+        ...hospitalFilter,
+        ...(isPatient && patientId ? { patientId } : {}),
+        OR: [
+          {
+            status: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          ...(isPatient ? [] : [
+            {
+              patient: {
+                OR: [
+                  {
+                    firstName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                  {
+                    lastName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                ],
+              },
+            },
+          ]),
+        ],
+      },
+      select: {
+        id: true,
+        totalAmount: true,
+        paidAmount: true,
+        status: true,
+        createdAt: true,
+        patient: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 5,
+    });
+
+    // Search prescriptions - filter by patient if patient role
+    const prescriptions = await prisma.prescription.findMany({
+      where: {
+        ...hospitalFilter,
+        ...(isPatient && patientId ? { patientId } : {}),
+        OR: [
+          {
+            treatmentPlan: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          {
+            prescriptionItems: {
+              some: {
+                drugName: {
+                  contains: searchTerm,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          },
+          ...(isPatient ? [] : [
+            {
+              patient: {
+                OR: [
+                  {
+                    firstName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                  {
+                    lastName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                ],
+              },
+            },
+          ]),
+        ],
+      },
+      select: {
+        id: true,
+        treatmentPlan: true,
+        status: true,
+        createdAt: true,
+        prescriptionItems: {
+          select: {
+            drugName: true,
+            dosage: true,
+          },
+          take: 2,
+        },
+        patient: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 5,
+    });
+
+    // Search lab orders - filter by patient if patient role
+    const labOrders = await prisma.labOrder.findMany({
+      where: {
+        ...hospitalFilter,
+        ...(isPatient && patientId ? { patientId } : {}),
+        OR: [
+          {
+            description: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          ...(isPatient ? [] : [
+            {
+              patient: {
+                OR: [
+                  {
+                    firstName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                  {
+                    lastName: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                ],
+              },
+            },
+          ]),
+        ],
+      },
+      select: {
+        id: true,
+        orderType: true,
+        description: true,
+        status: true,
+        createdAt: true,
+        patient: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 5,
+    });
+
     return NextResponse.json({
       patients,
       appointments,
       medicalRecords,
+      invoices,
+      prescriptions,
+      labOrders,
     });
   } catch (error) {
     console.error('Error searching:', error);

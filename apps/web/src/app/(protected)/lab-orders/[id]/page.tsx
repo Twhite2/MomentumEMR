@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, Textarea } from '@momentum/ui';
-import { ArrowLeft, TestTube, User, Calendar, Upload, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, TestTube, User, Calendar, Upload, Plus, Trash2, Send, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
@@ -30,6 +30,9 @@ interface LabOrder {
     id: number;
     resultNotes: string | null;
     finalized: boolean;
+    releasedToPatient: boolean;
+    releasedAt: string | null;
+    releaser: { name: string } | null;
     uploader: {
       id: number;
       name: string;
@@ -103,6 +106,21 @@ export default function LabOrderDetailPage() {
     },
     onError: () => {
       toast.error('Failed to update status');
+    },
+  });
+
+  // Release to patient mutation
+  const releaseToPatient = useMutation({
+    mutationFn: async (resultId: number) => {
+      const response = await axios.post(`/api/lab-results/${resultId}/release`);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Lab result released to patient!');
+      queryClient.invalidateQueries({ queryKey: ['lab-order', orderId] });
+    },
+    onError: () => {
+      toast.error('Failed to release result');
     },
   });
 
@@ -357,12 +375,25 @@ export default function LabOrderDetailPage() {
                         <p className="text-sm text-muted-foreground">
                           Uploaded by {result.uploader.name} • {formatDateTime(result.createdAt)}
                         </p>
+                        {result.releasedToPatient && result.releasedAt && (
+                          <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            Released to patient by {result.releaser?.name} • {formatDateTime(result.releasedAt)}
+                          </p>
+                        )}
                       </div>
-                      {result.finalized && (
-                        <span className="text-xs bg-green-haze text-white px-2 py-1 rounded">
-                          Finalized
-                        </span>
-                      )}
+                      <div className="flex flex-col gap-2">
+                        {result.finalized && (
+                          <span className="text-xs bg-green-haze text-white px-2 py-1 rounded">
+                            Finalized
+                          </span>
+                        )}
+                        {result.releasedToPatient && (
+                          <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
+                            Released
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {result.resultNotes && (
@@ -389,6 +420,24 @@ export default function LabOrderDetailPage() {
                             </div>
                           ))}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Release to Patient Button */}
+                    {result.finalized && !result.releasedToPatient && (
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => releaseToPatient.mutate(result.id)}
+                          loading={releaseToPatient.isPending}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Release to Patient
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          This will make the results visible to the patient
+                        </p>
                       </div>
                     )}
                   </div>

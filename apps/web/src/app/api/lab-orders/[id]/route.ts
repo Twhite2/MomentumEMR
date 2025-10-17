@@ -35,6 +35,11 @@ export async function GET(
                 name: true,
               },
             },
+            releaser: {
+              select: {
+                name: true,
+              },
+            },
             labResultValues: {
               orderBy: { id: 'asc' },
             },
