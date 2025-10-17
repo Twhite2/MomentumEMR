@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@momentum/database';
 
-// GET /api/search - Global search across patients, appointments, and medical records
+// GET /api/search - Role-aware global search
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
@@ -15,18 +15,67 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('q');
 
     if (!query || query.length < 2) {
-      return NextResponse.json({ 
-        patients: [], 
-        appointments: [], 
-        medicalRecords: [] 
-      });
+      return NextResponse.json(
+        session.user.role === 'super_admin'
+          ? { hospitals: [], subscriptions: [] }
+          : { patients: [], appointments: [], medicalRecords: [] }
+      );
     }
 
     const searchTerm = query.toLowerCase();
 
-    // Build hospital filter for non-super-admin users
+    // SUPER ADMIN: Search hospitals and subscriptions
+    if (session.user.role === 'super_admin') {
+      const hospitals = await prisma.hospital.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: searchTerm,
+                mode: 'insensitive',
+              },
+            },
+            {
+              address: {
+                contains: searchTerm,
+                mode: 'insensitive',
+              },
+            },
+            {
+              contactEmail: {
+                contains: searchTerm,
+                mode: 'insensitive',
+              },
+            },
+            {
+              phoneNumber: {
+                contains: searchTerm,
+                mode: 'insensitive',
+              },
+            },
+          ],
+        },
+        select: {
+          id: true,
+          name: true,
+          address: true,
+          contactEmail: true,
+          phoneNumber: true,
+          subscriptionPlan: true,
+          active: true,
+        },
+        take: 5,
+      });
+
+      return NextResponse.json({
+        hospitals,
+        subscriptions: [], // Can be expanded later
+      });
+    }
+
+    // HOSPITAL STAFF: Search patients, appointments, medical records
     const hospitalFilter: any = {};
-    if (session.user.role !== 'super_admin' && session.user.hospitalId) {
+    if (session.user.hospitalId) {
       hospitalFilter.hospitalId = parseInt(session.user.hospitalId);
     }
 
