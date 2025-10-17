@@ -26,6 +26,8 @@ export default function NewHospitalPage() {
     tagline: '',
   });
 
+  const [creationResult, setCreationResult] = useState<any>(null);
+
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       const response = await axios.post('/api/hospitals', data);
@@ -33,8 +35,8 @@ export default function NewHospitalPage() {
     },
     onSuccess: (data) => {
       toast.success('Hospital created successfully');
+      setCreationResult(data);
       queryClient.invalidateQueries({ queryKey: ['hospitals'] });
-      router.push(`/hospitals/${data.id}`);
     },
     onError: () => {
       toast.error('Failed to create hospital');
@@ -45,6 +47,83 @@ export default function NewHospitalPage() {
     e.preventDefault();
     createMutation.mutate(formData);
   };
+
+  // Show success message with setup link
+  if (creationResult) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg border border-border p-8 max-w-2xl mx-auto">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-green-haze/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Building2 className="w-8 h-8 text-green-haze" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Hospital Created Successfully!</h1>
+            <p className="text-muted-foreground">
+              {creationResult.hospital.name} has been registered in the system
+            </p>
+          </div>
+
+          <div className="bg-primary/5 rounded-lg p-6 mb-6">
+            <h3 className="font-semibold mb-4">Admin Account Created</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Name:</span>
+                <span className="font-medium">{creationResult.adminUser.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Email:</span>
+                <span className="font-medium">{creationResult.adminUser.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Role:</span>
+                <span className="font-medium">Hospital Admin</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-saffron/10 border border-saffron/20 rounded-lg p-6 mb-6">
+            <h3 className="font-semibold text-saffron mb-2 flex items-center gap-2">
+              <Mail className="w-5 h-5" />
+              Password Setup Required
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              A password setup link has been generated. Share this with the hospital admin to activate their account.
+            </p>
+            <div className="bg-white rounded border border-border p-3">
+              <p className="text-xs text-muted-foreground mb-2">Setup Link (Valid for 24 hours):</p>
+              <code className="text-xs break-all bg-muted px-2 py-1 rounded block">
+                {creationResult.setupLink}
+              </code>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() => {
+                navigator.clipboard.writeText(creationResult.setupLink);
+                toast.success('Setup link copied to clipboard!');
+              }}
+            >
+              Copy Link
+            </Button>
+          </div>
+
+          <div className="flex gap-3">
+            <Link href="/hospitals" className="flex-1">
+              <Button variant="outline" className="w-full">
+                Back to Hospitals
+              </Button>
+            </Link>
+            <Link href={`/hospitals/${creationResult.hospital.id}`} className="flex-1">
+              <Button variant="primary" className="w-full">
+                View Hospital Details
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

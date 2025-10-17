@@ -162,16 +162,18 @@ model Hospital {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  hospitalId     Int       @map("hospital_id")
-  name           String
-  email          String    @unique
-  hashedPassword String    @map("hashed_password")
-  role           UserRole
-  active         Boolean   @default(true)
-  lastLogin      DateTime? @map("last_login")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  id                   Int       @id @default(autoincrement())
+  hospitalId           Int       @map("hospital_id")
+  name                 String
+  email                String    @unique
+  hashedPassword       String    @map("hashed_password")
+  role                 UserRole
+  active               Boolean   @default(true)
+  lastLogin            DateTime? @map("last_login")
+  passwordResetToken   String?   @map("password_reset_token") @db.Text
+  passwordResetExpiry  DateTime? @map("password_reset_expiry")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
   // Relations
   hospital                Hospital              @relation(fields: [hospitalId], references: [id])
@@ -187,6 +189,7 @@ model User {
 
   @@index([hospitalId])
   @@index([email])
+  @@index([passwordResetToken])
   @@map("users")
 }
 
