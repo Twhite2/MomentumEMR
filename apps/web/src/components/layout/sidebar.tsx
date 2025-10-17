@@ -58,6 +58,12 @@ const navItems: NavItem[] = [
     roles: ['super_admin'],
   },
   {
+    label: 'Disease Analytics',
+    href: '/disease-analytics',
+    icon: TestTube,
+    roles: ['super_admin'],
+  },
+  {
     label: 'Analytics',
     href: '/analytics',
     icon: BarChart3,
