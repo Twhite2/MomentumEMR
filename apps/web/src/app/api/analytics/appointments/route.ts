@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
       select: { id: true, name: true },
     });
 
-    const doctorStats = topDoctors.map((stat) => ({
+    const doctorStats = topDoctors.map((stat: { doctorId: number; _count: number }) => ({
       doctor: doctors.find((d) => d.id === stat.doctorId),
       count: stat._count,
     }));
