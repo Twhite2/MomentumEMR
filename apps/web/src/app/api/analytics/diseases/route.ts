@@ -113,8 +113,8 @@ export async function GET(request: NextRequest) {
 
     const sampleStats = {
       totalSamples: labOrders.length,
-      pendingSamples: labOrders.filter(l => l.status === 'pending').length,
-      completedSamples: labOrders.filter(l => l.status === 'completed').length,
+      pendingSamples: labOrders.filter((l: { status: string | null }) => l.status === 'pending').length,
+      completedSamples: labOrders.filter((l: { status: string | null }) => l.status === 'completed').length,
       samplesByType: groupByTestType(labOrders),
     };
 
