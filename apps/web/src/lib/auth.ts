@@ -136,8 +136,11 @@ export const authOptions = {
 } satisfies NextAuthConfig;
 
 // Ensure secret is set - NextAuth v5 picks this up automatically from AUTH_SECRET or NEXTAUTH_SECRET
+// Only throw error at runtime, not during build
 if (!process.env.NEXTAUTH_SECRET && !process.env.AUTH_SECRET) {
-  throw new Error('Missing NEXTAUTH_SECRET or AUTH_SECRET environment variable');
+  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+    console.warn('Warning: Missing NEXTAUTH_SECRET or AUTH_SECRET environment variable');
+  }
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);
