@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
         totalCases: data.count,
         uniquePatients: data.patientIds.size,
         affectedHospitals: data.hospitalIds.size,
-        latestCase: new Date(Math.max(...data.recentCases.map(d => d.getTime()))),
+        latestCase: new Date(Math.max(...data.recentCases.map((d: Date) => d.getTime()))),
         trend: calculateTrend(data.recentCases),
       }))
       .sort((a, b) => b.totalCases - a.totalCases)
@@ -122,8 +122,8 @@ export async function GET(request: NextRequest) {
     const summary = {
       totalDiseases: diseaseStats.length,
       totalCases: diseaseStats.reduce((sum: number, d: { totalCases: number }) => sum + d.totalCases, 0),
-      totalPatients: new Set(medicalRecords.map(r => r.patientId)).size,
-      totalHospitals: new Set(medicalRecords.map(r => r.hospitalId)).size,
+      totalPatients: new Set(medicalRecords.map((r: { patientId: number }) => r.patientId)).size,
+      totalHospitals: new Set(medicalRecords.map((r: { hospitalId: number }) => r.hospitalId)).size,
       avgCasesPerDisease: diseaseStats.length > 0 
         ? Math.round(diseaseStats.reduce((sum: number, d: { totalCases: number }) => sum + d.totalCases, 0) / diseaseStats.length)
         : 0,
