@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "type-check:strict": "tsc --noEmit --incremental false",
+    "clean": "rimraf .next tsconfig.tsbuildinfo node_modules/.cache",
+    "build:clean": "npm run clean && npm run build",
+    "verify": "powershell -ExecutionPolicy Bypass -File ./check-build.ps1",
+    "precommit": "npm run type-check:strict"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.899.0",
