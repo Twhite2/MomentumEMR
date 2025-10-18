@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
             },
             _sum: {
               totalAmount: true,
-              amountPaid: true,
+              paidAmount: true,
             },
           }),
           
@@ -175,7 +175,7 @@ export async function GET(request: NextRequest) {
           paidInvoicesThisMonth,
           pendingInvoicesThisMonth,
           revenueThisMonth: invoiceSummary._sum.totalAmount || 0,
-          collectedThisMonth: invoiceSummary._sum.amountPaid || 0,
+          collectedThisMonth: invoiceSummary._sum.paidAmount || 0,
           patientTypeBreakdown,
         });
 
@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
           prisma.labOrder.count({
             where: {
               hospitalId,
-              orderedById: userId,
+              orderedBy: userId,
               status: 'pending',
             },
           }),
@@ -414,15 +414,13 @@ export async function GET(request: NextRequest) {
             },
           }),
           
-          // Low stock items
-          prisma.inventory.count({
-            where: {
-              hospitalId,
-              quantity: {
-                lte: prisma.inventory.fields.reorderLevel,
-              },
-            },
-          }),
+          // Low stock items (items where stockQuantity <= reorderLevel)
+          prisma.$queryRaw`
+            SELECT COUNT(*) as count
+            FROM inventory
+            WHERE hospital_id = ${hospitalId}
+            AND stock_quantity <= reorder_level
+          `,
         ]);
 
         return NextResponse.json({
@@ -430,7 +428,7 @@ export async function GET(request: NextRequest) {
           activePrescriptions: pharmacistActivePrescriptions,
           dispensedToday: pharmacistDispensedToday,
           pendingPrescriptions: pharmacistPending,
-          lowStockItems: pharmacistLowStock,
+          lowStockItems: Number((pharmacistLowStock as any)[0]?.count || 0),
         });
 
       case 'patient':
