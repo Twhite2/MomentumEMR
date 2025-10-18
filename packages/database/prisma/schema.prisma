@@ -178,6 +178,7 @@ model User {
   // Relations
   hospital                Hospital              @relation(fields: [hospitalId], references: [id])
   patientProfile          Patient?
+  assignedPatients        Patient[]             @relation("PrimaryDoctor")
   appointments            Appointment[]
   medicalRecords          MedicalRecord[]
   prescriptions           Prescription[]
@@ -199,6 +200,7 @@ model Patient {
   id                  Int          @id @default(autoincrement())
   hospitalId          Int          @map("hospital_id")
   userId              Int?         @unique @map("user_id")
+  primaryDoctorId     Int?         @map("primary_doctor_id")
   patientType         PatientType  @default(self_pay) @map("patient_type")
   corporateClientId   Int?         @map("corporate_client_id")
   firstName           String       @map("first_name")
@@ -215,6 +217,7 @@ model Patient {
   // Relations
   hospital        Hospital          @relation(fields: [hospitalId], references: [id])
   user            User?             @relation(fields: [userId], references: [id])
+  primaryDoctor   User?             @relation("PrimaryDoctor", fields: [primaryDoctorId], references: [id])
   corporateClient CorporateClient?  @relation(fields: [corporateClientId], references: [id])
   hmo             Hmo?              @relation(fields: [insuranceId], references: [id])
   appointments    Appointment[]
@@ -226,6 +229,7 @@ model Patient {
 
   @@index([hospitalId])
   @@index([userId])
+  @@index([primaryDoctorId])
   @@index([corporateClientId])
   @@index([insuranceId])
   @@map("patients")
@@ -508,6 +512,7 @@ model LabResult {
   uploadedBy         Int       @map("uploaded_by")
   fileUrl            String?   @map("file_url") @db.Text
   resultNotes        String?   @map("result_notes") @db.Text
+  doctorNote         String?   @map("doctor_note") @db.Text
   finalized          Boolean   @default(false)
   releasedToPatient  Boolean   @default(false) @map("released_to_patient")
   releasedAt         DateTime? @map("released_at")

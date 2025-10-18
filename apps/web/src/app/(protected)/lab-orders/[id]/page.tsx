@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button, Input, Textarea } from '@momentum/ui';
 import { ArrowLeft, TestTube, User, Calendar, Upload, Plus, Trash2, Send, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -60,9 +61,13 @@ interface TestValue {
 export default function LabOrderDetailPage() {
   const params = useParams();
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
   const orderId = params.id as string;
 
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [showSendDialog, setShowSendDialog] = useState(false);
+  const [doctorNote, setDoctorNote] = useState('');
+  const [selectedResultId, setSelectedResultId] = useState<number | null>(null);
   const [resultNotes, setResultNotes] = useState('');
   const [testValues, setTestValues] = useState<TestValue[]>([
     { testName: '', resultValue: '', unit: '', normalRange: '' },
@@ -109,6 +114,21 @@ export default function LabOrderDetailPage() {
     },
   });
 
+  // Finalize result mutation (lab tech)
+  const finalizeResult = useMutation({
+    mutationFn: async (resultId: number) => {
+      const response = await axios.post(`/api/lab-results/${resultId}/finalize`);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Lab result finalized and ready for doctor review!');
+      queryClient.invalidateQueries({ queryKey: ['lab-order', orderId] });
+    },
+    onError: () => {
+      toast.error('Failed to finalize result');
+    },
+  });
+
   // Release to patient mutation
   const releaseToPatient = useMutation({
     mutationFn: async (resultId: number) => {
@@ -123,6 +143,43 @@ export default function LabOrderDetailPage() {
       toast.error('Failed to release result');
     },
   });
+
+  // Send result with note to patient mutation
+  const sendToPatient = useMutation({
+    mutationFn: async ({ resultId, note }: { resultId: number; note: string }) => {
+      const response = await axios.post(`/api/lab-results/${resultId}/send-to-patient`, {
+        doctorNote: note,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Lab result sent to patient with your note!');
+      setShowSendDialog(false);
+      setDoctorNote('');
+      setSelectedResultId(null);
+      queryClient.invalidateQueries({ queryKey: ['lab-order', orderId] });
+    },
+    onError: () => {
+      toast.error('Failed to send result to patient');
+    },
+  });
+
+  const handleOpenSendDialog = () => {
+    // Get the latest finalized result
+    const finalizedResult = order?.labResults.find(r => r.finalized);
+    if (finalizedResult) {
+      setSelectedResultId(finalizedResult.id);
+      setShowSendDialog(true);
+    } else {
+      toast.error('No finalized results available to send');
+    }
+  };
+
+  const handleSendToPatient = () => {
+    if (selectedResultId) {
+      sendToPatient.mutate({ resultId: selectedResultId, note: doctorNote });
+    }
+  };
 
   const addTestValue = () => {
     setTestValues([...testValues, { testName: '', resultValue: '', unit: '', normalRange: '' }]);
@@ -423,8 +480,26 @@ export default function LabOrderDetailPage() {
                       </div>
                     )}
 
-                    {/* Release to Patient Button */}
-                    {result.finalized && !result.releasedToPatient && (
+                    {/* Finalize Result Button (Lab Tech) */}
+                    {!result.finalized && session?.user?.role === 'lab_tech' && (
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => finalizeResult.mutate(result.id)}
+                          loading={finalizeResult.isPending}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Finalize Result
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Mark this result as reviewed and ready for doctor approval
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Release to Patient Button (Doctor) */}
+                    {result.finalized && !result.releasedToPatient && ['doctor', 'admin'].includes(session?.user?.role || '') && (
                       <div className="mt-4 pt-4 border-t border-border">
                         <Button
                           variant="primary"
@@ -509,6 +584,16 @@ export default function LabOrderDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
             <div className="space-y-2">
+              {order.labResults.some(r => r.finalized && !r.releasedToPatient) && (
+                <Button 
+                  variant="primary" 
+                  className="w-full"
+                  onClick={handleOpenSendDialog}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Results to Patient
+                </Button>
+              )}
               <Link href={`/prescriptions/new?patientId=${order.patient.id}`}>
                 <Button variant="outline" className="w-full">
                   Create Prescription
@@ -528,6 +613,106 @@ export default function LabOrderDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Send to Patient Dialog */}
+      {showSendDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Send Results to Patient</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Add a doctor's note to accompany the lab results
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowSendDialog(false);
+                  setDoctorNote('');
+                  setSelectedResultId(null);
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Patient Info */}
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm font-medium mb-2">Sending to:</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-tory-blue/10 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold text-tory-blue">
+                      {order.patient.firstName.charAt(0)}{order.patient.lastName.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium">
+                      {order.patient.firstName} {order.patient.lastName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {calculateAge(order.patient.dob)} years • {order.patient.gender}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Test Info */}
+              <div className="p-4 border border-border rounded-lg">
+                <p className="text-sm font-medium mb-2">Test Type:</p>
+                <p className="text-lg font-semibold">{order.orderType.replace('_', ' ')}</p>
+              </div>
+
+              {/* Doctor's Note */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Doctor's Note <span className="text-red-ribbon">*</span>
+                </label>
+                <Textarea
+                  value={doctorNote}
+                  onChange={(e) => setDoctorNote(e.target.value)}
+                  rows={6}
+                  placeholder="Write a note to the patient explaining the results, next steps, or any recommendations...
+
+Example:
+Your test results are within normal ranges. Please continue with your current treatment plan. If you experience any symptoms, schedule a follow-up appointment."
+                  className="w-full"
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  This note will be visible to the patient along with their lab results
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="primary"
+                  className="flex-1"
+                  onClick={handleSendToPatient}
+                  loading={sendToPatient.isPending}
+                  disabled={!doctorNote.trim()}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Send to Patient
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowSendDialog(false);
+                    setDoctorNote('');
+                    setSelectedResultId(null);
+                  }}
+                  disabled={sendToPatient.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

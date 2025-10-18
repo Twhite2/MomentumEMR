@@ -25,15 +25,21 @@ export default function NewLabOrderPage() {
     orderType: 'Lab_Test',
     description: '',
   });
+  const [customTestType, setCustomTestType] = useState('');
 
   // Fetch patients
-  const { data: patients } = useQuery<{ patients: Patient[] }>({
+  const { data: patients, isLoading: patientsLoading, error: patientsError } = useQuery<{ patients: Patient[] }>({
     queryKey: ['patients-all'],
     queryFn: async () => {
       const response = await axios.get('/api/patients?limit=100');
       return response.data;
     },
   });
+
+  // Debug: Log patients data
+  console.log('Patients data:', patients);
+  console.log('Patients loading:', patientsLoading);
+  console.log('Patients error:', patientsError);
 
   // Create lab order mutation
   const createLabOrder = useMutation({
@@ -60,9 +66,17 @@ export default function NewLabOrderPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Use custom test type if "Other" is selected
+    const finalOrderType = formData.orderType === 'Other' ? customTestType : formData.orderType;
+
+    if (formData.orderType === 'Other' && !customTestType.trim()) {
+      toast.error('Please specify the custom test type');
+      return;
+    }
+
     const payload = {
       patientId: formData.patientId,
-      orderType: formData.orderType,
+      orderType: finalOrderType,
       description: formData.description || null,
     };
 
@@ -97,16 +111,36 @@ export default function NewLabOrderPage() {
               value={formData.patientId}
               onChange={handleInputChange}
               required
-              disabled={!!preSelectedPatientId}
+              disabled={!!preSelectedPatientId || patientsLoading}
             >
-              <option value="">Select patient</option>
-              {patients?.patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.firstName} {patient.lastName} (ID: P-
-                  {patient.id.toString().padStart(6, '0')})
-                </option>
-              ))}
+              {patientsLoading ? (
+                <option value="">Loading patients...</option>
+              ) : patientsError ? (
+                <option value="">Error loading patients</option>
+              ) : !patients?.patients || patients.patients.length === 0 ? (
+                <option value="">No patients found</option>
+              ) : (
+                <>
+                  <option value="">Select patient</option>
+                  {patients.patients.map((patient) => (
+                    <option key={patient.id} value={patient.id}>
+                      {patient.firstName} {patient.lastName} (ID: P-
+                      {patient.id.toString().padStart(6, '0')})
+                    </option>
+                  ))}
+                </>
+              )}
             </Select>
+            {patientsError && (
+              <p className="text-sm text-red-ribbon mt-1">
+                Failed to load patients. Please try refreshing the page.
+              </p>
+            )}
+            {!patientsLoading && !patientsError && patients?.patients?.length === 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                No patients found. <Link href="/patients/new" className="text-primary hover:underline">Create a patient first</Link>
+              </p>
+            )}
           </div>
 
           {/* Test Details */}
@@ -126,7 +160,18 @@ export default function NewLabOrderPage() {
                 <option value="MRI">MRI</option>
                 <option value="Ultrasound">Ultrasound</option>
                 <option value="Pathology">Pathology</option>
+                <option value="Other">Other (Specify Custom Type)</option>
               </Select>
+
+              {formData.orderType === 'Other' && (
+                <Input
+                  label="Custom Test Type"
+                  placeholder="Enter custom test type (e.g., ECG, EEG, Biopsy, etc.)"
+                  value={customTestType}
+                  onChange={(e) => setCustomTestType(e.target.value)}
+                  required
+                />
+              )}
 
               <Textarea
                 label="Test Description & Instructions"
@@ -147,7 +192,11 @@ export default function NewLabOrderPage() {
               <h3 className="font-semibold text-primary">Order Summary</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Test type: <span className="font-medium text-foreground">{formData.orderType.replace('_', ' ')}</span>
+              Test type: <span className="font-medium text-foreground">
+                {formData.orderType === 'Other' 
+                  ? customTestType || 'Other (Not specified)' 
+                  : formData.orderType.replace('_', ' ')}
+              </span>
             </p>
             {formData.patientId && (
               <p className="text-sm text-muted-foreground mt-1">

@@ -97,13 +97,19 @@ const navItems: NavItem[] = [
     label: 'Lab Orders',
     href: '/lab-orders',
     icon: TestTube,
-    roles: ['admin', 'doctor', 'nurse', 'lab_tech'],
+    roles: ['admin', 'doctor', 'nurse'],
+  },
+  {
+    label: 'Incoming Orders',
+    href: '/lab-orders',
+    icon: TestTube,
+    roles: ['lab_tech'],
   },
   {
     label: 'Lab Results',
     href: '/lab-results',
-    icon: TestTube,
-    roles: ['patient'],
+    icon: ClipboardList,
+    roles: ['lab_tech', 'patient'],
   },
   {
     label: 'Prescriptions',

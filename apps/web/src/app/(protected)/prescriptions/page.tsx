@@ -43,6 +43,8 @@ interface PrescriptionsResponse {
 
 export default function PrescriptionsPage() {
   const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  const canCreatePrescription = ['doctor', 'nurse', 'admin', 'super_admin'].includes(userRole || '');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
 
@@ -87,12 +89,16 @@ export default function PrescriptionsPage() {
         <div>
           <h1 className="text-3xl font-bold">Prescriptions</h1>
           <p className="text-muted-foreground mt-1">
-            {session?.user?.role === 'patient' 
+            {userRole === 'patient' 
               ? 'View your medication orders and treatment plans'
-              : 'Manage medication orders and treatment plans'}
+              : userRole === 'cashier'
+              ? 'View prescriptions for billing and invoicing'
+              : canCreatePrescription
+              ? 'Manage medication orders and treatment plans'
+              : 'View and dispense medication orders'}
           </p>
         </div>
-        {session?.user?.role !== 'patient' && (
+        {canCreatePrescription && (
           <Link href="/prescriptions/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4 mr-2" />
@@ -137,8 +143,14 @@ export default function PrescriptionsPage() {
         ) : data?.prescriptions.length === 0 ? (
           <div className="p-8 text-center">
             <Pill className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No prescriptions found</p>
-            {session?.user?.role !== 'patient' && (
+            <p className="text-muted-foreground">
+              {userRole === 'pharmacist' 
+                ? 'No prescriptions available yet'
+                : userRole === 'cashier'
+                ? 'No prescriptions to bill yet'
+                : 'No prescriptions found'}
+            </p>
+            {canCreatePrescription && (
               <Link href="/prescriptions/new">
                 <Button variant="primary" size="sm" className="mt-4">
                   Create First Prescription

@@ -11,6 +11,7 @@ import axios from 'axios';
 interface LabResult {
   id: number;
   resultNotes: string | null;
+  doctorNote: string | null;
   releasedAt: string;
   labOrder: {
     orderType: string;
@@ -31,28 +32,35 @@ interface LabResult {
 
 export default function LabResultsPage() {
   const { data: session } = useSession();
+  const isLabTech = session?.user?.role === 'lab_tech';
+  const isPatient = session?.user?.role === 'patient';
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [testTypeFilter, setTestTypeFilter] = useState('');
 
-  // Fetch patient's lab results
+  // Fetch lab results based on role
   const { data, isLoading } = useQuery({
-    queryKey: ['patient-lab-results'],
+    queryKey: isLabTech ? ['all-lab-results'] : ['patient-lab-results'],
     queryFn: async () => {
-      const response = await axios.get('/api/lab-results/patient');
+      const endpoint = isLabTech ? '/api/lab-results' : '/api/lab-results/patient';
+      const response = await axios.get(endpoint);
       return response.data;
     },
   });
 
   // Filter results based on search term and test type
   const filteredResults = useMemo(() => {
-    if (!data?.releasedResults) return [];
+    const resultsArray = isLabTech ? data?.results : data?.releasedResults;
+    if (!resultsArray) return [];
 
-    return data.releasedResults.filter((result: LabResult) => {
+    return resultsArray.filter((result: any) => {
       const matchesSearch =
         searchTerm === '' ||
         result.labOrder.orderType.toLowerCase().includes(searchTerm.toLowerCase()) ||
         result.labOrder.doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        new Date(result.releasedAt).toLocaleDateString().includes(searchTerm);
+        (result.labOrder.patient && 
+          `${result.labOrder.patient.firstName} ${result.labOrder.patient.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (result.releasedAt && new Date(result.releasedAt).toLocaleDateString().includes(searchTerm));
 
       const matchesType =
         testTypeFilter === '' ||
@@ -60,7 +68,7 @@ export default function LabResultsPage() {
 
       return matchesSearch && matchesType;
     });
-  }, [data?.releasedResults, searchTerm, testTypeFilter]);
+  }, [isLabTech, data?.results, data?.releasedResults, searchTerm, testTypeFilter]);
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -77,10 +85,12 @@ export default function LabResultsPage() {
       <div>
         <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
           <TestTube className="w-8 h-8" />
-          My Lab Results
+          {isLabTech ? 'Lab Results Management' : 'My Lab Results'}
         </h1>
         <p className="text-muted-foreground mt-1">
-          View your laboratory test results and reports
+          {isLabTech 
+            ? 'Manage and track all laboratory test results' 
+            : 'View your laboratory test results and reports'}
         </p>
       </div>
 
@@ -193,7 +203,7 @@ export default function LabResultsPage() {
               ) : null}
             </div>
           ) : (
-            filteredResults.map((result: LabResult) => (
+            filteredResults.map((result: any) => (
               <div key={result.id} className="p-6 hover:bg-muted/30 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -203,6 +213,11 @@ export default function LabResultsPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg">{result.labOrder.orderType.replace('_', ' ')}</h3>
+                        {isLabTech && result.labOrder.patient && (
+                          <p className="text-sm font-medium text-foreground">
+                            Patient: {result.labOrder.patient.firstName} {result.labOrder.patient.lastName}
+                          </p>
+                        )}
                         <p className="text-sm text-muted-foreground">
                           Ordered by Dr. {result.labOrder.doctor.name}
                         </p>
@@ -223,9 +238,23 @@ export default function LabResultsPage() {
                         </span>
                       </div>
                       
+                      {result.doctorNote && (
+                        <div className="mt-3 p-4 bg-green-50 border-l-4 border-green-600 rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <FileText className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-semibold text-green-900">Message from Dr. {result.labOrder.doctor.name}</p>
+                              <p className="text-sm text-green-800 mt-1 whitespace-pre-wrap">
+                                {result.doctorNote}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {result.resultNotes && (
                         <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-                          <p className="text-sm font-medium text-foreground">Doctor's Notes:</p>
+                          <p className="text-sm font-medium text-foreground">Lab Technician Notes:</p>
                           <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
                             {result.resultNotes}
                           </p>
@@ -236,7 +265,7 @@ export default function LabResultsPage() {
                         <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                           <p className="text-sm font-medium text-foreground mb-2">Test Values:</p>
                           <div className="space-y-1">
-                            {result.labResultValues.map((value, idx) => (
+                            {result.labResultValues.map((value: any, idx: number) => (
                               <div key={idx} className="flex justify-between text-sm">
                                 <span className="font-medium">{value.testName}</span>
                                 <span>

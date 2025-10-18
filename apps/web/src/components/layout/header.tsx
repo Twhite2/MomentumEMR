@@ -86,6 +86,9 @@ export function Header({ userName, userRole }: HeaderProps) {
               className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               value={searchQuery}
               onChange={handleSearchChange}
+              autoComplete="off"
+              name="global-search"
+              id="global-search"
             />
             {searchQuery && (
               <button

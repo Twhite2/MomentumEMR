@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/prescriptions - List prescriptions
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'pharmacist', 'patient']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'pharmacist', 'cashier', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(session.user.id);
     const userRole = session.user.role;
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
 // POST /api/prescriptions - Create new prescription
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['doctor']);
+    const session = await requireRole(['doctor', 'nurse', 'admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const doctorId = parseInt(session.user.id);
 

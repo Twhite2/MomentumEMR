@@ -20,6 +20,13 @@ interface CorporateClient {
   companyName: string;
 }
 
+interface Staff {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
 export default function NewPatientPage() {
   const router = useRouter();
   const [patientType, setPatientType] = useState('self_pay');
@@ -37,6 +44,7 @@ export default function NewPatientPage() {
     emergencyContact: '',
     insuranceId: '',
     corporateClientId: '',
+    primaryDoctorId: '',
   });
 
   // Fetch HMO policies
@@ -53,6 +61,15 @@ export default function NewPatientPage() {
     queryKey: ['corporate-clients'],
     queryFn: async () => {
       const response = await axios.get('/api/corporate-clients');
+      return response.data;
+    },
+  });
+
+  // Fetch Doctors/Staff for assignment
+  const { data: staffData } = useQuery<{ staff: Staff[] }>({
+    queryKey: ['staff-doctors'],
+    queryFn: async () => {
+      const response = await axios.get('/api/staff?role=doctor');
       return response.data;
     },
   });
@@ -105,6 +122,7 @@ export default function NewPatientPage() {
         formData.patientType === 'corporate' && formData.corporateClientId
           ? formData.corporateClientId
           : null,
+      primaryDoctorId: formData.primaryDoctorId || null,
     };
 
     createPatient.mutate(payload);
@@ -169,6 +187,31 @@ export default function NewPatientPage() {
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
               </Select>
+            </div>
+          </div>
+
+          {/* Doctor Assignment */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Primary Care Doctor</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Select
+                label="Assign Primary Doctor"
+                name="primaryDoctorId"
+                value={formData.primaryDoctorId}
+                onChange={handleInputChange}
+              >
+                <option value="">Select doctor (optional)</option>
+                {staffData?.staff?.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.name} - {doctor.email}
+                  </option>
+                ))}
+              </Select>
+              <div className="flex items-end">
+                <p className="text-sm text-muted-foreground">
+                  Assign this patient to a primary care doctor. This helps doctors manage their patient list.
+                </p>
+              </div>
             </div>
           </div>
 

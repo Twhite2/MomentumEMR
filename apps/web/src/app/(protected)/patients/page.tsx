@@ -8,15 +8,26 @@ import Link from 'next/link';
 import axios from 'axios';
 
 interface Patient {
-  id: number;
+  id: number | string;
+  userId?: number;
   firstName: string;
   lastName: string;
   dob: string;
-  gender: string;
+  gender: string | null;
   patientType: string;
   contactInfo: {
     phone?: string;
     email?: string;
+  };
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  primaryDoctor?: {
+    id: number;
+    name: string;
+    email: string;
   };
   hmo?: {
     id: number;
@@ -27,6 +38,7 @@ interface Patient {
     id: number;
     companyName: string;
   };
+  isUserOnly?: boolean;
   createdAt: string;
 }
 
@@ -173,6 +185,9 @@ export default function PatientsPage() {
                       Type
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Primary Doctor
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Contact
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -185,22 +200,28 @@ export default function PatientsPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {data?.patients.map((patient) => (
-                    <tr key={patient.id} className="hover:bg-muted/50">
+                    <tr key={patient.id} className={`hover:bg-muted/50 ${patient.isUserOnly ? 'bg-yellow-50/30' : ''}`}>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                             <span className="text-primary font-medium">
                               {patient.firstName.charAt(0)}
-                              {patient.lastName.charAt(0)}
+                              {patient.lastName?.charAt(0) || ''}
                             </span>
                           </div>
                           <div>
                             <p className="font-medium">
                               {patient.firstName} {patient.lastName}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              ID: P-{patient.id.toString().padStart(6, '0')}
-                            </p>
+                            {patient.isUserOnly ? (
+                              <p className="text-xs text-amber-600 font-medium">
+                                User Account Only • {patient.user?.email}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">
+                                ID: P-{patient.id.toString().padStart(6, '0')}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -220,6 +241,16 @@ export default function PatientsPage() {
                         >
                           {patient.patientType === 'self_pay' ? 'Self Pay' : patient.patientType.toUpperCase()}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {patient.primaryDoctor ? (
+                          <div>
+                            <p className="text-sm font-medium">{patient.primaryDoctor.name}</p>
+                            <p className="text-xs text-muted-foreground">{patient.primaryDoctor.email}</p>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Not assigned</p>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-sm">{patient.contactInfo?.phone || 'N/A'}</p>
@@ -243,11 +274,19 @@ export default function PatientsPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <Link href={`/patients/${patient.id}`}>
-                          <Button variant="ghost" size="sm">
-                            View
-                          </Button>
-                        </Link>
+                        {patient.isUserOnly ? (
+                          <Link href={`/patients/new?userId=${patient.userId}`}>
+                            <Button variant="outline" size="sm" className="text-amber-600 border-amber-600 hover:bg-amber-50">
+                              Create Record
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Link href={`/patients/${patient.id}`}>
+                            <Button variant="ghost" size="sm">
+                              View
+                            </Button>
+                          </Link>
+                        )}
                       </td>
                     </tr>
                   ))}

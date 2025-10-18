@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button, Select } from '@momentum/ui';
 import { Plus, TestTube, User, Calendar } from 'lucide-react';
 import Link from 'next/link';
@@ -40,6 +41,9 @@ interface LabOrdersResponse {
 }
 
 export default function LabOrdersPage() {
+  const { data: session } = useSession();
+  const isLabTech = session?.user?.role === 'lab_tech';
+  
   const [status, setStatus] = useState('');
   const [orderType, setOrderType] = useState('');
   const [page, setPage] = useState(1);
@@ -100,17 +104,23 @@ export default function LabOrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Lab Orders</h1>
+          <h1 className="text-3xl font-bold">
+            {isLabTech ? 'Incoming Lab Orders' : 'Lab Orders'}
+          </h1>
           <p className="text-muted-foreground mt-1">
-            Manage diagnostic tests and laboratory orders
+            {isLabTech 
+              ? 'View and process diagnostic test requests from doctors'
+              : 'Manage diagnostic tests and laboratory orders'}
           </p>
         </div>
-        <Link href="/lab-orders/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4 mr-2" />
-            New Lab Order
-          </Button>
-        </Link>
+        {!isLabTech && (
+          <Link href="/lab-orders/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4 mr-2" />
+              New Lab Order
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Filters */}
@@ -163,12 +173,16 @@ export default function LabOrdersPage() {
         ) : data?.orders.length === 0 ? (
           <div className="p-8 text-center">
             <TestTube className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No lab orders found</p>
-            <Link href="/lab-orders/new">
-              <Button variant="primary" size="sm" className="mt-4">
-                Create First Lab Order
-              </Button>
-            </Link>
+            <p className="text-muted-foreground">
+              {isLabTech ? 'No incoming lab orders at the moment' : 'No lab orders found'}
+            </p>
+            {!isLabTech && (
+              <Link href="/lab-orders/new">
+                <Button variant="primary" size="sm" className="mt-4">
+                  Create First Lab Order
+                </Button>
+              </Link>
+            )}
           </div>
         ) : (
           <>

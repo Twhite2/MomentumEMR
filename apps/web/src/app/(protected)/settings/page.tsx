@@ -13,6 +13,8 @@ export default function SettingsPage() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('general');
   const isPatient = session?.user?.role === 'patient';
+  const isLabTech = session?.user?.role === 'lab_tech';
+  const canManageBranding = ['admin', 'super_admin'].includes(session?.user?.role || '');
   const [brandingData, setBrandingData] = useState({
     name: '',
     tagline: '',
@@ -129,7 +131,7 @@ export default function SettingsPage() {
             >
               Privacy
             </button>
-            {!isPatient && (
+            {canManageBranding && (
               <button
                 onClick={() => setActiveTab('branding')}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -230,15 +232,17 @@ export default function SettingsPage() {
                   {!isPatient && (
                     <div className="flex items-center justify-between py-3 border-b border-border">
                       <div>
-                        <p className="font-medium">Patient Updates</p>
+                        <p className="font-medium">{isLabTech ? 'Lab Test Updates' : 'Patient Updates'}</p>
                         <p className="text-sm text-muted-foreground">
-                          Notifications about patient record changes
+                          {isLabTech 
+                            ? 'Notifications about new lab test orders'
+                            : 'Notifications about patient record changes'}
                         </p>
                       </div>
                       <input type="checkbox" defaultChecked className="h-5 w-5 text-primary" />
                     </div>
                   )}
-                  {!isPatient && (
+                  {!isPatient && !isLabTech && (
                     <div className="flex items-center justify-between py-3 border-b border-border">
                       <div>
                         <p className="font-medium">Low Stock Alerts</p>
@@ -299,7 +303,7 @@ export default function SettingsPage() {
           )}
 
           {/* Branding Settings */}
-          {activeTab === 'branding' && !isPatient && (
+          {activeTab === 'branding' && canManageBranding && (
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
@@ -434,7 +438,7 @@ export default function SettingsPage() {
                   Privacy Settings
                 </h3>
                 <div className="space-y-4">
-                  {!isPatient && (
+                  {!isPatient && !isLabTech && (
                     <div className="flex items-center justify-between py-3 border-b border-border">
                       <div>
                         <p className="font-medium">Profile Visibility</p>
@@ -463,7 +467,7 @@ export default function SettingsPage() {
                       </span>
                     </div>
                   )}
-                  {!isPatient && (
+                  {!isPatient && !isLabTech && (
                     <div className="flex items-center justify-between py-3 border-b border-border">
                       <div>
                         <p className="font-medium">Activity Status</p>
