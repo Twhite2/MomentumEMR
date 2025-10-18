@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@momentum/database';
+import { notifyLabResultsReady } from '@/lib/notification-helpers';
 
 export async function POST(
   request: NextRequest,
