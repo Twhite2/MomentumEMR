@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
 import { ArrowLeft, Save } from 'lucide-react';
@@ -39,8 +40,13 @@ interface Patient {
 
 export default function EditPatientPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const params = useParams();
   const patientId = params.id as string;
+
+  // Nurses can only edit demographics and contact info, not billing/insurance
+  const isNurse = session?.user?.role === 'nurse';
+  const canManageBilling = !isNurse;
 
   const [patientType, setPatientType] = useState('self_pay');
   const [formData, setFormData] = useState({
@@ -226,48 +232,49 @@ export default function EditPatientPage() {
             </div>
           </div>
 
-          {/* Patient Type */}
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Patient Type</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Select
-                label="Patient Type"
-                name="patientType"
-                value={formData.patientType}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="self_pay">Self Pay</option>
-                <option value="hmo">HMO</option>
-                <option value="corporate">Corporate</option>
-              </Select>
-
-              {patientType === 'hmo' && (
+          {/* Patient Type & Billing - Hidden for nurses */}
+          {canManageBilling && (
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Patient Type & Billing</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
-                  label="HMO Policy"
-                  name="insuranceId"
-                  value={formData.insuranceId}
+                  label="Patient Type"
+                  name="patientType"
+                  value={formData.patientType}
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="">Select HMO policy</option>
-                  {hmoList?.map((hmo) => (
-                    <option key={hmo.id} value={hmo.id}>
-                      {hmo.policyName} - {hmo.provider}
-                    </option>
-                  ))}
+                  <option value="self_pay">Self Pay</option>
+                  <option value="hmo">HMO</option>
+                  <option value="corporate">Corporate</option>
                 </Select>
-              )}
 
-              {patientType === 'corporate' && (
-                <Select
-                  label="Corporate Client"
-                  name="corporateClientId"
-                  value={formData.corporateClientId}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select corporate client</option>
+                {patientType === 'hmo' && (
+                  <Select
+                    label="HMO Policy"
+                    name="insuranceId"
+                    value={formData.insuranceId}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select HMO policy</option>
+                    {hmoList?.map((hmo) => (
+                      <option key={hmo.id} value={hmo.id}>
+                        {hmo.policyName} - {hmo.provider}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+
+                {patientType === 'corporate' && (
+                  <Select
+                    label="Corporate Client"
+                    name="corporateClientId"
+                    value={formData.corporateClientId}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select corporate client</option>
                   {corporateClients?.map((client) => (
                     <option key={client.id} value={client.id}>
                       {client.companyName}
@@ -277,6 +284,7 @@ export default function EditPatientPage() {
               )}
             </div>
           </div>
+          )}
 
           {/* Contact Information */}
           <div>

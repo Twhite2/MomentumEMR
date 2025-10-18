@@ -7,6 +7,7 @@ import { Button, Input } from '@momentum/ui';
 import { Settings, Bell, Lock, Eye, Globe, Save, Palette, Upload, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import BrandingSettings from '@/components/settings/BrandingSettings';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -28,7 +29,7 @@ export default function SettingsPage() {
     queryKey: ['hospital-branding', session?.user?.hospitalId],
     queryFn: async () => {
       if (!session?.user?.hospitalId) return null;
-      const response = await axios.get(`/api/hospitals/${session.user.hospitalId}/theme`);
+      const response = await axios.get(`/api/hospitals/${session.user.hospitalId}/branding`);
       return response.data;
     },
     enabled: !!session?.user?.hospitalId,
@@ -303,130 +304,11 @@ export default function SettingsPage() {
           )}
 
           {/* Branding Settings */}
-          {activeTab === 'branding' && canManageBranding && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-                  <Palette className="w-5 h-5" />
-                  Hospital Branding
-                </h3>
-                <p className="text-sm text-muted-foreground mb-6">
-                  Customize your hospital's appearance on the login screen and throughout the system
-                </p>
-                
-                <div className="space-y-6">
-                  {/* Logo Upload */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Hospital Logo</label>
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-muted">
-                        <Image className="w-8 h-8 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <Button variant="outline" size="sm">
-                          <Upload className="w-4 h-4 mr-2" />
-                          Upload Logo
-                        </Button>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Recommended: 200x200px, PNG or SVG
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Hospital Name */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Hospital Name</label>
-                    <Input 
-                      value={brandingData.name}
-                      onChange={(e) => setBrandingData({ ...brandingData, name: e.target.value })}
-                      placeholder="City General Hospital" 
-                    />
-                  </div>
-
-                  {/* Tagline */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Tagline (Optional)</label>
-                    <Input 
-                      value={brandingData.tagline}
-                      onChange={(e) => setBrandingData({ ...brandingData, tagline: e.target.value })}
-                      placeholder="Your Health, Our Priority" 
-                    />
-                  </div>
-
-                  {/* Primary Color */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Primary Color</label>
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="color" 
-                        value={brandingData.primaryColor}
-                        onChange={(e) => setBrandingData({ ...brandingData, primaryColor: e.target.value })}
-                        className="h-10 w-20 border border-border rounded cursor-pointer"
-                      />
-                      <Input 
-                        value={brandingData.primaryColor}
-                        onChange={(e) => setBrandingData({ ...brandingData, primaryColor: e.target.value })}
-                        placeholder="#0F4C81"
-                        className="flex-1"
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Used for buttons, headers, and primary UI elements
-                    </p>
-                  </div>
-
-                  {/* Secondary Color */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Secondary Color</label>
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="color" 
-                        value={brandingData.secondaryColor}
-                        onChange={(e) => setBrandingData({ ...brandingData, secondaryColor: e.target.value })}
-                        className="h-10 w-20 border border-border rounded cursor-pointer"
-                      />
-                      <Input 
-                        value={brandingData.secondaryColor}
-                        onChange={(e) => setBrandingData({ ...brandingData, secondaryColor: e.target.value })}
-                        placeholder="#4A90E2"
-                        className="flex-1"
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Used for accents and secondary UI elements
-                    </p>
-                  </div>
-
-                  {/* Preview */}
-                  <div className="mt-6 p-4 border border-border rounded-lg bg-muted/30">
-                    <h4 className="text-sm font-semibold mb-3">Preview</h4>
-                    <div className="bg-white p-6 rounded-lg border border-border">
-                      <div className="flex items-center gap-3 mb-4">
-                        {brandingData.logoUrl ? (
-                          <img src={brandingData.logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: brandingData.primaryColor }}>
-                            {brandingData.name ? brandingData.name.charAt(0) : 'H'}
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-bold text-lg" style={{ color: brandingData.primaryColor }}>
-                            {brandingData.name || 'Hospital Name'}
-                          </p>
-                          {brandingData.tagline && (
-                            <p className="text-sm text-muted-foreground">{brandingData.tagline}</p>
-                          )}
-                        </div>
-                      </div>
-                      <Button style={{ backgroundColor: brandingData.primaryColor }} className="text-white">
-                        Sample Button
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {activeTab === 'branding' && canManageBranding && session?.user?.hospitalId && (
+            <BrandingSettings 
+              hospitalId={parseInt(session.user.hospitalId)}
+              initialData={hospital}
+            />
           )}
 
           {/* Privacy Settings */}

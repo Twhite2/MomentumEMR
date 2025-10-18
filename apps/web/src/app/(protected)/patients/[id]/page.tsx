@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
 import { ArrowLeft, Edit, Calendar, FileText, Pill, TestTube, DollarSign, User } from 'lucide-react';
 import Link from 'next/link';
@@ -39,7 +40,16 @@ interface Patient {
 
 export default function PatientDetailPage() {
   const params = useParams();
+  const { data: session } = useSession();
   const patientId = params.id as string;
+
+  // Role-based permissions
+  const userRole = session?.user?.role;
+  const isNurse = userRole === 'nurse';
+  const isDoctor = userRole === 'doctor';
+  const canPrescribe = isDoctor; // Only doctors can prescribe
+  const canOrderLabs = isDoctor; // Only doctors can order lab tests
+  const canCreateInvoices = ['admin', 'receptionist'].includes(userRole || ''); // Only admins/receptionists handle billing
 
   const { data: patient, isLoading, error } = useQuery<Patient>({
     queryKey: ['patient', patientId],
@@ -222,32 +232,45 @@ export default function PatientDetailPage() {
 
         {/* Medical History & Activities */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Quick Actions */}
+          {/* Quick Actions - Role-based */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* All staff can add medical records/notes */}
             <Link href={`/medical-records/new?patientId=${patient.id}`}>
               <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
                 <FileText className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
                 <p className="text-sm font-medium">Add Record</p>
               </button>
             </Link>
-            <Link href={`/prescriptions/new?patientId=${patient.id}`}>
-              <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
-                <Pill className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
-                <p className="text-sm font-medium">Prescribe</p>
-              </button>
-            </Link>
-            <Link href={`/lab-orders/new?patientId=${patient.id}`}>
-              <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
-                <TestTube className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
-                <p className="text-sm font-medium">Lab Order</p>
-              </button>
-            </Link>
-            <Link href={`/billing/new?patientId=${patient.id}`}>
-              <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
-                <DollarSign className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
-                <p className="text-sm font-medium">Create Invoice</p>
-              </button>
-            </Link>
+            
+            {/* Only doctors can prescribe */}
+            {canPrescribe && (
+              <Link href={`/prescriptions/new?patientId=${patient.id}`}>
+                <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+                  <Pill className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+                  <p className="text-sm font-medium">Prescribe</p>
+                </button>
+              </Link>
+            )}
+            
+            {/* Only doctors can order lab tests */}
+            {canOrderLabs && (
+              <Link href={`/lab-orders/new?patientId=${patient.id}`}>
+                <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+                  <TestTube className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+                  <p className="text-sm font-medium">Lab Order</p>
+                </button>
+              </Link>
+            )}
+            
+            {/* Only admins/receptionists can create invoices */}
+            {canCreateInvoices && (
+              <Link href={`/billing/new?patientId=${patient.id}`}>
+                <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+                  <DollarSign className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+                  <p className="text-sm font-medium">Create Invoice</p>
+                </button>
+              </Link>
+            )}
           </div>
 
           {/* Appointments */}

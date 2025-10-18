@@ -4,19 +4,42 @@ import { StatCard } from './stat-card';
 import { Users, Calendar, DollarSign, UserPlus, Package, TrendingUp } from 'lucide-react';
 import { Session } from 'next-auth';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 interface AdminDashboardProps {
   session: Session;
 }
 
 export default function AdminDashboard({ session }: AdminDashboardProps) {
-  // TODO: Fetch real data from API
-  const stats = {
-    totalPatients: 1247,
-    totalStaff: 85,
-    todayAppointments: 32,
-    revenueToday: 450000,
-  };
+  // Fetch real dashboard statistics
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
+      const response = await axios.get('/api/dashboard/stats');
+      return response.data;
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            Welcome back, {session.user.name}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Hospital Admin Dashboard - {session.user.hospitalName}
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -35,16 +58,15 @@ export default function AdminDashboard({ session }: AdminDashboardProps) {
         <Link href="/patients">
           <StatCard
             title="Total Patients"
-            value={stats.totalPatients.toLocaleString()}
+            value={stats?.totalPatients?.toLocaleString() || '0'}
             icon={Users}
             color="blue"
-            trend={{ value: 12, isPositive: true }}
           />
         </Link>
         <Link href="/users">
           <StatCard
             title="Total Staff"
-            value={stats.totalStaff}
+            value={stats?.totalStaff || 0}
             icon={UserPlus}
             color="purple"
           />
@@ -52,18 +74,17 @@ export default function AdminDashboard({ session }: AdminDashboardProps) {
         <Link href="/appointments">
           <StatCard
             title="Today's Appointments"
-            value={stats.todayAppointments}
+            value={stats?.todayAppointments || 0}
             icon={Calendar}
             color="green"
           />
         </Link>
         <Link href="/billing">
           <StatCard
-            title="Revenue Today"
-            value={`₦${(stats.revenueToday / 1000).toFixed(0)}K`}
+            title="Revenue This Month"
+            value={`₦${((stats?.revenueThisMonth || 0) / 1000).toFixed(0)}K`}
             icon={DollarSign}
             color="yellow"
-            trend={{ value: 8, isPositive: true }}
           />
         </Link>
       </div>
@@ -76,23 +97,21 @@ export default function AdminDashboard({ session }: AdminDashboardProps) {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">HMO Patients</span>
-              <span className="font-semibold">45%</span>
+              <span className="font-semibold">
+                {stats?.patientTypeBreakdown?.hmo?.percentage || 0}%
+              </span>
             </div>
-            <div className="w-full bg-muted h-2 rounded-full">
-              <div className="bg-primary h-2 rounded-full" style={{ width: '45%' }}></div>
-            </div>
-
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Corporate Clients</span>
-              <span className="font-semibold">35%</span>
+              <span className="text-sm text-muted-foreground">Corporate Patients</span>
+              <span className="font-semibold">
+                {stats?.patientTypeBreakdown?.corporate?.percentage || 0}%
+              </span>
             </div>
-            <div className="w-full bg-muted h-2 rounded-full">
-              <div className="bg-danube h-2 rounded-full" style={{ width: '35%' }}></div>
-            </div>
-
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Self Pay</span>
-              <span className="font-semibold">20%</span>
+              <span className="font-semibold">
+                {stats?.patientTypeBreakdown?.self_pay?.percentage || 0}%
+              </span>
             </div>
             <div className="w-full bg-muted h-2 rounded-full">
               <div className="bg-green-haze h-2 rounded-full" style={{ width: '20%' }}></div>

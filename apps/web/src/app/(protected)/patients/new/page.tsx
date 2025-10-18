@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
 import { ArrowLeft, Save } from 'lucide-react';
@@ -29,7 +30,12 @@ interface Staff {
 
 export default function NewPatientPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [patientType, setPatientType] = useState('self_pay');
+  
+  // Nurses cannot assign doctors or manage insurance/billing
+  const isNurse = session?.user?.role === 'nurse';
+  const canAssignDoctor = !isNurse;
 
   // Form state
   const [formData, setFormData] = useState({
@@ -190,30 +196,32 @@ export default function NewPatientPage() {
             </div>
           </div>
 
-          {/* Doctor Assignment */}
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Primary Care Doctor</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Select
-                label="Assign Primary Doctor"
-                name="primaryDoctorId"
-                value={formData.primaryDoctorId}
-                onChange={handleInputChange}
-              >
-                <option value="">Select doctor (optional)</option>
-                {staffData?.staff?.map((doctor) => (
-                  <option key={doctor.id} value={doctor.id}>
-                    {doctor.name} - {doctor.email}
-                  </option>
-                ))}
-              </Select>
-              <div className="flex items-end">
-                <p className="text-sm text-muted-foreground">
-                  Assign this patient to a primary care doctor. This helps doctors manage their patient list.
-                </p>
+          {/* Doctor Assignment - Hidden for nurses */}
+          {canAssignDoctor && (
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Primary Care Doctor</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Select
+                  label="Assign Primary Doctor"
+                  name="primaryDoctorId"
+                  value={formData.primaryDoctorId}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select doctor (optional)</option>
+                  {staffData?.staff?.map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      {doctor.name} - {doctor.email}
+                    </option>
+                  ))}
+                </Select>
+                <div className="flex items-end">
+                  <p className="text-sm text-muted-foreground">
+                    Assign this patient to a primary care doctor. This helps doctors manage their patient list.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Patient Type */}
           <div>

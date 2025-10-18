@@ -12,7 +12,16 @@ interface DoctorDashboardProps {
 }
 
 export default function DoctorDashboard({ session }: DoctorDashboardProps) {
-  // Fetch appointments data
+  // Fetch dashboard statistics
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
+      const response = await axios.get('/api/dashboard/stats');
+      return response.data;
+    },
+  });
+
+  // Fetch appointments data for list view
   const { data: appointmentsData, isLoading: appointmentsLoading } = useQuery({
     queryKey: ['appointments-dashboard'],
     queryFn: async () => {
@@ -21,25 +30,7 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
     },
   });
 
-  // Fetch lab orders/results data
-  const { data: labOrdersData, isLoading: labOrdersLoading } = useQuery({
-    queryKey: ['lab-orders-dashboard'],
-    queryFn: async () => {
-      const response = await axios.get('/api/lab-orders?limit=100');
-      return response.data;
-    },
-  });
-
-  // Fetch inventory data
-  const { data: inventoryData, isLoading: inventoryLoading } = useQuery({
-    queryKey: ['inventory-dashboard'],
-    queryFn: async () => {
-      const response = await axios.get('/api/inventory?limit=100');
-      return response.data;
-    },
-  });
-
-  // Calculate today's appointments
+  // Calculate today's appointments for list view
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
@@ -49,29 +40,6 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
     const aptDate = new Date(apt.startTime);
     return aptDate >= today && aptDate < tomorrow;
   }) || [];
-
-  // Get pending lab results (completed orders with results that aren't finalized)
-  const pendingLabResults = labOrdersData?.orders?.filter((order: any) => 
-    order.labResults?.some((result: any) => !result.finalized)
-  ).length || 0;
-
-  // Get follow-ups due (appointments marked as follow-up in next 7 days)
-  const nextWeek = new Date(today);
-  nextWeek.setDate(nextWeek.getDate() + 7);
-  
-  const followUpsDue = appointmentsData?.appointments?.filter((apt: any) => {
-    const aptDate = new Date(apt.startTime);
-    return aptDate >= today && aptDate <= nextWeek && 
-           (apt.appointmentType?.toLowerCase().includes('follow') || 
-            apt.department?.toLowerCase().includes('follow'));
-  }).length || 0;
-
-  // Get critical/low stock inventory items
-  const lowStockItems = inventoryData?.items?.filter((item: any) => 
-    item.quantity <= item.reorderLevel
-  ) || [];
-
-  const isLoading = appointmentsLoading || labOrdersLoading || inventoryLoading;
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -114,23 +82,23 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
         <Link href="/appointments">
           <StatCard
             title="Today's Appointments"
-            value={isLoading ? '...' : todayAppointments.length}
+            value={isLoading ? '...' : (stats?.todayAppointments || 0)}
             icon={Calendar}
             color="blue"
           />
         </Link>
         <Link href="/lab-orders">
           <StatCard
-            title="Pending Lab Results"
-            value={isLoading ? '...' : pendingLabResults}
+            title="Pending Lab Orders"
+            value={isLoading ? '...' : (stats?.pendingLabOrders || 0)}
             icon={TestTube}
             color="yellow"
           />
         </Link>
-        <Link href="/appointments">
+        <Link href="/patients">
           <StatCard
-            title="Follow-ups Due"
-            value={isLoading ? '...' : followUpsDue}
+            title="Total Patients"
+            value={isLoading ? '...' : (stats?.totalPatients || 0)}
             icon={UserCheck}
             color="purple"
           />
@@ -187,148 +155,46 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
           </div>
         </div>
 
-        {/* Lab Result Notifications */}
+        {/* Quick Links */}
         <div className="bg-white rounded-lg border border-border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Lab Results Ready</h2>
-            <Link href="/lab-orders" className="text-sm text-primary hover:underline">
-              View All
+          <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <Link href="/lab-orders" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+              <TestTube className="w-6 h-6 mx-auto mb-2 text-primary" />
+              <p className="text-sm font-medium">Lab Orders</p>
+            </Link>
+            <Link href="/prescriptions" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+              <Pill className="w-6 h-6 mx-auto mb-2 text-primary" />
+              <p className="text-sm font-medium">Prescriptions</p>
+            </Link>
+            <Link href="/medical-records" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+              <FileText className="w-6 h-6 mx-auto mb-2 text-primary" />
+              <p className="text-sm font-medium">Records</p>
+            </Link>
+            <Link href="/patients" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+              <UserCheck className="w-6 h-6 mx-auto mb-2 text-primary" />
+              <p className="text-sm font-medium">My Patients</p>
             </Link>
           </div>
-          <div className="space-y-3">
-            {labOrdersLoading ? (
-              <div className="p-8 text-center">
-                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                <p className="text-sm text-muted-foreground">Loading lab results...</p>
-              </div>
-            ) : labOrdersData?.orders?.filter((order: any) => 
-                order.labResults?.length > 0
-              ).length === 0 ? (
-              <div className="p-8 text-center">
-                <TestTube className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-20" />
-                <p className="text-sm text-muted-foreground">No lab results available</p>
-              </div>
-            ) : (
-              labOrdersData.orders
-                .filter((order: any) => order.labResults?.length > 0)
-                .slice(0, 3)
-                .map((order: any) => {
-                  const hasUnfinalized = order.labResults.some((r: any) => !r.finalized);
-                  return (
-                    <Link key={order.id} href={`/lab-orders/${order.id}`}>
-                      <div className={`p-3 border rounded-lg ${
-                        hasUnfinalized ? 'bg-green-haze/5 border-green-haze/20' : ''
-                      }`}>
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-medium">
-                            {order.patient?.firstName} {order.patient?.lastName} - {order.orderType.replace('_', ' ')}
-                          </p>
-                          {hasUnfinalized && (
-                            <span className="text-xs text-green-haze font-semibold">NEEDS REVIEW</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {order.description?.substring(0, 50) || 'Lab test results'} • {order.labResults.length} result(s)
-                        </p>
-                        <p className="text-xs text-primary hover:underline mt-2">
-                          {hasUnfinalized ? 'Review & Approve →' : 'View Results →'}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })
-            )}
-          </div>
         </div>
       </div>
 
-      {/* Pharmacy Inventory Widget */}
+      {/* Stats Summary */}
       <div className="bg-white rounded-lg border border-border p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Pharmacy Inventory Status</h2>
-          <Link href="/inventory" className="text-sm text-primary hover:underline">
-            View All
-          </Link>
-        </div>
+        <h2 className="text-lg font-semibold mb-4">Summary</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {inventoryLoading ? (
-            <div className="col-span-3 p-8 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-              <p className="text-sm text-muted-foreground">Loading inventory...</p>
-            </div>
-          ) : !inventoryData?.items || inventoryData.items.length === 0 ? (
-            <div className="col-span-3 p-8 text-center">
-              <Pill className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-20" />
-              <p className="text-sm text-muted-foreground">No inventory items found</p>
-            </div>
-          ) : lowStockItems.length === 0 ? (
-            <div className="col-span-3 p-8 text-center">
-              <div className="w-12 h-12 bg-green-haze/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Pill className="w-6 h-6 text-green-haze" />
-              </div>
-              <p className="text-sm text-green-haze font-medium">All medications well stocked</p>
-              <p className="text-xs text-muted-foreground mt-1">No items below reorder level</p>
-            </div>
-          ) : (
-            lowStockItems.slice(0, 3).map((item: any) => {
-              const percentage = (item.quantity / (item.reorderLevel * 2)) * 100;
-              const isCritical = item.quantity <= item.reorderLevel / 2;
-              const isLow = !isCritical && item.quantity <= item.reorderLevel;
-              
-              return (
-                <Link key={item.id} href={`/inventory/${item.id}`}>
-                  <div className={`p-4 border rounded-lg ${
-                    isCritical 
-                      ? 'bg-red-ribbon/5 border-red-ribbon/20' 
-                      : 'bg-saffron/5 border-saffron/20'
-                  }`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        isCritical 
-                          ? 'bg-red-ribbon text-white' 
-                          : 'bg-saffron text-black'
-                      }`}>
-                        {isCritical ? 'Critical' : 'Low Stock'}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {item.quantity} {item.unit || 'units'} remaining
-                    </p>
-                    <div className="mt-2 w-full bg-muted h-1.5 rounded-full">
-                      <div 
-                        className={`h-1.5 rounded-full ${isCritical ? 'bg-red-ribbon' : 'bg-saffron'}`}
-                        style={{ width: `${Math.min(percentage, 100)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="/patients" className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
-            <FileText className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-sm font-medium">Open Patient File</p>
-          </Link>
-          <Link href="/prescriptions" className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
-            <Pill className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-sm font-medium">Create Prescription</p>
-          </Link>
-          <Link href="/lab-orders" className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
-            <TestTube className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-sm font-medium">Request Lab Order</p>
-          </Link>
-          <Link href="/appointments" className="p-4 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors text-center cursor-pointer">
-            <Calendar className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-sm font-medium">View Full Schedule</p>
-          </Link>
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-muted-foreground mb-1">Pending Appointments</p>
+            <p className="text-2xl font-bold text-tory-blue">{stats?.pendingAppointments || 0}</p>
+          </div>
+          <div className="p-4 bg-green-50 rounded-lg">
+            <p className="text-sm text-muted-foreground mb-1">Completed Today</p>
+            <p className="text-2xl font-bold text-green-haze">{stats?.completedToday || 0}</p>
+          </div>
+          <div className="p-4 bg-purple-50 rounded-lg">
+            <p className="text-sm text-muted-foreground mb-1">Active Prescriptions</p>
+            <p className="text-2xl font-bold text-purple-600">{stats?.activePrescriptions || 0}</p>
+          </div>
         </div>
       </div>
     </div>

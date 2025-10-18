@@ -115,7 +115,7 @@ const navItems: NavItem[] = [
     label: 'Prescriptions',
     href: '/prescriptions',
     icon: ClipboardList,
-    roles: ['admin', 'doctor', 'pharmacist', 'patient'],
+    roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'patient'],
   },
   {
     label: 'Pharmacy',

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, FileText } from 'lucide-react';
+import { ArrowLeft, Save, FileText, Upload, X, File } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -27,6 +27,9 @@ export default function NewMedicalRecordPage() {
     diagnosis: '',
     notes: '',
   });
+
+  const [attachments, setAttachments] = useState<Array<{ name: string; url: string; size: number }>>([]);
+  const [uploading, setUploading] = useState(false);
 
   // Fetch patients
   const { data: patients } = useQuery<{ patients: Patient[] }>({
@@ -71,7 +74,7 @@ export default function NewMedicalRecordPage() {
       visitDate: formData.visitDate,
       diagnosis: formData.diagnosis || null,
       notes: formData.notes || null,
-      attachments: null, // TODO: Implement file upload
+      attachments: attachments.length > 0 ? JSON.stringify(attachments) : null,
     };
 
     createRecord.mutate(payload);
@@ -154,17 +157,99 @@ export default function NewMedicalRecordPage() {
             </div>
           </div>
 
-          {/* File Attachments - Placeholder */}
+          {/* File Attachments */}
           <div>
             <h2 className="text-lg font-semibold mb-4">Attachments</h2>
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-              <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground mb-2">
-                File upload feature coming soon
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Support for lab results, X-rays, scans, and other medical documents
-              </p>
+            <div className="border-2 border-dashed border-border rounded-lg p-6">
+              {/* Upload Area */}
+              <div className="text-center mb-4">
+                <input
+                  type="file"
+                  id="file-upload"
+                  multiple
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp"
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files || []);
+                    if (files.length === 0) return;
+
+                    setUploading(true);
+                    try {
+                      const formData = new FormData();
+                      files.forEach((file) => formData.append('files', file));
+                      formData.append('folder', 'medical-records');
+
+                      const response = await axios.post('/api/upload/file', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                      });
+
+                      // Handle single or multiple file response
+                      const newFiles = response.data.files 
+                        ? response.data.files 
+                        : [response.data.file];
+
+                      setAttachments((prev) => [...prev, ...newFiles]);
+                      toast.success(`${files.length} file(s) uploaded successfully!`);
+                    } catch (error: any) {
+                      toast.error(error.response?.data?.error || 'Failed to upload files');
+                    } finally {
+                      setUploading(false);
+                      // Reset input
+                      e.target.value = '';
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-primary text-primary rounded-lg cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  {uploading ? 'Uploading...' : 'Upload Files'}
+                </label>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Support for lab results, X-rays, scans, PDFs, and images (Max 10MB per file)
+                </p>
+              </div>
+
+              {/* Uploaded Files List */}
+              {attachments.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium mb-2">Uploaded Files ({attachments.length})</p>
+                  {attachments.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <File className="w-5 h-5 text-primary flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {(file.size / 1024).toFixed(2)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAttachments((prev) => prev.filter((_, i) => i !== index));
+                          toast.success('File removed');
+                        }}
+                        className="p-1 hover:bg-red-100 rounded text-red-600 flex-shrink-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {attachments.length === 0 && !uploading && (
+                <div className="text-center py-4">
+                  <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-2 opacity-50" />
+                  <p className="text-sm text-muted-foreground">No files uploaded yet</p>
+                </div>
+              )}
             </div>
           </div>
 
