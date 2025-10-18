@@ -109,11 +109,11 @@ export async function GET(request: NextRequest) {
         upcomingAppointments,
       },
       distribution: {
-        byStatus: appointmentsByStatus.reduce((acc: any, item) => {
+        byStatus: appointmentsByStatus.reduce((acc: any, item: { status: string; _count: number }) => {
           acc[item.status] = item._count;
           return acc;
         }, {}),
-        byType: appointmentsByType.reduce((acc: any, item) => {
+        byType: appointmentsByType.reduce((acc: any, item: { appointmentType: string; _count: number }) => {
           acc[item.appointmentType] = item._count;
           return acc;
         }, {}),
