@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       take: 10,
     });
 
-    const doctorIds = topDoctors.map((d) => d.doctorId);
+    const doctorIds = topDoctors.map((d: { doctorId: number; _count: number }) => d.doctorId);
     const doctors = await prisma.user.findMany({
       where: { id: { in: doctorIds } },
       select: { id: true, name: true },
