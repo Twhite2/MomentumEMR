@@ -1,6 +1,5 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { UserRole } from '@momentum/database';
 import AdminDashboard from '@/components/dashboard/admin-dashboard';
 import DoctorDashboard from '@/components/dashboard/doctor-dashboard';
 import NurseDashboard from '@/components/dashboard/nurse-dashboard';
@@ -10,6 +9,8 @@ import LabTechDashboard from '@/components/dashboard/lab-tech-dashboard';
 import PatientDashboard from '@/components/dashboard/patient-dashboard';
 import SuperAdminDashboard from '@/app/(protected)/super-admin/page';
 
+type UserRole = 'super_admin' | 'admin' | 'doctor' | 'nurse' | 'pharmacist' | 'cashier' | 'lab_tech' | 'patient';
+
 export default async function DashboardPage() {
   const session = await auth();
 
@@ -17,7 +18,7 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const role = session.user.role;
+  const role = session.user.role as UserRole;
 
   // Show super admin dashboard directly (no redirect)
   if (role === 'super_admin') {
