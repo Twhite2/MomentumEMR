@@ -102,11 +102,11 @@ export async function GET(request: NextRequest) {
         growthRate: totalPatients > 0 ? (newPatients / totalPatients) * 100 : 0,
       },
       distribution: {
-        byType: patientsByType.reduce((acc: any, item) => {
+        byType: patientsByType.reduce((acc: any, item: { patientType: string; _count: number }) => {
           acc[item.patientType] = item._count;
           return acc;
         }, {}),
-        byGender: patientsByGender.reduce((acc: any, item) => {
+        byGender: patientsByGender.reduce((acc: any, item: { gender: string | null; _count: number }) => {
           const gender = item.gender || 'unknown';
           acc[gender] = item._count;
           return acc;
