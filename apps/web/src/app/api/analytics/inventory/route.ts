@@ -70,19 +70,19 @@ export async function GET(request: NextRequest) {
         averageItemValue: totalItems > 0 ? totalValue / totalItems : 0,
       },
       alerts: {
-        lowStock: lowStockItems.slice(0, 10).map((item) => ({
+        lowStock: lowStockItems.slice(0, 10).map((item: { id: number; itemName: string; stockQuantity: number; reorderLevel: number }) => ({
           id: item.id,
           itemName: item.itemName,
           stockQuantity: item.stockQuantity,
           reorderLevel: item.reorderLevel,
         })),
-        expired: expiredItems.slice(0, 10).map((item) => ({
+        expired: expiredItems.slice(0, 10).map((item: { id: number; itemName: string; expiryDate: Date | null; stockQuantity: number }) => ({
           id: item.id,
           itemName: item.itemName,
           expiryDate: item.expiryDate,
           stockQuantity: item.stockQuantity,
         })),
-        expiringSoon: expiringSoonItems.slice(0, 10).map((item) => ({
+        expiringSoon: expiringSoonItems.slice(0, 10).map((item: { id: number; itemName: string; expiryDate: Date | null; stockQuantity: number }) => ({
           id: item.id,
           itemName: item.itemName,
           expiryDate: item.expiryDate,

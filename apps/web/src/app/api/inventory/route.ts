@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const items = filteredItems.slice(skip, skip + limit);
 
     // Add status flags
-    const itemsWithStatus = items.map((item) => {
+    const itemsWithStatus = items.map((item: any) => {
       const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
       const isLowStock = item.stockQuantity <= item.reorderLevel;
       const daysToExpiry = item.expiryDate

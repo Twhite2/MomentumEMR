@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Multiple files
       const fileDataArray = await Promise.all(
-        files.map(async (file) => ({
+        files.map(async (file: File) => ({
           file: Buffer.from(await file.arrayBuffer()),
           fileName: file.name,
           contentType: file.type,
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
       const fileUrls = await uploadMultipleFiles(fileDataArray, folder);
 
-      const uploadedFiles = files.map((file, index) => ({
+      const uploadedFiles = files.map((file: File, index: number) => ({
         name: file.name,
         url: fileUrls[index],
         type: file.type,
