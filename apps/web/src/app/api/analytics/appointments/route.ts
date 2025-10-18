@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Calculate completion rate
-    const completedCount = appointmentsByStatus.find((s) => s.status === 'completed')?._count || 0;
+    const completedCount = appointmentsByStatus.find((s: { status: string; _count: number }) => s.status === 'completed')?._count || 0;
     const completionRate = totalAppointments > 0 ? (completedCount / totalAppointments) * 100 : 0;
 
     // Get daily appointment count (last 30 days)
