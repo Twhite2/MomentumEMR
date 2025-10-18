@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "cd ../../packages/database && pnpm generate",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
