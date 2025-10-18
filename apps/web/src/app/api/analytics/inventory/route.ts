@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     // Get top value items
     const topValueItems = inventory
-      .map((item) => {
+      .map((item: { id: number; itemName: string; stockQuantity: number; unitPrice: any }) => {
         const price = item.unitPrice ? Number(item.unitPrice) : 0;
         return {
           id: item.id,
@@ -49,8 +49,8 @@ export async function GET(request: NextRequest) {
 
     // Calculate turnover (items with low stockQuantity / reorder level ratio)
     const slowMovingItems = inventory
-      .filter((item) => item.stockQuantity > item.reorderLevel * 2)
-      .map((item) => ({
+      .filter((item: { stockQuantity: number; reorderLevel: number }) => item.stockQuantity > item.reorderLevel * 2)
+      .map((item: { id: number; itemName: string; stockQuantity: number; reorderLevel: number }) => ({
         id: item.id,
         itemName: item.itemName,
         stockQuantity: item.stockQuantity,
