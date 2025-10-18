@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
       },
       subscriptionDistribution,
       roleDistribution,
-      topHospitals: hospitalsWithStats.map((h) => ({
+      topHospitals: hospitalsWithStats.map((h: { id: number; name: string; subscriptionPlan: string | null; active: boolean; createdAt: Date; _count: { users: number; patients: number } }) => ({
         id: h.id,
         name: h.name,
         plan: h.subscriptionPlan,

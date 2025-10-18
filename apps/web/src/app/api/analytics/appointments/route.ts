@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
     });
 
     const doctorStats = topDoctors.map((stat: { doctorId: number; _count: number }) => ({
-      doctor: doctors.find((d) => d.id === stat.doctorId),
+      doctor: doctors.find((d: { id: number; name: string | null }) => d.id === stat.doctorId),
       count: stat._count,
     }));
 

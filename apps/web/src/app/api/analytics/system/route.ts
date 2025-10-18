@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
 
     // Get top performing hospitals by activity
     const hospitalActivity = usersByHospital
-      .map((h) => ({
+      .map((h: { id: number; name: string; _count: { users: number; patients: number; appointments: number } }) => ({
         id: h.id,
         name: h.name,
         userCount: h._count.users,

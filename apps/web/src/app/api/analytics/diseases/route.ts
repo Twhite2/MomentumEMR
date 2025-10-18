@@ -60,8 +60,8 @@ export async function GET(request: NextRequest) {
         // Extract disease names (simple extraction, could be improved)
         const diseases = record.diagnosis
           .split(/[,;.]/)
-          .map((d) => d.trim())
-          .filter((d) => d.length > 0);
+          .map((d: string) => d.trim())
+          .filter((d: string) => d.length > 0);
 
         diseases.forEach((disease) => {
           const normalizedDisease = disease.toLowerCase();

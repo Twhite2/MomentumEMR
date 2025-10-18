@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )
         .slice(0, 10)
-        .map((h) => {
+        .map((h: { id: number; name: string; subscriptionPlan: string | null; active: boolean; createdAt: Date }) => {
           const planName = h.subscriptionPlan || 'Basic';
           return {
             id: h.id,

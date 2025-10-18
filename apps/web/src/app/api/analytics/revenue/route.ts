@@ -79,14 +79,14 @@ export async function GET(request: NextRequest) {
     });
 
     // Get patient types
-    const patientIds = revenueByPatientType.map((r) => r.patientId);
+    const patientIds = revenueByPatientType.map((r: { patientId: number; _sum: any }) => r.patientId);
     const patients = await prisma.patient.findMany({
       where: { id: { in: patientIds } },
       select: { id: true, patientType: true },
     });
 
     const revenueByType = patients.reduce((acc: any, patient) => {
-      const revenue = revenueByPatientType.find((r) => r.patientId === patient.id);
+      const revenue = revenueByPatientType.find((r: { patientId: number; _sum: any }) => r.patientId === patient.id);
       const amount = Number(revenue?._sum.paidAmount || 0);
       acc[patient.patientType] = (acc[patient.patientType] || 0) + amount;
       return acc;
