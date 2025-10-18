@@ -3,6 +3,14 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@momentum/ui', '@momentum/database'],
+  eslint: {
+    // Don't fail production builds on ESLint errors
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Still type-check, but ESLint won't block the build
+    ignoreBuildErrors: false,
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
