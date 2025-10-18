@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     });
 
     const ageDistribution = patients.reduce(
-      (acc: any, patient) => {
+      (acc: any, patient: { dob: Date }) => {
         const age = new Date().getFullYear() - new Date(patient.dob).getFullYear();
         if (age < 18) acc['0-17']++;
         else if (age < 30) acc['18-29']++;
