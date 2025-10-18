@@ -14,17 +14,17 @@ export async function GET(request: NextRequest) {
     });
 
     const totalItems = inventory.length;
-    const totalValue = inventory.reduce((sum, item) => {
+    const totalValue = inventory.reduce((sum: number, item: { stockQuantity: number; unitPrice: any }) => {
       const price = item.unitPrice ? Number(item.unitPrice) : 0;
       return sum + item.stockQuantity * price;
     }, 0);
 
     // Calculate stock status
-    const lowStockItems = inventory.filter((item) => item.stockQuantity <= item.reorderLevel);
+    const lowStockItems = inventory.filter((item: { stockQuantity: number; reorderLevel: number }) => item.stockQuantity <= item.reorderLevel);
     const expiredItems = inventory.filter(
-      (item) => item.expiryDate && new Date(item.expiryDate) < new Date()
+      (item: { expiryDate: Date | null }) => item.expiryDate && new Date(item.expiryDate) < new Date()
     );
-    const expiringSoonItems = inventory.filter((item) => {
+    const expiringSoonItems = inventory.filter((item: { expiryDate: Date | null }) => {
       if (!item.expiryDate) return false;
       const daysToExpiry = Math.ceil(
         (new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)

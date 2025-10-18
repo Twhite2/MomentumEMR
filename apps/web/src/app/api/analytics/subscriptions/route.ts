@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // Calculate revenue by plan
     const revenueByPlan: Record<string, any> = {};
     
-    hospitals.forEach((hospital) => {
+    hospitals.forEach((hospital: { id: number; name: string; subscriptionPlan: string | null; active: boolean; createdAt: Date }) => {
       const plan = hospital.subscriptionPlan || 'Basic';
       const price = subscriptionPricing[plan] || 0;
       
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       0
     );
     const totalYearlyRevenue = totalMonthlyRevenue * 12;
-    const activeSubscriptions = hospitals.filter((h) => h.active).length;
+    const activeSubscriptions = hospitals.filter((h: { active: boolean }) => h.active).length;
 
     // Get growth metrics (compare with previous month)
     const lastMonth = new Date();

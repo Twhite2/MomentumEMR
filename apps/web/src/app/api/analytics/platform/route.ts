@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
       Enterprise: 500000,
     };
 
-    const monthlyRevenue = hospitalsByPlan.reduce((total, plan) => {
+    const monthlyRevenue = hospitalsByPlan.reduce((total: number, plan: { subscriptionPlan: string | null; _count: { id: number } }) => {
       const planName = plan.subscriptionPlan || 'Basic';
       const price = subscriptionPricing[planName] || 0;
       return total + price * plan._count.id;

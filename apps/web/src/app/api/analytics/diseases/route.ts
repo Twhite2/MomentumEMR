@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       recentCases: Date[];
     }>();
 
-    medicalRecords.forEach((record) => {
+    medicalRecords.forEach((record: { id: number; diagnosis: string | null; visitDate: Date; patientId: number; hospitalId: number; hospital: { id: number; name: string } }) => {
       if (record.diagnosis) {
         // Extract disease names (simple extraction, could be improved)
         const diseases = record.diagnosis
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
           .map((d: string) => d.trim())
           .filter((d: string) => d.length > 0);
 
-        diseases.forEach((disease) => {
+        diseases.forEach((disease: string) => {
           const normalizedDisease = disease.toLowerCase();
           
           if (!diseaseMap.has(normalizedDisease)) {
@@ -121,11 +121,11 @@ export async function GET(request: NextRequest) {
     // Overall summary
     const summary = {
       totalDiseases: diseaseStats.length,
-      totalCases: diseaseStats.reduce((sum, d) => sum + d.totalCases, 0),
+      totalCases: diseaseStats.reduce((sum: number, d: { totalCases: number }) => sum + d.totalCases, 0),
       totalPatients: new Set(medicalRecords.map(r => r.patientId)).size,
       totalHospitals: new Set(medicalRecords.map(r => r.hospitalId)).size,
       avgCasesPerDisease: diseaseStats.length > 0 
-        ? Math.round(diseaseStats.reduce((sum, d) => sum + d.totalCases, 0) / diseaseStats.length)
+        ? Math.round(diseaseStats.reduce((sum: number, d: { totalCases: number }) => sum + d.totalCases, 0) / diseaseStats.length)
         : 0,
     };
 
@@ -165,7 +165,7 @@ function calculateTrend(dates: Date[]): string {
 function groupByTestType(labOrders: any[]) {
   const typeMap = new Map<string, number>();
   
-  labOrders.forEach((order) => {
+  labOrders.forEach((order: any) => {
     const type = order.orderType || 'Unknown';
     typeMap.set(type, (typeMap.get(type) || 0) + 1);
   });

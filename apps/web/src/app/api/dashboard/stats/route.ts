@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
         ]);
 
         // Calculate percentages for patient types
-        const patientTypeBreakdown = patientsByType.reduce((acc, group) => {
+        const patientTypeBreakdown = patientsByType.reduce((acc: any, group: { patientType: string; _count: number }) => {
           const percentage = totalPatients > 0 
             ? Math.round((group._count / totalPatients) * 100) 
             : 0;

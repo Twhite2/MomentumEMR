@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
         uptime: '99.9%', // Placeholder
         lastIncident: null,
         totalHospitals: usersByHospital.length,
-        activeHospitals: usersByHospital.filter((h) => h._count.users > 0).length,
+        activeHospitals: usersByHospital.filter((h: { _count: { users: number } }) => h._count.users > 0).length,
       },
     });
   } catch (error) {
