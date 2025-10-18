@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
         latestCase: new Date(Math.max(...data.recentCases.map((d: Date) => d.getTime()))),
         trend: calculateTrend(data.recentCases),
       }))
-      .sort((a, b) => b.totalCases - a.totalCases)
+      .sort((a: { totalCases: number }, b: { totalCases: number }) => b.totalCases - a.totalCases)
       .slice(0, 20); // Top 20 diseases
 
     // Sample collection statistics
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
 function calculateTrend(dates: Date[]): string {
   if (dates.length < 2) return 'stable';
   
-  const sortedDates = dates.sort((a, b) => a.getTime() - b.getTime());
+  const sortedDates = dates.sort((a: Date, b: Date) => a.getTime() - b.getTime());
   const midPoint = Math.floor(sortedDates.length / 2);
   const firstHalf = sortedDates.slice(0, midPoint).length;
   const secondHalf = sortedDates.slice(midPoint).length;
@@ -172,6 +172,6 @@ function groupByTestType(labOrders: any[]) {
   
   return Array.from(typeMap.entries())
     .map(([type, count]) => ({ type, count }))
-    .sort((a, b) => b.count - a.count)
+    .sort((a: { count: number }, b: { count: number }) => b.count - a.count)
     .slice(0, 10);
 }

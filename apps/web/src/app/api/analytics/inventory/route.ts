@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
           totalValue: item.stockQuantity * price,
         };
       })
-      .sort((a, b) => b.totalValue - a.totalValue)
+      .sort((a: { totalValue: number }, b: { totalValue: number }) => b.totalValue - a.totalValue)
       .slice(0, 10);
 
     // Calculate turnover (items with low stockQuantity / reorder level ratio)
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
         reorderLevel: item.reorderLevel,
         ratio: item.stockQuantity / item.reorderLevel,
       }))
-      .sort((a, b) => b.ratio - a.ratio)
+      .sort((a: { ratio: number }, b: { ratio: number }) => b.ratio - a.ratio)
       .slice(0, 10);
 
     return apiResponse({

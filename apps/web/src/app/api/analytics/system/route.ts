@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
         activityScore:
           h._count.users * 2 + h._count.patients + h._count.appointments * 3,
       }))
-      .sort((a, b) => b.activityScore - a.activityScore)
+      .sort((a: { activityScore: number }, b: { activityScore: number }) => b.activityScore - a.activityScore)
       .slice(0, 5);
 
     return NextResponse.json({
