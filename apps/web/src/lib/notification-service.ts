@@ -21,7 +21,7 @@ interface NotificationData {
   title: string;
   message: string;
   link?: string;
-  metadata?: any;
+  metadata?: Record<string, any>;
 }
 
 export class NotificationService {
@@ -112,7 +112,7 @@ export class NotificationService {
         },
       });
 
-      const notifications: NotificationData[] = pharmacists.map((user: any) => ({
+      const notifications: NotificationData[] = pharmacists.map((user: { id: number }) => ({
         userId: user.id,
         hospitalId: item.hospitalId,
         type: 'low_stock_alert',

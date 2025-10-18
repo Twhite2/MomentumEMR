@@ -92,20 +92,21 @@ export const authOptions = {
         console.log('✅ [AUTH] Authorization successful!');
         console.log('👤 [AUTH] Returning user:', authUser);
         return authUser;
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('💥 [AUTH] Authorization failed!');
+          const err = error as Error;
           console.error('❌ [AUTH] Error details:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name,
+            message: err.message,
+            stack: err.stack,
+            name: err.name,
           });
-          throw new Error(error.message || 'Authentication failed');
+          throw new Error(err.message || 'Authentication failed');
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -114,10 +115,10 @@ export const authOptions = {
       }
       return token;
     },
-    async session({ session, token }: any) {
+    async session({ session, token }: { session: any; token: any }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = token.role as any;
+        session.user.role = token.role as string;
         session.user.hospitalId = token.hospitalId as string;
         session.user.hospitalName = token.hospitalName as string;
       }
