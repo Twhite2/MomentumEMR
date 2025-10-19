@@ -33,6 +33,9 @@ export async function POST(
         hospitalId,
         status: 'active',
       },
+      include: {
+        questions: true,
+      },
     });
 
     if (!survey) {
@@ -52,24 +55,36 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { rating, feedback, responses } = body;
+    const { answers } = body; // Array of { questionId, answer }
 
     // Validation
-    if (!rating) {
-      return apiResponse({ error: 'Rating is required' }, 400);
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+      return apiResponse({ error: 'Answers are required' }, 400);
     }
 
-    if (rating < 1 || rating > 5) {
-      return apiResponse({ error: 'Rating must be between 1 and 5' }, 400);
+    // Validate required questions are answered
+    const requiredQuestions = survey.questions.filter(q => q.required);
+    const answeredQuestionIds = answers.map(a => a.questionId);
+    const missingRequired = requiredQuestions.filter(q => !answeredQuestionIds.includes(q.id));
+    
+    if (missingRequired.length > 0) {
+      return apiResponse({ error: 'Please answer all required questions' }, 400);
     }
 
+    // Create response with answers in a transaction
     const response = await prisma.surveyResponse.create({
       data: {
         surveyId,
         patientId: patient.id,
-        rating,
-        feedback,
-        responses,
+        answers: {
+          create: answers.map((a: any) => ({
+            questionId: a.questionId,
+            answer: String(a.answer),
+          })),
+        },
+      },
+      include: {
+        answers: true,
       },
     });
 
