@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
 // POST /api/lab-orders - Create new lab order
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['doctor', 'nurse']);
+    const session = await requireRole(['admin', 'doctor', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
     const orderedBy = parseInt(session.user.id);
 
