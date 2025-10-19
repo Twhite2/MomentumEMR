@@ -154,6 +154,7 @@ model Hospital {
   notifications        Notification[]
   patientSurveys       PatientSurvey[]
   labOrders            LabOrder[]
+  surveys              Survey[]
   analyticsDashboards  AnalyticsDashboard[]
   analyticsReports     AnalyticsReport[]
   analyticsMetrics     AnalyticsMetric[]
@@ -187,6 +188,7 @@ model User {
   labResultsReleased      LabResult[]           @relation("ReleasedBy")
   notificationsReceived   Notification[]        @relation("NotificationRecipient")
   notificationsSent       Notification[]        @relation("NotificationSender")
+  surveysCreated          Survey[]
   analyticsDashboards     AnalyticsDashboard[]  @relation("DashboardCreator")
   analyticsReports        AnalyticsReport[]     @relation("ReportGenerator")
 
@@ -217,15 +219,16 @@ model Patient {
   // Relations
   hospital        Hospital          @relation(fields: [hospitalId], references: [id])
   user            User?             @relation(fields: [userId], references: [id])
-  primaryDoctor   User?             @relation("PrimaryDoctor", fields: [primaryDoctorId], references: [id])
-  corporateClient CorporateClient?  @relation(fields: [corporateClientId], references: [id])
-  hmo             Hmo?              @relation(fields: [insuranceId], references: [id])
-  appointments    Appointment[]
-  medicalRecords  MedicalRecord[]
-  prescriptions   Prescription[]
-  invoices        Invoice[]
-  patientSurveys  PatientSurvey[]
-  labOrders       LabOrder[]
+  primaryDoctor     User?             @relation("PrimaryDoctor", fields: [primaryDoctorId], references: [id])
+  corporateClient   CorporateClient?  @relation(fields: [corporateClientId], references: [id])
+  hmo               Hmo?              @relation(fields: [insuranceId], references: [id])
+  appointments      Appointment[]
+  medicalRecords    MedicalRecord[]
+  prescriptions     Prescription[]
+  invoices          Invoice[]
+  patientSurveys    PatientSurvey[]
+  labOrders         LabOrder[]
+  surveyResponses   SurveyResponse[]
 
   @@index([hospitalId])
   @@index([userId])
@@ -607,4 +610,48 @@ model AnalyticsMetric {
   @@index([metricDate])
   @@index([metricType])
   @@map("analytics_metrics")
+}
+
+enum SurveyStatus {
+  draft
+  active
+  closed
+}
+
+model Survey {
+  id          Int          @id @default(autoincrement())
+  hospitalId  Int          @map("hospital_id")
+  title       String
+  description String?      @db.Text
+  status      SurveyStatus @default(draft)
+  createdBy   Int          @map("created_by")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  hospital  Hospital         @relation(fields: [hospitalId], references: [id])
+  creator   User             @relation(fields: [createdBy], references: [id])
+  responses SurveyResponse[]
+
+  @@index([hospitalId])
+  @@index([status])
+  @@map("surveys")
+}
+
+model SurveyResponse {
+  id          Int      @id @default(autoincrement())
+  surveyId    Int      @map("survey_id")
+  patientId   Int      @map("patient_id")
+  rating      Int?     // Overall rating (1-5)
+  feedback    String?  @db.Text
+  responses   Json?    // Store question-answer pairs
+  completedAt DateTime @default(now()) @map("completed_at")
+
+  // Relations
+  survey  Survey  @relation(fields: [surveyId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([surveyId])
+  @@index([patientId])
+  @@map("survey_responses")
 }

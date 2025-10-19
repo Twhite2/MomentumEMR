@@ -6,10 +6,23 @@ import { useSession } from 'next-auth/react';
 import { Button, Input } from '@momentum/ui';
 import { MessageSquare, Plus, Search, CheckCircle, Clock, TrendingUp, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
+import axios from 'axios';
 
 export default function SurveysPage() {
   const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Fetch surveys and stats
+  const { data: surveysData } = useQuery({
+    queryKey: ['surveys'],
+    queryFn: async () => {
+      const response = await axios.get('/api/surveys');
+      return response.data;
+    },
+  });
+
+  const surveys = surveysData?.surveys || [];
+  const stats = surveysData?.stats || {};
 
   return (
     <div className="space-y-6">
@@ -42,7 +55,7 @@ export default function SurveysPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Available Surveys</p>
-                <p className="text-2xl font-bold text-primary mt-1">3</p>
+                <p className="text-2xl font-bold text-primary mt-1">{stats.available || 0}</p>
                 <p className="text-xs text-muted-foreground mt-1">Pending your feedback</p>
               </div>
               <MessageSquare className="w-10 h-10 text-primary/20" />
@@ -53,7 +66,7 @@ export default function SurveysPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Completed</p>
-                <p className="text-2xl font-bold text-green-600 mt-1">5</p>
+                <p className="text-2xl font-bold text-green-600 mt-1">{stats.completed || 0}</p>
                 <p className="text-xs text-muted-foreground mt-1">Thank you!</p>
               </div>
               <CheckCircle className="w-10 h-10 text-green-600/20" />
@@ -64,7 +77,7 @@ export default function SurveysPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Your Avg. Rating</p>
-                <p className="text-2xl font-bold text-primary mt-1">4.5/5</p>
+                <p className="text-2xl font-bold text-primary mt-1">{stats.avgRating || 0}/5</p>
                 <p className="text-xs text-muted-foreground mt-1">Your feedback score</p>
               </div>
               <BarChart3 className="w-10 h-10 text-primary/20" />
@@ -78,7 +91,7 @@ export default function SurveysPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Surveys</p>
-                <p className="text-2xl font-bold text-primary mt-1">24</p>
+                <p className="text-2xl font-bold text-primary mt-1">{stats.total || 0}</p>
               </div>
               <MessageSquare className="w-10 h-10 text-primary/20" />
             </div>
@@ -88,7 +101,7 @@ export default function SurveysPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Active Surveys</p>
-                <p className="text-2xl font-bold text-green-600 mt-1">8</p>
+                <p className="text-2xl font-bold text-green-600 mt-1">{stats.active || 0}</p>
               </div>
               <CheckCircle className="w-10 h-10 text-green-600/20" />
             </div>
@@ -98,7 +111,7 @@ export default function SurveysPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Responses</p>
-                <p className="text-2xl font-bold text-primary mt-1">1,547</p>
+                <p className="text-2xl font-bold text-primary mt-1">{stats.totalResponses?.toLocaleString() || 0}</p>
               </div>
               <TrendingUp className="w-10 h-10 text-primary/20" />
             </div>
@@ -108,7 +121,7 @@ export default function SurveysPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Avg. Satisfaction</p>
-                <p className="text-2xl font-bold text-green-600 mt-1">4.5/5</p>
+                <p className="text-2xl font-bold text-green-600 mt-1">{stats.avgSatisfaction || 0}/5</p>
               </div>
               <BarChart3 className="w-10 h-10 text-green-600/20" />
             </div>
