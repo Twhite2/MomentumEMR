@@ -618,6 +618,17 @@ enum SurveyStatus {
   closed
 }
 
+enum QuestionType {
+  short_text
+  long_text
+  multiple_choice
+  checkboxes
+  rating
+  yes_no
+  date
+  linear_scale
+}
+
 model Survey {
   id          Int          @id @default(autoincrement())
   hospitalId  Int          @map("hospital_id")
@@ -631,6 +642,7 @@ model Survey {
   // Relations
   hospital  Hospital         @relation(fields: [hospitalId], references: [id])
   creator   User             @relation(fields: [createdBy], references: [id])
+  questions SurveyQuestion[]
   responses SurveyResponse[]
 
   @@index([hospitalId])
@@ -638,20 +650,52 @@ model Survey {
   @@map("surveys")
 }
 
+model SurveyQuestion {
+  id           Int          @id @default(autoincrement())
+  surveyId     Int          @map("survey_id")
+  questionText String       @map("question_text") @db.Text
+  questionType QuestionType @map("question_type")
+  options      Json?        // For multiple choice/checkboxes: ["Option 1", "Option 2"]
+  required     Boolean      @default(false)
+  order        Int          @default(0)
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  survey  Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  answers SurveyAnswer[]
+
+  @@index([surveyId])
+  @@map("survey_questions")
+}
+
 model SurveyResponse {
   id          Int      @id @default(autoincrement())
   surveyId    Int      @map("survey_id")
   patientId   Int      @map("patient_id")
-  rating      Int?     // Overall rating (1-5)
-  feedback    String?  @db.Text
-  responses   Json?    // Store question-answer pairs
   completedAt DateTime @default(now()) @map("completed_at")
 
   // Relations
-  survey  Survey  @relation(fields: [surveyId], references: [id])
-  patient Patient @relation(fields: [patientId], references: [id])
+  survey  Survey         @relation(fields: [surveyId], references: [id])
+  patient Patient        @relation(fields: [patientId], references: [id])
+  answers SurveyAnswer[]
 
+  @@unique([surveyId, patientId]) // One response per patient per survey
   @@index([surveyId])
   @@index([patientId])
   @@map("survey_responses")
+}
+
+model SurveyAnswer {
+  id         Int    @id @default(autoincrement())
+  responseId Int    @map("response_id")
+  questionId Int    @map("question_id")
+  answer     String @db.Text // Store answer as string (can be JSON for multiple selections)
+
+  // Relations
+  response SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  question SurveyQuestion @relation(fields: [questionId], references: [id])
+
+  @@index([responseId])
+  @@index([questionId])
+  @@map("survey_answers")
 }

@@ -1,16 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button, Input } from '@momentum/ui';
-import { MessageSquare, Plus, Search, CheckCircle, Clock, TrendingUp, BarChart3 } from 'lucide-react';
+import { MessageSquare, Plus, Search, CheckCircle, Clock, TrendingUp, BarChart3, X } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 export default function SurveysPage() {
   const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    status: 'draft' as 'draft' | 'active' | 'closed',
+  });
+  const queryClient = useQueryClient();
 
   // Fetch surveys and stats
   const { data: surveysData } = useQuery({
@@ -21,11 +29,110 @@ export default function SurveysPage() {
     },
   });
 
+  // Create survey mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const response = await axios.post('/api/surveys', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Survey created successfully!');
+      queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      setShowCreateModal(false);
+      setFormData({ title: '', description: '', status: 'draft' });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Failed to create survey');
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title) {
+      toast.error('Please enter a survey title');
+      return;
+    }
+    createMutation.mutate(formData);
+  };
+
   const surveys = surveysData?.surveys || [];
   const stats = surveysData?.stats || {};
 
   return (
-    <div className="space-y-6">
+    <>
+      {/* Create Survey Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-primary">Create New Survey</h2>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Survey Title *</label>
+                <Input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="e.g., Post-Visit Patient Satisfaction"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Brief description of the survey..."
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="active">Active</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createMutation.isPending}
+                  className="flex-1"
+                >
+                  {createMutation.isPending ? 'Creating...' : 'Create Survey'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -40,10 +147,12 @@ export default function SurveysPage() {
           </p>
         </div>
         {session?.user?.role !== 'patient' && (
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Survey
-          </Button>
+          <Link href="/surveys/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Survey
+            </Button>
+          </Link>
         )}
       </div>
 
@@ -377,7 +486,8 @@ export default function SurveysPage() {
         </div>
       </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

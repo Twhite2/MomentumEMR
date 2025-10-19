@@ -34,12 +34,19 @@ export async function GET(request: NextRequest) {
       });
 
       if (!patient) {
-        return apiResponse({ surveys: [], stats: {} });
+        return apiResponse({ surveys: [], stats: { available: 0, completed: 0, avgRating: 0 } });
       }
 
-      // Get all active surveys
+      // Get all active surveys with questions
       const surveys = await prisma.survey.findMany({
         where,
+        include: {
+          questions: {
+            orderBy: {
+              order: 'asc',
+            },
+          },
+        },
         orderBy: { createdAt: 'desc' },
       });
 
@@ -47,6 +54,9 @@ export async function GET(request: NextRequest) {
       const responses = await prisma.surveyResponse.findMany({
         where: {
           patientId: patient.id,
+        },
+        include: {
+          answers: true,
         },
       });
 
@@ -59,14 +69,25 @@ export async function GET(request: NextRequest) {
         ...survey,
         completed: responsesBySurveyId.has(survey.id),
         response: responsesBySurveyId.get(survey.id) || null,
+        questionCount: survey.questions.length,
       }));
 
       // Calculate stats
       const available = surveysWithStatus.filter(s => !s.completed).length;
       const completed = responses.length;
-      const avgRating = responses.length > 0
-        ? responses.reduce((sum, r) => sum + (r.rating || 0), 0) / responses.length
-        : 0;
+      
+      // Calculate average rating from all responses
+      const totalRating = responses.reduce((sum, response) => {
+        const ratingAnswer = response.answers.find(a => {
+          const question = surveys
+            .find(s => s.id === response.surveyId)
+            ?.questions.find(q => q.id === a.questionId);
+          return question?.questionType === 'rating';
+        });
+        return sum + (ratingAnswer ? parseInt(ratingAnswer.answer || '0') : 0);
+      }, 0);
+      
+      const avgRating = responses.length > 0 ? totalRating / responses.length : 0;
 
       return apiResponse({
         surveys: surveysWithStatus,
@@ -87,10 +108,10 @@ export async function GET(request: NextRequest) {
               name: true,
             },
           },
+          questions: true,
           responses: {
-            select: {
-              id: true,
-              rating: true,
+            include: {
+              answers: true,
             },
           },
         },
@@ -101,17 +122,30 @@ export async function GET(request: NextRequest) {
       const total = surveys.length;
       const active = surveys.filter(s => s.status === 'active').length;
       const totalResponses = surveys.reduce((sum, s) => sum + s.responses.length, 0);
-      const allRatings = surveys.flatMap(s => s.responses.map(r => r.rating || 0));
-      const avgSatisfaction = allRatings.length > 0
-        ? allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length
-        : 0;
+      
+      // Calculate average satisfaction from rating questions
+      let totalRatingSum = 0;
+      let ratingCount = 0;
+      
+      surveys.forEach(survey => {
+        const ratingQuestion = survey.questions.find(q => q.questionType === 'rating');
+        if (ratingQuestion) {
+          survey.responses.forEach(response => {
+            const ratingAnswer = response.answers.find(a => a.questionId === ratingQuestion.id);
+            if (ratingAnswer) {
+              totalRatingSum += parseInt(ratingAnswer.answer || '0');
+              ratingCount++;
+            }
+          });
+        }
+      });
+      
+      const avgSatisfaction = ratingCount > 0 ? totalRatingSum / ratingCount : 0;
 
       const surveysWithStats = surveys.map(survey => ({
         ...survey,
         responseCount: survey.responses.length,
-        avgRating: survey.responses.length > 0
-          ? survey.responses.reduce((sum, r) => sum + (r.rating || 0), 0) / survey.responses.length
-          : 0,
+        questionCount: survey.questions.length,
       }));
 
       return apiResponse({
@@ -129,7 +163,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/surveys - Create new survey (Admin only)
+// POST /api/surveys - Create new survey with questions (Admin only)
 export async function POST(request: NextRequest) {
   try {
     const session = await requireRole(['admin']);
@@ -137,13 +171,18 @@ export async function POST(request: NextRequest) {
     const createdBy = parseInt(session.user.id);
 
     const body = await request.json();
-    const { title, description, status } = body;
+    const { title, description, status, questions } = body;
 
     // Validation
     if (!title) {
       return apiResponse({ error: 'Title is required' }, 400);
     }
 
+    if (!questions || questions.length === 0) {
+      return apiResponse({ error: 'At least one question is required' }, 400);
+    }
+
+    // Create survey with questions in a transaction
     const survey = await prisma.survey.create({
       data: {
         hospitalId,
@@ -151,6 +190,15 @@ export async function POST(request: NextRequest) {
         description,
         status: status || 'draft',
         createdBy,
+        questions: {
+          create: questions.map((q: any, index: number) => ({
+            questionText: q.questionText,
+            questionType: q.questionType,
+            options: q.options && q.options.length > 0 ? q.options : null,
+            required: q.required || false,
+            order: index,
+          })),
+        },
       },
       include: {
         creator: {
@@ -159,6 +207,7 @@ export async function POST(request: NextRequest) {
             name: true,
           },
         },
+        questions: true,
       },
     });
 
