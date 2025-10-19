@@ -17,11 +17,14 @@ import {
   ShoppingCart,
   TestTube,
   MessageSquare,
+  X,
 } from 'lucide-react';
 
 interface SidebarProps {
   role: UserRole;
   hospitalName: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 interface NavItem {
@@ -149,62 +152,91 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function Sidebar({ role, hospitalName }: SidebarProps) {
+export function Sidebar({ role, hospitalName, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   const filteredNavItems = navItems.filter((item) => item.roles.includes(role));
 
   return (
-    <aside className="w-64 bg-white border-r border-border h-screen sticky top-0 flex flex-col">
-      {/* Logo & Hospital Name */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
-            <img src="/logo.png" alt="Momentum EMR" className="w-full h-full object-contain" />
-          </div>
-          <div>
-            <h2 className="font-bold text-sm text-primary">Momentum EMR</h2>
-            <p className="text-xs text-muted-foreground truncate">{hospitalName}</p>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed lg:sticky top-0 left-0 z-50
+          w-64 bg-white border-r border-border h-screen flex flex-col
+          transition-transform duration-300 ease-in-out
+          lg:translate-x-0
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        {/* Logo & Hospital Name */}
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                <img src="/logo.png" alt="Momentum EMR" className="w-full h-full object-contain" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="font-bold text-sm text-primary">Momentum EMR</h2>
+                <p className="text-xs text-muted-foreground truncate">{hospitalName}</p>
+              </div>
+            </div>
+            {/* Close button (mobile only) */}
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1 hover:bg-spindle rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-muted-foreground" />
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4">
-        <ul className="space-y-1">
-          {filteredNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto p-4">
+          <ul className="space-y-1">
+            {filteredNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
 
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`
-                    flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                    ${
-                      isActive
-                        ? 'bg-primary text-white'
-                        : 'text-muted-foreground hover:bg-spindle hover:text-primary'
-                    }
-                  `}
-                >
-                  <Icon className="w-5 h-5" />
-                  {item.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => onClose?.()}
+                    className={`
+                      flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                      ${
+                        isActive
+                          ? 'bg-primary text-white'
+                          : 'text-muted-foreground hover:bg-spindle hover:text-primary'
+                      }
+                    `}
+                  >
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-border">
-        <div className="text-xs text-muted-foreground text-center">
-          <p>© 2025 Momentum</p>
+        {/* Footer */}
+        <div className="p-4 border-t border-border">
+          <div className="text-xs text-muted-foreground text-center">
+            <p>© 2025 Momentum</p>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 

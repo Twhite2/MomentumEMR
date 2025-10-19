@@ -1,7 +1,7 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { Search, User, LogOut, Settings, X } from 'lucide-react';
+import { Search, User, LogOut, Settings, X, Menu } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -11,9 +11,10 @@ import NotificationsDropdown from './notifications-dropdown';
 interface HeaderProps {
   userName: string;
   userRole: string;
+  onMenuClick?: () => void;
 }
 
-export function Header({ userName, userRole }: HeaderProps) {
+export function Header({ userName, userRole, onMenuClick }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -70,9 +71,17 @@ export function Header({ userName, userRole }: HeaderProps) {
 
   return (
     <header className="h-16 bg-white border-b border-border sticky top-0 z-10">
-      <div className="h-full px-6 flex items-center justify-between">
+      <div className="h-full px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
+        {/* Hamburger Menu (Mobile) */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 hover:bg-spindle rounded-lg transition-colors"
+          aria-label="Toggle menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
         {/* Search Bar */}
-        <div className="flex-1 max-w-xl" ref={searchRef}>
+        <div className="flex-1 max-w-xl hidden sm:block" ref={searchRef}>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
@@ -296,7 +305,7 @@ export function Header({ userName, userRole }: HeaderProps) {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Notifications */}
           <NotificationsDropdown />
 
@@ -304,14 +313,14 @@ export function Header({ userName, userRole }: HeaderProps) {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-3 p-2 hover:bg-spindle rounded-lg transition-colors"
+              className="flex items-center gap-2 sm:gap-3 p-2 hover:bg-spindle rounded-lg transition-colors"
             >
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-white text-sm font-medium">
                   {userName.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <div className="text-left">
+              <div className="text-left hidden md:block">
                 <p className="text-sm font-medium">{userName}</p>
                 <p className="text-xs text-muted-foreground capitalize">{userRole}</p>
               </div>

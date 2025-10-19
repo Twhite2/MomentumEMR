@@ -54,6 +54,15 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Responsive table utilities */
+  .table-responsive {
+    @apply block overflow-x-auto -mx-3 sm:mx-0;
+  }
+  
+  .table-responsive table {
+    @apply min-w-full;
+  }
 }
 
 /* Custom scrollbar */
