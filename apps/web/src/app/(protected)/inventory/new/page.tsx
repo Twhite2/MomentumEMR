@@ -48,7 +48,18 @@ export default function NewInventoryPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createItem.mutate(formData);
+    
+    // Transform form data to match API expectations
+    const apiData = {
+      itemName: formData.drugName,
+      itemCode: formData.batchNumber || null,
+      stockQuantity: parseInt(formData.quantity) || 0,
+      unitPrice: parseFloat(formData.unitPrice) || 0,
+      reorderLevel: parseInt(formData.reorderLevel) || 10,
+      expiryDate: formData.expiryDate || null,
+    };
+    
+    createItem.mutate(apiData);
   };
 
   return (
