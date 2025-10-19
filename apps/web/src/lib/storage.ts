@@ -39,13 +39,13 @@ export async function uploadFile(options: UploadOptions): Promise<string> {
         Key: key,
         Body: file,
         ContentType: contentType,
-        // Make file publicly readable
-        ACL: 'public-read',
+        // Backblaze B2 doesn't support ACL parameter
+        // File permissions are controlled at bucket level
       })
     );
 
-    // Return public URL
-    const publicUrl = `${process.env.B2_ENDPOINT}/${BUCKET_NAME}/${key}`;
+    // Return public URL - B2 format
+    const publicUrl = `https://f004.backblazeb2.com/file/${BUCKET_NAME}/${key}`;
     return publicUrl;
   } catch (error) {
     console.error('Error uploading file to B2:', error);

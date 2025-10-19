@@ -23,6 +23,15 @@ export default function BillingPage() {
     enabled: isPatient,
   });
 
+  // Fetch billing stats
+  const { data: billingStats } = useQuery({
+    queryKey: ['billing-stats'],
+    queryFn: async () => {
+      const response = await axios.get('/api/billing/stats');
+      return response.data;
+    },
+  });
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -89,8 +98,12 @@ export default function BillingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Outstanding Balance</p>
-                <p className="text-2xl font-bold text-orange-600 mt-1">₦0</p>
-                <p className="text-xs text-green-600 mt-1">✓ All bills paid</p>
+                <p className="text-2xl font-bold text-orange-600 mt-1">
+                  ₦{(billingStats?.outstandingBalance || 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-green-600 mt-1">
+                  {billingStats?.outstandingBalance === 0 ? '✓ All bills paid' : 'Pending payment'}
+                </p>
               </div>
               <DollarSign className="w-10 h-10 text-orange-600/20" />
             </div>
@@ -100,8 +113,12 @@ export default function BillingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Paid This Year</p>
-                <p className="text-2xl font-bold text-primary mt-1">₦125,000</p>
-                <p className="text-xs text-muted-foreground mt-1">6 bills paid</p>
+                <p className="text-2xl font-bold text-primary mt-1">
+                  ₦{(billingStats?.totalPaidThisYear || 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {billingStats?.billsPaidCount || 0} bills paid
+                </p>
               </div>
               <CheckCircle className="w-10 h-10 text-primary/20" />
             </div>
@@ -114,8 +131,14 @@ export default function BillingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Revenue</p>
-              <p className="text-2xl font-bold text-primary mt-1">₦2.4M</p>
-              <p className="text-xs text-green-600 mt-1">+12% from last month</p>
+              <p className="text-2xl font-bold text-primary mt-1">
+                ₦{((billingStats?.totalRevenue || 0) / 1000000).toFixed(1)}M
+              </p>
+              <p className={`text-xs mt-1 ${
+                (billingStats?.revenueGrowth || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {(billingStats?.revenueGrowth || 0) >= 0 ? '+' : ''}{billingStats?.revenueGrowth || 0}% from last month
+              </p>
             </div>
             <TrendingUp className="w-10 h-10 text-primary/20" />
           </div>
@@ -125,8 +148,10 @@ export default function BillingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Pending Invoices</p>
-              <p className="text-2xl font-bold text-orange-600 mt-1">18</p>
-              <p className="text-xs text-muted-foreground mt-1">₦450,000</p>
+              <p className="text-2xl font-bold text-orange-600 mt-1">{billingStats?.pendingInvoicesCount || 0}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                ₦{(billingStats?.pendingAmount || 0).toLocaleString()}
+              </p>
             </div>
             <AlertCircle className="w-10 h-10 text-orange-600/20" />
           </div>
@@ -136,8 +161,10 @@ export default function BillingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Paid Today</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">32</p>
-              <p className="text-xs text-muted-foreground mt-1">₦145,000</p>
+              <p className="text-2xl font-bold text-green-600 mt-1">{billingStats?.paidTodayCount || 0}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                ₦{(billingStats?.paidTodayAmount || 0).toLocaleString()}
+              </p>
             </div>
             <CheckCircle className="w-10 h-10 text-green-600/20" />
           </div>
@@ -147,8 +174,10 @@ export default function BillingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Overdue</p>
-              <p className="text-2xl font-bold text-red-600 mt-1">5</p>
-              <p className="text-xs text-muted-foreground mt-1">₦85,000</p>
+              <p className="text-2xl font-bold text-red-600 mt-1">{billingStats?.overdueCount || 0}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                ₦{(billingStats?.overdueAmount || 0).toLocaleString()}
+              </p>
             </div>
             <AlertCircle className="w-10 h-10 text-red-600/20" />
           </div>
