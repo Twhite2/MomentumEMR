@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     // Apply pagination after filtering
     const items = filteredItems.slice(skip, skip + limit);
 
-    // Add status flags
+    // Add status flags and transform field names for frontend
     const itemsWithStatus = items.map((item: any) => {
       const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
       const isLowStock = item.stockQuantity <= item.reorderLevel;
@@ -64,6 +64,13 @@ export async function GET(request: NextRequest) {
 
       return {
         ...item,
+        // Transform database field names to match frontend expectations
+        drugName: item.itemName,
+        genericName: null,
+        category: 'Other',
+        quantity: item.stockQuantity,
+        batchNumber: item.itemCode,
+        manufacturer: null,
         isExpired,
         isLowStock,
         daysToExpiry,

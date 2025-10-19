@@ -24,7 +24,7 @@ export async function GET(
       return apiResponse({ error: 'Inventory item not found' }, 404);
     }
 
-    // Add status flags
+    // Add status flags and transform field names
     const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
     const isLowStock = item.stockQuantity <= item.reorderLevel;
     const daysToExpiry = item.expiryDate
@@ -36,6 +36,13 @@ export async function GET(
 
     return apiResponse({
       ...item,
+      // Transform database field names to match frontend expectations
+      drugName: item.itemName,
+      genericName: null,
+      category: 'Other',
+      quantity: item.stockQuantity,
+      batchNumber: item.itemCode,
+      manufacturer: null,
       isExpired,
       isLowStock,
       daysToExpiry,
@@ -60,12 +67,20 @@ export async function PUT(
     const body = await request.json();
     const {
       itemName,
+      drugName,
       itemCode,
+      batchNumber,
       stockQuantity,
+      quantity,
       unitPrice,
       reorderLevel,
       expiryDate,
     } = body;
+    
+    // Transform frontend field names to database field names
+    const finalItemName = itemName || drugName;
+    const finalItemCode = itemCode || batchNumber;
+    const finalStockQuantity = stockQuantity !== undefined ? stockQuantity : quantity;
 
     // Verify item exists
     const existing = await prisma.inventory.findFirst({
@@ -80,16 +95,25 @@ export async function PUT(
     const item = await prisma.inventory.update({
       where: { id: itemId },
       data: {
-        itemName: itemName !== undefined ? itemName : undefined,
-        itemCode: itemCode !== undefined ? itemCode : undefined,
-        stockQuantity: stockQuantity !== undefined ? parseInt(stockQuantity) : undefined,
+        itemName: finalItemName !== undefined ? finalItemName : undefined,
+        itemCode: finalItemCode !== undefined ? finalItemCode : undefined,
+        stockQuantity: finalStockQuantity !== undefined ? parseInt(finalStockQuantity) : undefined,
         unitPrice: unitPrice !== undefined ? parseFloat(unitPrice) : undefined,
         reorderLevel: reorderLevel !== undefined ? parseInt(reorderLevel) : undefined,
         expiryDate: expiryDate ? new Date(expiryDate) : undefined,
       },
     });
 
-    return apiResponse(item);
+    // Transform response to match frontend expectations
+    return apiResponse({
+      ...item,
+      drugName: item.itemName,
+      genericName: null,
+      category: 'Other',
+      quantity: item.stockQuantity,
+      batchNumber: item.itemCode,
+      manufacturer: null,
+    });
   } catch (error) {
     return handleApiError(error);
   }
