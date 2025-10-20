@@ -8,6 +8,7 @@ import { Upload, Save, X } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { useHospitalTheme } from '@/contexts/hospital-theme-context';
 
 interface BrandingSettingsProps {
   hospitalId: number;
@@ -22,6 +23,7 @@ interface BrandingSettingsProps {
 export default function BrandingSettings({ hospitalId, initialData }: BrandingSettingsProps) {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
+  const { updateTheme } = useHospitalTheme();
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logoUrl || null);
@@ -40,9 +42,24 @@ export default function BrandingSettings({ hospitalId, initialData }: BrandingSe
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success('Branding updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['hospital', hospitalId] });
+      
+      // Update logo preview with the new uploaded URL (with cache busting)
+      const cacheBustedUrl = data.hospital?.logoUrl ? data.hospital.logoUrl + '?t=' + Date.now() : null;
+      if (cacheBustedUrl) {
+        setLogoPreview(cacheBustedUrl);
+      }
+      
+      // Update theme context to refresh logo across the entire app (sidebar, etc.)
+      updateTheme({
+        logoUrl: cacheBustedUrl || undefined,
+        primaryColor: data.hospital?.primaryColor || primaryColor,
+        secondaryColor: data.hospital?.secondaryColor || secondaryColor,
+        tagline: data.hospital?.tagline || tagline,
+      });
+      
       setLogoFile(null);
     },
     onError: (error: any) => {
@@ -118,6 +135,8 @@ export default function BrandingSettings({ hospitalId, initialData }: BrandingSe
                   alt="Hospital Logo"
                   fill
                   className="object-contain p-2"
+                  unoptimized
+                  key={logoPreview}
                 />
               </div>
             )}

@@ -294,6 +294,17 @@ async function main() {
     },
   });
 
+  await prisma.user.create({
+    data: {
+      hospitalId: hospital.id,
+      name: 'Peter Imonte',
+      email: 'imontepez@gmail.com',
+      hashedPassword,
+      role: 'lab_tech',
+      active: true,
+    },
+  });
+
   // Cashier
   await prisma.user.create({
     data: {
@@ -386,13 +397,14 @@ async function main() {
   console.log('   - sadiqdahir323@gmail.com');
   console.log('   - torinco2020@gmail.com');
   console.log('   - ukemeudo72@gmail.com');
-  console.log('\n🔬 Lab Scientists (6 total):');
+  console.log('\n🔬 Lab Scientists (7 total):');
   console.log('   - james.wilson@citygeneralhospital.com');
   console.log('   - baridueh@gmail.com');
   console.log('   - samuelajewolesa@gmail.com');
   console.log('   - nnoromiheoma33@gmail.com');
   console.log('   - damilolaj442@gmail.com');
   console.log('   - nifemiadewura@gmail.com');
+  console.log('   - imontepez@gmail.com');
   console.log('\n🧑‍🤝‍🧑 Patients (5 total):');
   console.log('   - truorganicafricafoundation@gmail.com');
   console.log('   - olajideadara@yahoo.com');

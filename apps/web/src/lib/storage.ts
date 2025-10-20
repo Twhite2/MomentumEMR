@@ -39,6 +39,7 @@ export async function uploadFile(options: UploadOptions): Promise<string> {
         Key: key,
         Body: file,
         ContentType: contentType,
+        CacheControl: 'public, max-age=31536000',
         // Backblaze B2 doesn't support ACL parameter
         // File permissions are controlled at bucket level
       })
@@ -48,6 +49,8 @@ export async function uploadFile(options: UploadOptions): Promise<string> {
     const publicUrl = process.env.S3_PUBLIC_URL 
       ? `${process.env.S3_PUBLIC_URL}/${key}`
       : `https://f005.backblazeb2.com/file/${BUCKET_NAME}/${key}`;
+    
+    console.log('File uploaded successfully:', publicUrl);
     return publicUrl;
   } catch (error) {
     console.error('Error uploading file to B2:', error);
