@@ -90,6 +90,7 @@ export async function PUT(
         contentType: logo.type,
         folder: 'logos',
       });
+      console.log('✅ Logo uploaded successfully. URL:', logoUrl);
     }
 
     // Validate color formats (hex colors)
@@ -127,6 +128,8 @@ export async function PUT(
         tagline: true,
       },
     });
+
+    console.log('✅ Hospital updated with logo URL:', updatedHospital.logoUrl);
 
     return NextResponse.json({
       message: 'Hospital branding updated successfully',

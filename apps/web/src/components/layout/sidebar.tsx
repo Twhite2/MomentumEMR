@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserRole } from '@momentum/database';
+import Image from 'next/image';
+import { useHospitalTheme } from '@/contexts/hospital-theme-context';
 import {
   LayoutDashboard,
   Users,
@@ -154,8 +156,13 @@ const navItems: NavItem[] = [
 
 export function Sidebar({ role, hospitalName, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { theme } = useHospitalTheme();
 
   const filteredNavItems = navItems.filter((item) => item.roles.includes(role));
+  
+  // Use custom logo if available, otherwise default
+  const logoUrl = theme.logoUrl || '/logo.png';
+  const appName = role === 'super_admin' ? 'Momentum EMR' : hospitalName;
 
   return (
     <>
@@ -181,12 +188,24 @@ export function Sidebar({ role, hospitalName, isOpen, onClose }: SidebarProps) {
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                <img src="/logo.png" alt="Momentum EMR" className="w-full h-full object-contain" />
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+                <Image 
+                  src={logoUrl} 
+                  alt={appName}
+                  fill
+                  className="object-contain p-1"
+                  unoptimized
+                  key={logoUrl}
+                />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="font-bold text-sm text-primary">Momentum EMR</h2>
-                <p className="text-xs text-muted-foreground truncate">{hospitalName}</p>
+                <h2 className="font-bold text-sm text-primary">{appName}</h2>
+                {role === 'super_admin' && (
+                  <p className="text-xs text-muted-foreground truncate">Super Admin</p>
+                )}
+                {role !== 'super_admin' && theme.tagline && (
+                  <p className="text-xs text-muted-foreground truncate">{theme.tagline}</p>
+                )}
               </div>
             </div>
             {/* Close button (mobile only) */}
