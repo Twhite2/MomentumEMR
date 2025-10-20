@@ -112,11 +112,20 @@ export default function NewInventoryPage() {
                 onChange={handleInputChange}
                 required
               >
-                <option value="Antibiotic">Antibiotic</option>
-                <option value="Analgesic">Analgesic</option>
+                <option value="Antibacterial (Antibiotic)">Antibacterial (Antibiotic)</option>
+                <option value="Antifungal">Antifungal</option>
                 <option value="Antiviral">Antiviral</option>
-                <option value="Vaccine">Vaccine</option>
-                <option value="Supplement">Supplement</option>
+                <option value="Antimalarial">Antimalarial</option>
+                <option value="Antidiarrheal">Antidiarrheal</option>
+                <option value="Laxative">Laxative</option>
+                <option value="Antihypertensive">Antihypertensive</option>
+                <option value="Anti-diabetic">Anti-diabetic</option>
+                <option value="Antihistamine">Antihistamine</option>
+                <option value="Antitussive">Antitussive</option>
+                <option value="Antidepressant">Antidepressant</option>
+                <option value="Sedative/Anxiolytic">Sedative/Anxiolytic</option>
+                <option value="NSAIDs">NSAIDs</option>
+                <option value="Statins">Statins</option>
                 <option value="Other">Other</option>
               </Select>
 

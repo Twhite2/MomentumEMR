@@ -109,12 +109,21 @@ export default function InventoryDetailPage() {
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      Antibiotic: 'bg-green-haze/10 text-green-haze',
-      Analgesic: 'bg-tory-blue/10 text-tory-blue',
-      Antiviral: 'bg-amaranth/10 text-amaranth',
-      Vaccine: 'bg-danube/10 text-danube',
-      Supplement: 'bg-saffron/10 text-saffron',
-      Other: 'bg-muted text-muted-foreground',
+      'Antibacterial (Antibiotic)': 'bg-green-haze/10 text-green-haze',
+      'Antifungal': 'bg-tory-blue/10 text-tory-blue',
+      'Antiviral': 'bg-amaranth/10 text-amaranth',
+      'Antimalarial': 'bg-danube/10 text-danube',
+      'Antidiarrheal': 'bg-saffron/10 text-saffron',
+      'Laxative': 'bg-green-haze/10 text-green-haze',
+      'Antihypertensive': 'bg-tory-blue/10 text-tory-blue',
+      'Anti-diabetic': 'bg-amaranth/10 text-amaranth',
+      'Antihistamine': 'bg-danube/10 text-danube',
+      'Antitussive': 'bg-saffron/10 text-saffron',
+      'Antidepressant': 'bg-green-haze/10 text-green-haze',
+      'Sedative/Anxiolytic': 'bg-tory-blue/10 text-tory-blue',
+      'NSAIDs': 'bg-amaranth/10 text-amaranth',
+      'Statins': 'bg-danube/10 text-danube',
+      'Other': 'bg-muted text-muted-foreground',
     };
     return colors[category] || 'bg-muted text-muted-foreground';
   };
