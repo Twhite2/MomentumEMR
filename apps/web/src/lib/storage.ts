@@ -4,15 +4,15 @@ import { v4 as uuid } from 'uuid';
 
 // Initialize Backblaze B2 S3-compatible client
 const s3Client = new S3Client({
-  endpoint: process.env.B2_ENDPOINT || 'https://s3.us-west-004.backblazeb2.com',
-  region: process.env.B2_REGION || 'us-west-004',
+  endpoint: process.env.S3_ENDPOINT || 'https://s3.us-east-005.backblazeb2.com',
+  region: process.env.S3_REGION || 'us-east-005',
   credentials: {
-    accessKeyId: process.env.B2_KEY_ID || '',
-    secretAccessKey: process.env.B2_APPLICATION_KEY || '',
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
   },
 });
 
-const BUCKET_NAME = process.env.B2_BUCKET_NAME || 'emr-uploads';
+const BUCKET_NAME = process.env.S3_BUCKET || 'emr-uploads';
 
 export interface UploadOptions {
   file: Buffer;
@@ -45,7 +45,9 @@ export async function uploadFile(options: UploadOptions): Promise<string> {
     );
 
     // Return public URL - B2 format
-    const publicUrl = `https://f004.backblazeb2.com/file/${BUCKET_NAME}/${key}`;
+    const publicUrl = process.env.S3_PUBLIC_URL 
+      ? `${process.env.S3_PUBLIC_URL}/${key}`
+      : `https://f005.backblazeb2.com/file/${BUCKET_NAME}/${key}`;
     return publicUrl;
   } catch (error) {
     console.error('Error uploading file to B2:', error);
