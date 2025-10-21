@@ -79,6 +79,100 @@ export default function LabResultsPage() {
     });
   };
 
+  const handleDownloadPDF = async (result: any) => {
+    try {
+      // Open printable view in new window
+      window.open(`/api/lab-results/${result.id}/pdf`, '_blank');
+    } catch (error) {
+      console.error('Error opening PDF:', error);
+      alert('Failed to open PDF. Please try again.');
+    }
+  };
+
+  const handleViewDetails = (result: any) => {
+    // Create a detailed view modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    `;
+    
+    const content = `
+      <div style="background: white; border-radius: 12px; max-width: 800px; max-height: 90vh; overflow-y: auto; padding: 30px; position: relative;">
+        <button onclick="this.closest('[role=dialog]').remove()" style="position: absolute; top: 20px; right: 20px; background: #f3f4f6; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 20px;">×</button>
+        
+        <h2 style="color: #2563eb; margin: 0 0 20px 0; font-size: 24px;">Lab Test Details</h2>
+        
+        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h3 style="margin: 0 0 15px 0; color: #374151; font-size: 18px;">Test Information</h3>
+          <div style="display: grid; grid-template-columns: 180px 1fr; gap: 12px;">
+            <strong>Test Type:</strong> <span>${result.labOrder.orderType.replace('_', ' ').toUpperCase()}</span>
+            <strong>Ordered By:</strong> <span>Dr. ${result.labOrder.doctor.name}</span>
+            ${isLabTech && result.labOrder.patient ? `
+              <strong>Patient:</strong> <span>${result.labOrder.patient.firstName} ${result.labOrder.patient.lastName}</span>
+            ` : ''}
+            <strong>Released Date:</strong> <span>${new Date(result.releasedAt).toLocaleString()}</span>
+            <strong>Released By:</strong> <span>${result.releaser?.name || 'Doctor'}</span>
+          </div>
+        </div>
+        
+        ${result.labResultValues && result.labResultValues.length > 0 ? `
+          <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #374151; font-size: 18px;">Test Results</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f3f4f6;">
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Test Name</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Result</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Normal Range</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.labResultValues.map((value: any) => `
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>${value.testName}</strong></td>
+                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${value.resultValue} ${value.unit || ''}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${value.normalRange || '-'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : ''}
+        
+        ${result.doctorNote ? `
+          <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0; color: #065f46;">Doctor's Notes</h4>
+            <p style="margin: 0; white-space: pre-wrap; color: #047857;">${result.doctorNote}</p>
+          </div>
+        ` : ''}
+        
+        ${result.resultNotes ? `
+          <div style="background: #f3f4f6; border-left: 4px solid #6b7280; padding: 15px; border-radius: 4px;">
+            <h4 style="margin: 0 0 10px 0; color: #374151;">Lab Technician Notes</h4>
+            <p style="margin: 0; white-space: pre-wrap; color: #4b5563;">${result.resultNotes}</p>
+          </div>
+        ` : ''}
+      </div>
+    `;
+    
+    modal.setAttribute('role', 'dialog');
+    modal.innerHTML = content;
+    modal.onclick = (e) => {
+      if (e.target === modal) modal.remove();
+    };
+    document.body.appendChild(modal);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -204,7 +298,7 @@ export default function LabResultsPage() {
             </div>
           ) : (
             filteredResults.map((result: any) => (
-              <div key={result.id} className="p-6 hover:bg-muted/30 transition-colors">
+              <div key={result.id} id={`result-${result.id}`} className="p-6 hover:bg-muted/30 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
@@ -285,11 +379,11 @@ export default function LabResultsPage() {
                   </div>
 
                   <div className="flex flex-col gap-2 ml-4">
-                    <Button variant="primary" size="sm">
+                    <Button variant="primary" size="sm" onClick={() => handleDownloadPDF(result)}>
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetails(result)}>
                       <FileText className="w-4 h-4 mr-2" />
                       Details
                     </Button>
