@@ -186,6 +186,7 @@ model User {
   medicalRecords          MedicalRecord[]
   prescriptions           Prescription[]
   labOrdersOrdered        LabOrder[]            @relation("OrderedBy")
+  labOrdersAssigned       LabOrder[]            @relation("AssignedLabTech")
   labResultsUploaded      LabResult[]           @relation("UploadedBy")
   labResultsReleased      LabResult[]           @relation("ReleasedBy")
   notificationsReceived   Notification[]        @relation("NotificationRecipient")
@@ -492,6 +493,7 @@ model LabOrder {
   hospitalId  Int            @map("hospital_id")
   patientId   Int            @map("patient_id")
   orderedBy   Int            @map("ordered_by")
+  assignedTo  Int?           @map("assigned_to")
   orderType   LabOrderType   @map("order_type")
   description String?        @db.Text
   status      LabOrderStatus?
@@ -499,14 +501,16 @@ model LabOrder {
   updatedAt   DateTime       @updatedAt @map("updated_at")
 
   // Relations
-  hospital   Hospital    @relation(fields: [hospitalId], references: [id])
-  patient    Patient     @relation(fields: [patientId], references: [id])
-  doctor     User        @relation("OrderedBy", fields: [orderedBy], references: [id])
-  labResults LabResult[]
+  hospital       Hospital    @relation(fields: [hospitalId], references: [id])
+  patient        Patient     @relation(fields: [patientId], references: [id])
+  doctor         User        @relation("OrderedBy", fields: [orderedBy], references: [id])
+  assignedLabTech User?      @relation("AssignedLabTech", fields: [assignedTo], references: [id])
+  labResults     LabResult[]
 
   @@index([hospitalId])
   @@index([patientId])
   @@index([orderedBy])
+  @@index([assignedTo])
   @@index([status])
   @@map("lab_orders")
 }
