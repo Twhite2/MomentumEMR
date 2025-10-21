@@ -199,12 +199,7 @@ export default function PatientsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {data?.patients.map((patient) => {
-                    // Debug log for undefined IDs
-                    if (!patient.id && !patient.isUserOnly) {
-                      console.error('Patient with no ID:', patient);
-                    }
-                    return (
+                  {data?.patients.map((patient) => (
                     <tr key={patient.id || `user-${patient.userId}`} className={`hover:bg-muted/50 ${patient.isUserOnly ? 'bg-yellow-50/30' : ''}`}>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -298,8 +293,7 @@ export default function PatientsPage() {
                         )}
                       </td>
                     </tr>
-                    );
-                  })}
+                  ))}
                 </tbody>
               </table>
             </div>
