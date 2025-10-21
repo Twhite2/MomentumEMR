@@ -199,8 +199,13 @@ export default function PatientsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {data?.patients.map((patient) => (
-                    <tr key={patient.id} className={`hover:bg-muted/50 ${patient.isUserOnly ? 'bg-yellow-50/30' : ''}`}>
+                  {data?.patients.map((patient) => {
+                    // Debug log for undefined IDs
+                    if (!patient.id && !patient.isUserOnly) {
+                      console.error('Patient with no ID:', patient);
+                    }
+                    return (
+                    <tr key={patient.id || `user-${patient.userId}`} className={`hover:bg-muted/50 ${patient.isUserOnly ? 'bg-yellow-50/30' : ''}`}>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -280,16 +285,21 @@ export default function PatientsPage() {
                               Create Record
                             </Button>
                           </Link>
-                        ) : (
+                        ) : patient.id ? (
                           <Link href={`/patients/${patient.id}`}>
                             <Button variant="ghost" size="sm">
                               View
                             </Button>
                           </Link>
+                        ) : (
+                          <Button variant="ghost" size="sm" disabled>
+                            No Record
+                          </Button>
                         )}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

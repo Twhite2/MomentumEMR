@@ -170,6 +170,7 @@ export const NotificationTemplates = {
   VITAL_SIGNS_ALERT: 'vital_signs_alert',
   MEDICATION_DUE: 'medication_due',
   PATIENT_CHECKED_IN: 'patient_checked_in',
+  PATIENT_ACCOUNT_CREATED: 'patient_account_created',
 };
 
 export default notificationClient;

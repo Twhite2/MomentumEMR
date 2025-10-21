@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
-import { prisma } from '@momentum/database';
+import { prisma, NotificationType } from '@momentum/database';
 import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
+import { sendNotification, NotificationTemplates } from '@/lib/notifications';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
@@ -234,43 +235,34 @@ export async function POST(request: NextRequest) {
       return { patient, temporaryPassword };
     });
 
-    // TODO: Send email with credentials
-    // For now, return password in response (in production, only send via email)
+    // Log credentials (development only)
     console.log(`\n🔑 Patient account created for ${patientEmail}`);
     console.log(`   Temporary password: ${result.temporaryPassword}`);
     console.log(`   Patient must change password on first login\n`);
 
-    // Try to send notification email if NotificationAPI is configured
+    // Send email notification with login credentials
     try {
-      const notificationApiId = process.env.NOTIFICATIONAPI_CLIENT_ID;
-      const notificationApiSecret = process.env.NOTIFICATIONAPI_CLIENT_SECRET;
-      
-      if (notificationApiId && notificationApiSecret) {
-        // Send email via NotificationAPI or your email service
-        // This is a placeholder - implement based on your email service
-        await fetch('https://api.notificationapi.com/CLIENT_ID/notifications', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Basic ${Buffer.from(`${notificationApiId}:${notificationApiSecret}`).toString('base64')}`,
-          },
-          body: JSON.stringify({
-            notificationId: 'patient_account_created',
-            user: {
-              email: patientEmail,
-              number: contactInfo?.phone || '',
-            },
-            mergeTags: {
-              patientName: `${firstName} ${lastName}`,
-              email: patientEmail,
-              temporaryPassword: result.temporaryPassword,
-              loginUrl: process.env.AUTH_URL || 'http://localhost:3000',
-            },
-          }),
-        });
-      }
+      await sendNotification({
+        userId: result.patient.user!.id.toString(),
+        hospitalId: hospitalId.toString(),
+        userEmail: patientEmail,
+        userName: `${firstName} ${lastName}`,
+        notificationId: NotificationTemplates.PATIENT_ACCOUNT_CREATED,
+        notificationType: NotificationType.account,
+        message: `Welcome! Your patient account has been created. Please check your email for login credentials.`,
+        referenceId: result.patient.id,
+        referenceTable: 'patients',
+        parameters: {
+          patientName: `${firstName} ${lastName}`,
+          email: patientEmail,
+          temporaryPassword: result.temporaryPassword,
+          loginUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+          hospitalName: session.user.hospitalName,
+        },
+      });
+      console.log('✅ Account creation email sent successfully');
     } catch (emailError) {
-      console.error('Failed to send email notification:', emailError);
+      console.error('❌ Failed to send email notification:', emailError);
       // Don't fail the request if email fails
     }
 
