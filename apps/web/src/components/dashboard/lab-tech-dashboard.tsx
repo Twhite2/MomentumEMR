@@ -54,9 +54,8 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
     result.releasedToPatient
   ).length || 0;
 
-  // Get recent pending orders (sorted by created date, limit to 5)
-  const recentPendingOrders = ordersData?.orders
-    ?.filter((order: any) => order.status === 'pending' || order.status === 'in_progress')
+  // Get recent orders (all statuses, sorted by created date, limit to 5)
+  const recentOrders = ordersData?.orders
     ?.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     ?.slice(0, 5) || [];
 
@@ -129,13 +128,13 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
               <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
               <p className="text-sm text-muted-foreground">Loading orders...</p>
             </div>
-          ) : recentPendingOrders.length === 0 ? (
+          ) : recentOrders.length === 0 ? (
             <div className="p-8 text-center">
               <TestTube className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-20" />
-              <p className="text-sm text-muted-foreground">No pending lab orders</p>
+              <p className="text-sm text-muted-foreground">No recent lab orders</p>
             </div>
           ) : (
-            recentPendingOrders.map((order: any) => (
+            recentOrders.map((order: any) => (
               <Link key={order.id} href={`/lab-orders/${order.id}`}>
                 <div className={`p-3 border rounded-lg hover:bg-muted/30 transition-colors ${
                   order.status === 'in_progress' ? 'bg-saffron/5 border-saffron/20' : ''
