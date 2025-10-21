@@ -70,8 +70,11 @@ export default function LabResultsPage() {
     });
   }, [isLabTech, data?.results, data?.releasedResults, searchTerm, testTypeFilter]);
 
-  const formatDateTime = (dateString: string) => {
+  const formatDateTime = (dateString: string | null | undefined) => {
+    if (!dateString) return 'Not available';
     const date = new Date(dateString);
+    // Check if date is valid
+    if (isNaN(date.getTime())) return 'Invalid date';
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -322,15 +325,29 @@ export default function LabResultsPage() {
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">
-                          Released: {formatDateTime(result.releasedAt)}
+                          {result.releasedAt 
+                            ? `Released: ${formatDateTime(result.releasedAt)}`
+                            : result.finalized
+                            ? `Finalized: ${formatDateTime(result.updatedAt || result.createdAt)}`
+                            : `Created: ${formatDateTime(result.createdAt)}`
+                          }
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                        <span className="text-sm text-green-600 font-medium">
-                          Released by {result.releaser?.name || 'doctor'}
-                        </span>
-                      </div>
+                      {result.releasedAt ? (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="text-sm text-green-600 font-medium">
+                            Released by {result.releaser?.name || 'doctor'}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-orange-600" />
+                          <span className="text-sm text-orange-600 font-medium">
+                            {result.finalized ? 'Awaiting doctor review' : 'In progress'}
+                          </span>
+                        </div>
+                      )}
                       
                       {result.doctorNote && (
                         <div className="mt-3 p-4 bg-green-50 border-l-4 border-green-600 rounded-lg">
