@@ -87,6 +87,7 @@ export const authOptions = {
           role: user.role,
           hospitalId: user.hospitalId.toString(),
           hospitalName: user.hospital.name,
+          mustChangePassword: user.mustChangePassword || false,
         };
         
         console.log('✅ [AUTH] Authorization successful!');
