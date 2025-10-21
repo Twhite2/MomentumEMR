@@ -66,6 +66,12 @@ export default function NewLabOrderPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate patient selection
+    if (!formData.patientId || formData.patientId === '') {
+      toast.error('Please select a patient');
+      return;
+    }
+
     // Use custom test type if "Other" is selected
     const finalOrderType = formData.orderType === 'Other' ? customTestType : formData.orderType;
 
