@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
 import { ArrowLeft, Edit, Calendar, User, FileText, Stethoscope } from 'lucide-react';
 import Link from 'next/link';
@@ -37,6 +38,8 @@ interface MedicalRecord {
 export default function MedicalRecordDetailPage() {
   const params = useParams();
   const recordId = params.id as string;
+  const { data: session } = useSession();
+  const isLabTech = session?.user?.role === 'lab_tech';
 
   const { data: record, isLoading, error } = useQuery<MedicalRecord>({
     queryKey: ['medical-record', recordId],
@@ -164,7 +167,7 @@ export default function MedicalRecordDetailPage() {
 
               {record.notes && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Clinical Notes</p>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">{isLabTech ? "Lab Notes" : "Clinical Notes"}</p>
                   <div className="p-4 bg-muted/50 border border-border rounded-lg">
                     <p className="text-foreground whitespace-pre-wrap">{record.notes}</p>
                   </div>

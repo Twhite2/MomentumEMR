@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
 import { ArrowLeft, Save, FileText, Upload, X, File } from 'lucide-react';
 import Link from 'next/link';
@@ -18,6 +19,8 @@ interface Patient {
 export default function NewMedicalRecordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const isLabTech = session?.user?.role === 'lab_tech';
   const preSelectedPatientId = searchParams.get('patientId');
   const appointmentId = searchParams.get('appointmentId');
 
@@ -147,7 +150,7 @@ export default function NewMedicalRecordPage() {
               />
 
               <Textarea
-                label="Clinical Notes"
+                label={isLabTech ? "Lab Notes" : "Clinical Notes"}
                 name="notes"
                 value={formData.notes}
                 onChange={handleInputChange}
