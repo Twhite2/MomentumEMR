@@ -13,6 +13,11 @@ export async function GET(
     const hospitalId = parseInt(session.user.hospitalId);
     const patientId = parseInt(params.id);
 
+    // Validate patient ID
+    if (!params.id || isNaN(patientId)) {
+      return apiResponse({ error: 'Invalid patient ID' }, 400);
+    }
+
     const patient = await prisma.patient.findFirst({
       where: {
         id: patientId,

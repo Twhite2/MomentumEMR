@@ -65,6 +65,7 @@ enum NotificationType {
   appointment_reminder
   lab_result_ready
   payment_due
+  account
 }
 
 enum DeliveryMethod {
