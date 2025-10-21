@@ -106,12 +106,25 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const recentResultsCount = await prisma.labResult.count({
+      where: {
+        labOrder: {
+          hospitalId,
+        },
+        releasedToPatient: true,
+        releasedAt: {
+          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        },
+      },
+    });
+
     return apiResponse({
       results,
       stats: {
         totalResults: stats._count,
         finalizedResults: finalizedCount,
         releasedResults: releasedCount,
+        recentResults: recentResultsCount,
         pendingResults: stats._count - finalizedCount,
       },
       pagination: {
