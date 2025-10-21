@@ -88,7 +88,15 @@ export default function NewPatientPage() {
     },
     onSuccess: (data) => {
       toast.success('Patient registered successfully!');
-      router.push(`/patients/${data.id}`);
+      
+      // Show temporary password in development
+      if (data.temporaryPassword) {
+        toast.success(`Account created! Temporary password: ${data.temporaryPassword}`, {
+          duration: 10000,
+        });
+      }
+      
+      router.push(`/patients/${data.patient.id}`);
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Failed to register patient');
