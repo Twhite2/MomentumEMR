@@ -170,6 +170,7 @@ model User {
   hashedPassword       String    @map("hashed_password")
   role                 UserRole
   active               Boolean   @default(true)
+  mustChangePassword   Boolean   @default(false) @map("must_change_password")
   lastLogin            DateTime? @map("last_login")
   passwordResetToken   String?   @map("password_reset_token") @db.Text
   passwordResetExpiry  DateTime? @map("password_reset_expiry")

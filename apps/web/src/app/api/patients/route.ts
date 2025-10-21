@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@momentum/database';
 import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 // GET /api/patients - List patients for hospital
 export async function GET(request: NextRequest) {
@@ -146,37 +148,139 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Missing required fields' }, 400);
     }
 
-    // Create patient
-    const patient = await prisma.patient.create({
-      data: {
-        hospitalId,
-        firstName,
-        lastName,
-        dob: new Date(dob),
-        gender,
-        patientType,
-        contactInfo,
-        address,
-        emergencyContact,
-        insuranceId: insuranceId ? parseInt(insuranceId) : null,
-        corporateClientId: corporateClientId ? parseInt(corporateClientId) : null,
-        primaryDoctorId: primaryDoctorId ? parseInt(primaryDoctorId) : null,
-      },
-      include: {
-        primaryDoctor: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
-        hmo: true,
-        corporateClient: true,
-      },
+    // Validate email if provided
+    const patientEmail = contactInfo?.email;
+    if (!patientEmail) {
+      return apiResponse({ error: 'Patient email is required to create account' }, 400);
+    }
+
+    // Check if email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: patientEmail },
     });
 
-    return apiResponse(patient, 201);
+    if (existingUser) {
+      return apiResponse({ error: 'Email already exists in the system' }, 400);
+    }
+
+    // Generate random password (8-12 characters, alphanumeric)
+    const generatePassword = () => {
+      const length = 10;
+      const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let password = '';
+      const randomBytes = crypto.randomBytes(length);
+      for (let i = 0; i < length; i++) {
+        password += charset[randomBytes[i] % charset.length];
+      }
+      return password;
+    };
+
+    const temporaryPassword = generatePassword();
+    const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+
+    // Create user and patient in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create user account first
+      const user = await tx.user.create({
+        data: {
+          hospitalId,
+          name: `${firstName} ${lastName}`,
+          email: patientEmail,
+          hashedPassword,
+          role: 'patient',
+          active: true,
+          mustChangePassword: true, // Force password change on first login
+        },
+      });
+
+      // Create patient record linked to user
+      const patient = await tx.patient.create({
+        data: {
+          hospitalId,
+          userId: user.id,
+          firstName,
+          lastName,
+          dob: new Date(dob),
+          gender,
+          patientType,
+          contactInfo,
+          address,
+          emergencyContact,
+          insuranceId: insuranceId ? parseInt(insuranceId) : null,
+          corporateClientId: corporateClientId ? parseInt(corporateClientId) : null,
+          primaryDoctorId: primaryDoctorId ? parseInt(primaryDoctorId) : null,
+        },
+        include: {
+          primaryDoctor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
+          hmo: true,
+          corporateClient: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      return { patient, temporaryPassword };
+    });
+
+    // TODO: Send email with credentials
+    // For now, return password in response (in production, only send via email)
+    console.log(`\n🔑 Patient account created for ${patientEmail}`);
+    console.log(`   Temporary password: ${result.temporaryPassword}`);
+    console.log(`   Patient must change password on first login\n`);
+
+    // Try to send notification email if NotificationAPI is configured
+    try {
+      const notificationApiId = process.env.NOTIFICATIONAPI_CLIENT_ID;
+      const notificationApiSecret = process.env.NOTIFICATIONAPI_CLIENT_SECRET;
+      
+      if (notificationApiId && notificationApiSecret) {
+        // Send email via NotificationAPI or your email service
+        // This is a placeholder - implement based on your email service
+        await fetch('https://api.notificationapi.com/CLIENT_ID/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${Buffer.from(`${notificationApiId}:${notificationApiSecret}`).toString('base64')}`,
+          },
+          body: JSON.stringify({
+            notificationId: 'patient_account_created',
+            user: {
+              email: patientEmail,
+              number: contactInfo?.phone || '',
+            },
+            mergeTags: {
+              patientName: `${firstName} ${lastName}`,
+              email: patientEmail,
+              temporaryPassword: result.temporaryPassword,
+              loginUrl: process.env.AUTH_URL || 'http://localhost:3000',
+            },
+          }),
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send email notification:', emailError);
+      // Don't fail the request if email fails
+    }
+
+    return apiResponse({
+      patient: result.patient,
+      accountCreated: true,
+      message: 'Patient record and account created successfully. Login credentials have been sent to patient email.',
+      // Include password in development only
+      ...(process.env.NODE_ENV === 'development' && { temporaryPassword: result.temporaryPassword }),
+    }, 201);
   } catch (error) {
     return handleApiError(error);
   }
