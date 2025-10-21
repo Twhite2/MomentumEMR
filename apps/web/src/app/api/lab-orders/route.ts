@@ -104,9 +104,14 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Missing required fields' }, 400);
     }
 
+    const patientIdInt = parseInt(patientId);
+    if (isNaN(patientIdInt)) {
+      return apiResponse({ error: 'Invalid patient ID' }, 400);
+    }
+
     // Verify patient belongs to hospital
     const patient = await prisma.patient.findFirst({
-      where: { id: parseInt(patientId), hospitalId },
+      where: { id: patientIdInt, hospitalId },
     });
 
     if (!patient) {
@@ -117,7 +122,7 @@ export async function POST(request: NextRequest) {
     const order = await prisma.labOrder.create({
       data: {
         hospitalId,
-        patientId: parseInt(patientId),
+        patientId: patientIdInt,
         orderedBy,
         orderType,
         description: description || null,
