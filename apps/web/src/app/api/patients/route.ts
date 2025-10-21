@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
         hospitalId: hospitalId.toString(),
         userEmail: patientEmail,
         userName: `${firstName} ${lastName}`,
-        notificationId: NotificationTemplates.PATIENT_ACCOUNT_CREATED,
+        notificationId: 'momentum', // Using your existing notification template
         notificationType: NotificationType.account,
         message: `Welcome! Your patient account has been created. Please check your email for login credentials.`,
         referenceId: result.patient.id,
