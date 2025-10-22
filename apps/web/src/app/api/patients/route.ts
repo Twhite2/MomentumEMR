@@ -142,6 +142,7 @@ export async function POST(request: NextRequest) {
       insuranceId,
       corporateClientId,
       primaryDoctorId,
+      userId, // Optional: If provided, link to existing user account
     } = body;
 
     // Validation
@@ -155,13 +156,39 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Patient email is required to create account' }, 400);
     }
 
-    // Check if email already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: patientEmail },
-    });
+    let existingUser = null;
+    let newUserCreated = false;
 
-    if (existingUser) {
-      return apiResponse({ error: 'Email already exists in the system' }, 400);
+    // If userId is provided, verify it exists and matches the email
+    if (userId) {
+      existingUser = await prisma.user.findFirst({
+        where: {
+          id: userId,
+          hospitalId,
+        },
+      });
+
+      if (!existingUser) {
+        return apiResponse({ error: 'User account not found' }, 404);
+      }
+
+      // Check if user already has a patient record
+      const existingPatient = await prisma.patient.findUnique({
+        where: { userId: existingUser.id },
+      });
+
+      if (existingPatient) {
+        return apiResponse({ error: 'This user already has a patient record' }, 400);
+      }
+    } else {
+      // Check if email already exists (only when NOT linking to existing user)
+      existingUser = await prisma.user.findUnique({
+        where: { email: patientEmail },
+      });
+
+      if (existingUser) {
+        return apiResponse({ error: 'Email already exists in the system' }, 400);
+      }
     }
 
     // Generate random password (8-12 characters, alphanumeric)
@@ -176,29 +203,44 @@ export async function POST(request: NextRequest) {
       return password;
     };
 
-    const temporaryPassword = generatePassword();
-    const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+    let temporaryPassword = null;
+    let hashedPassword = null;
+    
+    // Only generate password if creating a new user (not linking to existing)
+    if (!userId) {
+      temporaryPassword = generatePassword();
+      hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+    }
 
     // Create user and patient in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Create user account first
-      const user = await tx.user.create({
-        data: {
-          hospitalId,
-          name: `${firstName} ${lastName}`,
-          email: patientEmail,
-          hashedPassword,
-          role: 'patient',
-          active: true,
-          mustChangePassword: true, // Force password change on first login
-        },
-      });
+      let userToLink;
+
+      if (userId) {
+        // Use existing user account
+        userToLink = existingUser;
+        newUserCreated = false;
+      } else {
+        // Create new user account
+        userToLink = await tx.user.create({
+          data: {
+            hospitalId,
+            name: `${firstName} ${lastName}`,
+            email: patientEmail,
+            hashedPassword: hashedPassword!,
+            role: 'patient',
+            active: true,
+            mustChangePassword: true, // Force password change on first login
+          },
+        });
+        newUserCreated = true;
+      }
 
       // Create patient record linked to user
       const patient = await tx.patient.create({
         data: {
           hospitalId,
-          userId: user.id,
+          userId: userToLink!.id,
           firstName,
           lastName,
           dob: new Date(dob),
@@ -232,46 +274,54 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return { patient, temporaryPassword };
+      return { patient, temporaryPassword, newUserCreated };
     });
 
-    // Log credentials (development only)
-    console.log(`\n🔑 Patient account created for ${patientEmail}`);
-    console.log(`   Temporary password: ${result.temporaryPassword}`);
-    console.log(`   Patient must change password on first login\n`);
+    // Log credentials (development only) - only for new accounts
+    if (result.newUserCreated && result.temporaryPassword) {
+      console.log(`\n🔑 Patient account created for ${patientEmail}`);
+      console.log(`   Temporary password: ${result.temporaryPassword}`);
+      console.log(`   Patient must change password on first login\n`);
+    } else {
+      console.log(`\n✅ Patient record created for existing user: ${patientEmail}\n`);
+    }
 
-    // Send email notification with login credentials
-    try {
-      await sendNotification({
-        userId: result.patient.user!.id.toString(),
-        hospitalId: hospitalId.toString(),
-        userEmail: patientEmail,
-        userName: `${firstName} ${lastName}`,
-        notificationId: 'momentum', // Using your existing notification template
-        notificationType: NotificationType.account,
-        message: `Welcome! Your patient account has been created. Please check your email for login credentials.`,
-        referenceId: result.patient.id,
-        referenceTable: 'patients',
-        parameters: {
-          patientName: `${firstName} ${lastName}`,
-          email: patientEmail,
-          temporaryPassword: result.temporaryPassword,
-          loginUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000',
-          hospitalName: session.user.hospitalName,
-        },
-      });
-      console.log('✅ Account creation email sent successfully');
-    } catch (emailError) {
-      console.error('❌ Failed to send email notification:', emailError);
-      // Don't fail the request if email fails
+    // Send email notification with login credentials (only for new accounts)
+    if (result.newUserCreated) {
+      try {
+        await sendNotification({
+          userId: result.patient.user!.id.toString(),
+          hospitalId: hospitalId.toString(),
+          userEmail: patientEmail,
+          userName: `${firstName} ${lastName}`,
+          notificationId: 'momentum', // Using your existing notification template
+          notificationType: NotificationType.account,
+          message: `Welcome! Your patient account has been created. Please check your email for login credentials.`,
+          referenceId: result.patient.id,
+          referenceTable: 'patients',
+          parameters: {
+            patientName: `${firstName} ${lastName}`,
+            email: patientEmail,
+            temporaryPassword: result.temporaryPassword,
+            loginUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+            hospitalName: session.user.hospitalName,
+          },
+        });
+        console.log('✅ Account creation email sent successfully');
+      } catch (emailError) {
+        console.error('❌ Failed to send email notification:', emailError);
+        // Don't fail the request if email fails
+      }
     }
 
     return apiResponse({
       patient: result.patient,
-      accountCreated: true,
-      message: 'Patient record and account created successfully. Login credentials have been sent to patient email.',
-      // Include password in development only
-      ...(process.env.NODE_ENV === 'development' && { temporaryPassword: result.temporaryPassword }),
+      accountCreated: result.newUserCreated,
+      message: result.newUserCreated 
+        ? 'Patient record and account created successfully. Login credentials have been sent to patient email.'
+        : 'Patient record created successfully and linked to existing user account.',
+      // Include password in development only for new accounts
+      ...(process.env.NODE_ENV === 'development' && result.temporaryPassword && { temporaryPassword: result.temporaryPassword }),
     }, 201);
   } catch (error) {
     return handleApiError(error);
