@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Info } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -30,12 +30,25 @@ interface Staff {
 
 export default function NewPatientPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get('userId');
   const { data: session } = useSession();
   const [patientType, setPatientType] = useState('self_pay');
   
   // Nurses cannot assign doctors or manage insurance/billing
   const isNurse = session?.user?.role === 'nurse';
   const canAssignDoctor = !isNurse;
+
+  // Fetch user data if userId is provided
+  const { data: userData, isLoading: userLoading } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      const response = await axios.get(`/api/users/${userId}`);
+      return response.data;
+    },
+    enabled: !!userId,
+  });
 
   // Form state
   const [formData, setFormData] = useState({
@@ -52,6 +65,23 @@ export default function NewPatientPage() {
     corporateClientId: '',
     primaryDoctorId: '',
   });
+
+  // Pre-fill form with user data if available
+  useEffect(() => {
+    if (userData) {
+      // Split name into first and last name
+      const nameParts = userData.name?.split(' ') || [];
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      setFormData(prev => ({
+        ...prev,
+        firstName,
+        lastName,
+        email: userData.email || '',
+      }));
+    }
+  }, [userData]);
 
   // Fetch HMO policies
   const { data: hmoList } = useQuery<HMO[]>({
@@ -122,7 +152,7 @@ export default function NewPatientPage() {
     if (formData.phone) contactInfo.phone = formData.phone;
     if (formData.email) contactInfo.email = formData.email;
 
-    const payload = {
+    const payload: any = {
       firstName: formData.firstName,
       lastName: formData.lastName,
       dob: formData.dob,
@@ -138,6 +168,11 @@ export default function NewPatientPage() {
           : null,
       primaryDoctorId: formData.primaryDoctorId || null,
     };
+
+    // Include userId if creating record for existing account
+    if (userId) {
+      payload.userId = parseInt(userId);
+    }
 
     createPatient.mutate(payload);
   };
@@ -157,6 +192,21 @@ export default function NewPatientPage() {
           <p className="text-muted-foreground mt-1">Enter patient information</p>
         </div>
       </div>
+
+      {/* Pre-fill notification banner */}
+      {userId && userData && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-blue-900">
+              Creating record for existing account
+            </p>
+            <p className="text-xs text-blue-700 mt-1">
+              Name and email have been pre-filled from the user account. Please complete the remaining information.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit}>
