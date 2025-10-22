@@ -9,10 +9,13 @@
 - ✅ Added handler info to PDF view for downloads
 - ✅ Updated both lab tech and patient API endpoints to include uploader data
 
-### 2. Read-Only Access for Other Lab Scientists
-- Need to add authorization checks in lab result edit endpoints
-- Only the lab scientist who uploaded can edit
-- Others can view but cannot modify
+### 2. ✅ Read-Only Access for Other Lab Scientists (COMPLETE)
+- ✅ Added authorization checks in finalize endpoint - only uploader or admin can finalize
+- ✅ Created comprehensive update/delete endpoints with ownership validation
+- ✅ Prevents editing finalized or released results
+- ✅ UI displays "Finalize" button only for the uploader
+- ✅ Shows read-only message for other lab scientists: "This result was handled by [Name]. Only they can finalize it."
+- ✅ Error messages display authorization failures clearly
 
 ### 3. Assign Lab Orders to Specific Lab Scientists
 - ✅ Added `assignedTo` field to `LabOrder` table
