@@ -27,6 +27,10 @@ interface LabOrder {
     name: string;
     email: string;
   };
+  assignedLabTech?: {
+    id: number;
+    name: string;
+  } | null;
   labResults: Array<{
     id: number;
     resultNotes: string | null;
@@ -344,6 +348,23 @@ export default function LabOrderDetailPage() {
                 <p className="text-sm text-muted-foreground">Test Type</p>
                 <p className="font-medium text-lg">{order.orderType.replace('_', ' ')}</p>
               </div>
+              {order.assignedLabTech && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Assigned To</p>
+                  <p className="font-medium text-blue-900 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    {order.assignedLabTech.name} (Lab Scientist)
+                  </p>
+                </div>
+              )}
+              {!order.assignedLabTech && (
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Assignment</p>
+                  <p className="font-medium text-gray-700">
+                    General Pool (Any lab scientist)
+                  </p>
+                </div>
+              )}
               {order.description && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Description & Instructions</p>

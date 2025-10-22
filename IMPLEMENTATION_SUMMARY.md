@@ -13,7 +13,8 @@
 - ✅ Added authorization checks in finalize endpoint - only uploader or admin can finalize
 - ✅ Created comprehensive update/delete endpoints with ownership validation
 - ✅ Prevents editing finalized or released results
-- ✅ UI displays "Finalize" button only for the uploader
+- ✅ UI displays "Edit" and "Finalize" buttons only for the uploader
+- ✅ Edit button allows correcting mistakes before finalization
 - ✅ Shows read-only message for other lab scientists: "This result was handled by [Name]. Only they can finalize it."
 - ✅ Error messages display authorization failures clearly
 
