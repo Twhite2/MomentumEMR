@@ -5,6 +5,8 @@ import { Calendar, FileText, DollarSign, TestTube } from 'lucide-react';
 import { Session } from 'next-auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 interface PatientDashboardProps {
   session: Session;
@@ -12,6 +14,18 @@ interface PatientDashboardProps {
 
 export default function PatientDashboard({ session }: PatientDashboardProps) {
   const router = useRouter();
+
+  // Fetch patient's lab results
+  const { data: labResultsData } = useQuery({
+    queryKey: ['patient-lab-results'],
+    queryFn: async () => {
+      const response = await axios.get('/api/lab-results/patient');
+      return response.data;
+    },
+  });
+
+  const recentResults = labResultsData?.results?.slice(0, 2) || [];
+  const recentResultsCount = labResultsData?.stats?.recentResults || 0;
 
   return (
     <div className="space-y-6">
@@ -27,25 +41,14 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
             <h2 className="text-lg font-semibold">Next Appointment</h2>
             <Calendar className="w-5 h-5 text-primary" />
           </div>
-          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-            <p className="font-medium">Dr. Sarah Johnson</p>
-            <p className="text-sm text-muted-foreground mt-1">Cardiology Consultation</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              📅 Tomorrow, 9:00 AM - 9:30 AM
-            </p>
-            <p className="text-sm text-muted-foreground">📍 City General Hospital, Room 204</p>
-            <div className="mt-4 flex gap-2">
-              <Link href="/appointments">
-                <button className="text-sm bg-primary text-white px-4 py-2 rounded hover:bg-primary/90">
-                  View Details
-                </button>
-              </Link>
-              <Link href="/appointments">
-                <button className="text-sm border border-border px-4 py-2 rounded hover:bg-muted">
-                  Reschedule
-                </button>
-              </Link>
-            </div>
+          <div className="text-center py-8 text-muted-foreground">
+            <Calendar className="w-12 h-12 mx-auto mb-3 opacity-20" />
+            <p className="text-sm">No upcoming appointments</p>
+            <Link href="/appointments">
+              <button className="text-sm bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 mt-4">
+                Schedule Appointment
+              </button>
+            </Link>
           </div>
         </div>
 
@@ -55,26 +58,33 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
             <h2 className="text-lg font-semibold">Recent Lab Results</h2>
             <TestTube className="w-5 h-5 text-green-haze" />
           </div>
-          <div className="space-y-3">
-            <Link href="/lab-results">
-              <div className="p-3 border rounded-lg cursor-pointer hover:border-primary transition-colors">
-                <p className="font-medium text-sm">Complete Blood Count</p>
-                <p className="text-xs text-muted-foreground mt-1">Date: Dec 25, 2025</p>
-                <p className="text-xs text-primary hover:underline mt-2">
-                  Download PDF →
-                </p>
-              </div>
-            </Link>
-            <Link href="/lab-results">
-              <div className="p-3 border rounded-lg cursor-pointer hover:border-primary transition-colors">
-                <p className="font-medium text-sm">Chest X-Ray</p>
-                <p className="text-xs text-muted-foreground mt-1">Date: Dec 20, 2025</p>
-                <p className="text-xs text-primary hover:underline mt-2">
-                  View Images →
-                </p>
-              </div>
-            </Link>
-          </div>
+          {recentResults.length > 0 ? (
+            <div className="space-y-3">
+              {recentResults.map((result: any) => (
+                <Link key={result.id} href={`/lab-results#result-${result.id}`}>
+                  <div className="p-3 border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                    <p className="font-medium text-sm">{result.labOrder.orderType.replace('_', ' ')}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Released: {new Date(result.releasedAt).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-primary hover:underline mt-2">
+                      View Details →
+                    </p>
+                  </div>
+                </Link>
+              ))}
+              {recentResultsCount > 2 && (
+                <Link href="/lab-results" className="block text-center text-sm text-primary hover:underline pt-2">
+                  View all {recentResultsCount} results →
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <TestTube className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p className="text-sm">No lab results available yet</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -84,22 +94,10 @@ export default function PatientDashboard({ session }: PatientDashboardProps) {
           <h2 className="text-lg font-semibold">Billing Summary</h2>
           <DollarSign className="w-5 h-5 text-saffron" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-green-haze/5 border border-green-haze/20 rounded-lg">
-            <p className="text-sm text-muted-foreground">Outstanding Balance</p>
-            <p className="text-2xl font-bold text-foreground mt-1">₦0</p>
-            <p className="text-xs text-green-haze mt-2">✓ All paid</p>
-          </div>
-          <div className="p-4 border rounded-lg">
-            <p className="text-sm text-muted-foreground">Last Payment</p>
-            <p className="text-2xl font-bold text-foreground mt-1">₦25,000</p>
-            <p className="text-xs text-muted-foreground mt-2">Dec 15, 2025</p>
-          </div>
-          <div className="p-4 border rounded-lg">
-            <p className="text-sm text-muted-foreground">Insurance Coverage</p>
-            <p className="text-lg font-bold text-foreground mt-1">Premium Health Plus</p>
-            <p className="text-xs text-muted-foreground mt-2">Provider: HealthGuard</p>
-          </div>
+        <div className="text-center py-8 text-muted-foreground">
+          <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-20" />
+          <p className="text-sm">Billing information will be available soon</p>
+          <p className="text-xs mt-2">Contact reception for billing inquiries</p>
         </div>
       </div>
 
