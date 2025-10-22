@@ -263,69 +263,40 @@ export default function SurveysPage() {
       {/* Available Surveys / Survey Templates */}
       {session?.user?.role === 'patient' ? (
         /* Patient View - Available Surveys to Take */
-        <>
-          <div className="bg-white rounded-lg border border-border p-6">
-            <h2 className="text-lg font-semibold text-primary mb-4">Available Surveys</h2>
+        <div className="bg-white rounded-lg border border-border p-6">
+          <h2 className="text-lg font-semibold text-primary mb-4">Available Surveys</h2>
+          {surveys.length > 0 ? (
             <div className="space-y-4">
-              <div className="p-4 border border-border rounded-lg hover:border-primary transition-colors cursor-pointer">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MessageSquare className="w-5 h-5 text-primary" />
+              {surveys.filter((survey: any) => survey.status === 'active').map((survey: any) => (
+                <div key={survey.id} className="p-4 border border-border rounded-lg hover:border-primary transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <MessageSquare className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-primary">{survey.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{survey.description}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Created: {new Date(survey.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-primary">Post-Visit Patient Satisfaction</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Share your feedback about your recent appointment</p>
-                      <p className="text-xs text-muted-foreground mt-2">Est. time: 5 minutes</p>
-                    </div>
+                    <Link href={`/surveys/${survey.id}`}>
+                      <Button variant="primary" size="sm">Take Survey</Button>
+                    </Link>
                   </div>
-                  <Button variant="primary" size="sm">Take Survey</Button>
                 </div>
-              </div>
-
-              <div className="p-4 border border-border rounded-lg hover:border-primary transition-colors cursor-pointer">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-green-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-primary">Service Quality Rating</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Rate our hospital services and facilities</p>
-                      <p className="text-xs text-muted-foreground mt-2">Est. time: 3 minutes</p>
-                    </div>
-                  </div>
-                  <Button variant="primary" size="sm">Take Survey</Button>
-                </div>
-              </div>
-
-              <div className="p-4 border border-border rounded-lg hover:border-primary transition-colors cursor-pointer">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-blue-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MessageSquare className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-primary">Doctor Consultation Feedback</h3>
-                      <p className="text-sm text-muted-foreground mt-1">How was your experience with your doctor?</p>
-                      <p className="text-xs text-muted-foreground mt-2">Est. time: 2 minutes</p>
-                    </div>
-                  </div>
-                  <Button variant="primary" size="sm">Take Survey</Button>
-                </div>
-              </div>
+              ))}
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg border border-border p-6">
-            <h2 className="text-lg font-semibold text-primary mb-4">Completed Surveys</h2>
-            <div className="text-center py-8 text-muted-foreground">
-              <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-20" />
-              <p>You have completed 5 surveys</p>
-              <p className="text-sm mt-2">Thank you for your valuable feedback!</p>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-20" />
+              <p className="text-lg font-medium">No surveys available</p>
+              <p className="text-sm mt-2">Check back later for feedback opportunities</p>
             </div>
-          </div>
-        </>
+          )}
+        </div>
       ) : (
         /* Staff View - Survey Templates */
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -385,102 +356,55 @@ export default function SurveysPage() {
               </tr>
             </thead>
             <tbody>
-              {/* Example row */}
-              <tr className="border-b border-border hover:bg-muted/50 transition-colors">
-                <td className="p-4">
-                  <div>
-                    <p className="font-medium">Post-Visit Patient Satisfaction</p>
-                    <p className="text-sm text-muted-foreground">
-                      Feedback on doctor consultation and overall experience
-                    </p>
-                  </div>
-                </td>
-                <td className="p-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600/10 text-green-600">
-                    Active
-                  </span>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-primary" />
-                    <span className="font-semibold">247</span>
-                  </div>
-                </td>
-                <td className="p-4 text-sm text-muted-foreground">
-                  2 weeks ago
-                </td>
-                <td className="p-4">
-                  <Link href="/surveys/1">
-                    <Button variant="outline" size="sm">
-                      View Results
-                    </Button>
-                  </Link>
-                </td>
-              </tr>
-              
-              <tr className="border-b border-border hover:bg-muted/50 transition-colors">
-                <td className="p-4">
-                  <div>
-                    <p className="font-medium">Pharmacy Service Quality</p>
-                    <p className="text-sm text-muted-foreground">
-                      Rate medication dispensing and pharmacist support
-                    </p>
-                  </div>
-                </td>
-                <td className="p-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600/10 text-green-600">
-                    Active
-                  </span>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-primary" />
-                    <span className="font-semibold">156</span>
-                  </div>
-                </td>
-                <td className="p-4 text-sm text-muted-foreground">
-                  1 month ago
-                </td>
-                <td className="p-4">
-                  <Link href="/surveys/2">
-                    <Button variant="outline" size="sm">
-                      View Results
-                    </Button>
-                  </Link>
-                </td>
-              </tr>
-
-              <tr className="border-b border-border hover:bg-muted/50 transition-colors">
-                <td className="p-4">
-                  <div>
-                    <p className="font-medium">Facility Cleanliness Survey</p>
-                    <p className="text-sm text-muted-foreground">
-                      Hospital hygiene and cleanliness feedback
-                    </p>
-                  </div>
-                </td>
-                <td className="p-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-600/10 text-gray-600">
-                    Closed
-                  </span>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span className="font-semibold">412</span>
-                  </div>
-                </td>
-                <td className="p-4 text-sm text-muted-foreground">
-                  3 months ago
-                </td>
-                <td className="p-4">
-                  <Link href="/surveys/3">
-                    <Button variant="outline" size="sm">
-                      View Results
-                    </Button>
-                  </Link>
-                </td>
-              </tr>
+              {surveys.length > 0 ? (
+                surveys.map((survey: any) => (
+                  <tr key={survey.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                    <td className="p-4">
+                      <div>
+                        <p className="font-medium">{survey.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {survey.description || 'No description'}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        survey.status === 'active' 
+                          ? 'bg-green-600/10 text-green-600'
+                          : survey.status === 'draft'
+                          ? 'bg-yellow-600/10 text-yellow-600'
+                          : 'bg-gray-600/10 text-gray-600'
+                      }`}>
+                        {survey.status.charAt(0).toUpperCase() + survey.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-primary" />
+                        <span className="font-semibold">{survey.responseCount || 0}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 text-sm text-muted-foreground">
+                      {new Date(survey.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-4">
+                      <Link href={`/surveys/${survey.id}`}>
+                        <Button variant="outline" size="sm">
+                          View Details
+                        </Button>
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p>No surveys created yet</p>
+                    <p className="text-sm mt-2">Create your first survey to get started</p>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
