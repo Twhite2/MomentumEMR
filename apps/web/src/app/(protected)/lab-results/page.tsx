@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button, Input } from '@momentum/ui';
-import { TestTube, Search, Download, FileText, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { TestTube, Search, Download, FileText, Calendar, CheckCircle, Clock, User } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 
@@ -122,6 +122,9 @@ export default function LabResultsPage() {
             <strong>Ordered By:</strong> <span>Dr. ${result.labOrder.doctor.name}</span>
             ${isLabTech && result.labOrder.patient ? `
               <strong>Patient:</strong> <span>${result.labOrder.patient.firstName} ${result.labOrder.patient.lastName}</span>
+            ` : ''}
+            ${result.uploader ? `
+              <strong>Handled By:</strong> <span>${result.uploader.name} (Lab Scientist)</span>
             ` : ''}
             <strong>Released Date:</strong> <span>${new Date(result.releasedAt).toLocaleString()}</span>
             <strong>Released By:</strong> <span>${result.releaser?.name || 'Doctor'}</span>
@@ -318,6 +321,12 @@ export default function LabResultsPage() {
                         <p className="text-sm text-muted-foreground">
                           Ordered by Dr. {result.labOrder.doctor.name}
                         </p>
+                        {result.uploader && (
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <User className="w-3 h-3" />
+                            Handled by {result.uploader.name}
+                          </p>
+                        )}
                       </div>
                     </div>
 
