@@ -65,6 +65,7 @@ export default function LabOrderDetailPage() {
   const orderId = params.id as string;
 
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [doctorNote, setDoctorNote] = useState('');
   const [selectedResultId, setSelectedResultId] = useState<number | null>(null);
@@ -95,9 +96,48 @@ export default function LabOrderDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['lab-order', orderId] });
     },
     onError: () => {
-      toast.error('Failed to upload lab result');
+      toast.error('Failed to upload result');
     },
   });
+
+  // Update result mutation
+  const updateResult = useMutation({
+    mutationFn: async (data: { resultId: number; resultNotes: string; testValues: TestValue[] }) => {
+      const response = await axios.put(`/api/lab-results/${data.resultId}`, {
+        resultNotes: data.resultNotes,
+        testValues: data.testValues,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Lab result updated successfully!');
+      setShowEditForm(false);
+      setSelectedResultId(null);
+      setResultNotes('');
+      setTestValues([{ testName: '', resultValue: '', unit: '', normalRange: '' }]);
+      queryClient.invalidateQueries({ queryKey: ['lab-order', orderId] });
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.error || 'Failed to update result';
+      toast.error(errorMessage);
+    },
+  });
+
+  // Handle edit result
+  const handleEditResult = (result: any) => {
+    setSelectedResultId(result.id);
+    setResultNotes(result.resultNotes || '');
+    setTestValues(result.labResultValues.length > 0 
+      ? result.labResultValues.map((v: any) => ({
+          testName: v.testName,
+          resultValue: v.resultValue || '',
+          unit: v.unit || '',
+          normalRange: v.normalRange || '',
+        }))
+      : [{ testName: '', resultValue: '', unit: '', normalRange: '' }]
+    );
+    setShowEditForm(true);
+  };
 
   // Update status mutation
   const updateStatus = useMutation({
@@ -422,6 +462,101 @@ export default function LabOrderDetailPage() {
               </form>
             )}
 
+            {/* Edit Form */}
+            {showEditForm && selectedResultId && (
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                updateResult.mutate({
+                  resultId: selectedResultId,
+                  resultNotes,
+                  testValues: testValues.filter(t => t.testName.trim() !== ''),
+                });
+              }} className="mb-6 p-4 border border-amber-500/20 bg-amber-50/50 rounded-lg">
+                <h3 className="font-semibold mb-4 text-amber-900">Edit Test Results</h3>
+                
+                <div className="space-y-4 mb-4">
+                  <Textarea
+                    label="Result Notes & Summary"
+                    value={resultNotes}
+                    onChange={(e) => setResultNotes(e.target.value)}
+                    rows={4}
+                    placeholder="Enter clinical interpretation, summary of findings..."
+                  />
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium">Test Values (Optional)</label>
+                      <Button type="button" variant="ghost" size="sm" onClick={addTestValue}>
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add Value
+                      </Button>
+                    </div>
+
+                    {testValues.map((test, index) => (
+                      <div key={index} className="grid grid-cols-4 gap-2 mb-2">
+                        <Input
+                          placeholder="Test name"
+                          value={test.testName}
+                          onChange={(e) => updateTestValue(index, 'testName', e.target.value)}
+                        />
+                        <Input
+                          placeholder="Result"
+                          value={test.resultValue}
+                          onChange={(e) => updateTestValue(index, 'resultValue', e.target.value)}
+                        />
+                        <Input
+                          placeholder="Unit"
+                          value={test.unit}
+                          onChange={(e) => updateTestValue(index, 'unit', e.target.value)}
+                        />
+                        <div className="flex gap-1">
+                          <Input
+                            placeholder="Normal range"
+                            value={test.normalRange}
+                            onChange={(e) => updateTestValue(index, 'normalRange', e.target.value)}
+                          />
+                          {testValues.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeTestValue(index)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-ribbon" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    loading={updateResult.isPending}
+                  >
+                    Save Changes
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowEditForm(false);
+                      setSelectedResultId(null);
+                      setResultNotes('');
+                      setTestValues([{ testName: '', resultValue: '', unit: '', normalRange: '' }]);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            )}
+
             {/* Results List */}
             {order.labResults.length > 0 ? (
               <div className="space-y-4">
@@ -481,21 +616,31 @@ export default function LabOrderDetailPage() {
                       </div>
                     )}
 
-                    {/* Finalize Result Button (Lab Tech - Only Uploader) */}
+                    {/* Edit and Finalize Result Buttons (Lab Tech - Only Uploader) */}
                     {!result.finalized && session?.user?.role === 'lab_tech' && (
                       result.uploader.id === parseInt(session.user.id) ? (
                         <div className="mt-4 pt-4 border-t border-border">
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => finalizeResult.mutate(result.id)}
-                            loading={finalizeResult.isPending}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Finalize Result
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditResult(result)}
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              Edit Result
+                            </Button>
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => finalizeResult.mutate(result.id)}
+                              loading={finalizeResult.isPending}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Finalize Result
+                            </Button>
+                          </div>
                           <p className="text-xs text-muted-foreground mt-2">
-                            Mark this result as reviewed and ready for doctor approval
+                            Edit to correct mistakes, then finalize when ready for doctor approval
                           </p>
                         </div>
                       ) : (
