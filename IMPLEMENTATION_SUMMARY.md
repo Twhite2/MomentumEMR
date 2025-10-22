@@ -2,10 +2,12 @@
 
 ## Features Implemented:
 
-### 1. Track Lab Scientist Who Handled Results
+### 1. ✅ Track Lab Scientist Who Handled Results (COMPLETE)
 - ✅ Database already has `uploadedBy` field in `LabResult` table
-- ✅ Display lab scientist name in results view
-- Need to update UI to show uploader name
+- ✅ Added uploader display in lab results list page with User icon
+- ✅ Added "Handled by [Name] (Lab Scientist)" in details modal
+- ✅ Added handler info to PDF view for downloads
+- ✅ Updated both lab tech and patient API endpoints to include uploader data
 
 ### 2. Read-Only Access for Other Lab Scientists
 - Need to add authorization checks in lab result edit endpoints
