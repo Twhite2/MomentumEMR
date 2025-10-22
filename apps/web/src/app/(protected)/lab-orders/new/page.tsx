@@ -24,6 +24,7 @@ export default function NewLabOrderPage() {
     patientId: preSelectedPatientId || '',
     orderType: 'Lab_Test',
     description: '',
+    assignedTo: '', // Lab scientist assignment (optional)
   });
   const [customTestType, setCustomTestType] = useState('');
 
@@ -32,6 +33,15 @@ export default function NewLabOrderPage() {
     queryKey: ['patients-all'],
     queryFn: async () => {
       const response = await axios.get('/api/patients?limit=100');
+      return response.data;
+    },
+  });
+
+  // Fetch lab scientists for assignment
+  const { data: labScientists, isLoading: labScientistsLoading } = useQuery<{ labScientists: Array<{ id: number; name: string; email: string }> }>({
+    queryKey: ['lab-scientists'],
+    queryFn: async () => {
+      const response = await axios.get('/api/users/lab-scientists');
       return response.data;
     },
   });
@@ -84,6 +94,7 @@ export default function NewLabOrderPage() {
       patientId: formData.patientId,
       orderType: finalOrderType,
       description: formData.description || null,
+      assignedTo: formData.assignedTo || null,
     };
 
     createLabOrder.mutate(payload);
@@ -147,6 +158,28 @@ export default function NewLabOrderPage() {
                 No patients found. <Link href="/patients/new" className="text-primary hover:underline">Create a patient first</Link>
               </p>
             )}
+          </div>
+
+          {/* Lab Scientist Assignment (Optional) */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Lab Scientist Assignment (Optional)</h2>
+            <Select
+              label="Assign to Lab Scientist"
+              name="assignedTo"
+              value={formData.assignedTo}
+              onChange={handleInputChange}
+              disabled={labScientistsLoading}
+            >
+              <option value="">General Pool (Any lab scientist)</option>
+              {labScientists?.labScientists?.map((scientist) => (
+                <option key={scientist.id} value={scientist.id}>
+                  {scientist.name}
+                </option>
+              ))}
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Leave empty to make this order available to all lab scientists
+            </p>
           </div>
 
           {/* Test Details */}

@@ -27,6 +27,14 @@ export async function GET(request: NextRequest) {
       where.orderedBy = userId;
     }
 
+    // Lab tech sees: orders assigned to them + unassigned orders
+    if (userRole === 'lab_tech') {
+      where.OR = [
+        { assignedTo: userId }, // Assigned to this lab tech
+        { assignedTo: null },   // Unassigned (general pool)
+      ];
+    }
+
     if (patientId) {
       where.patientId = parseInt(patientId);
     }
@@ -58,6 +66,12 @@ export async function GET(request: NextRequest) {
             },
           },
           doctor: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          assignedLabTech: {
             select: {
               id: true,
               name: true,
@@ -97,7 +111,7 @@ export async function POST(request: NextRequest) {
     const orderedBy = parseInt(session.user.id);
 
     const body = await request.json();
-    const { patientId, orderType, description } = body;
+    const { patientId, orderType, description, assignedTo } = body;
 
     // Validation
     if (!patientId || !orderType) {
@@ -118,12 +132,22 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Patient not found' }, 404);
     }
 
+    // Parse assignedTo if provided
+    let assignedToInt = null;
+    if (assignedTo && assignedTo !== '') {
+      assignedToInt = parseInt(assignedTo);
+      if (isNaN(assignedToInt)) {
+        assignedToInt = null;
+      }
+    }
+
     // Create lab order
     const order = await prisma.labOrder.create({
       data: {
         hospitalId,
         patientId: patientIdInt,
         orderedBy,
+        assignedTo: assignedToInt,
         orderType,
         description: description || null,
         status: 'pending',
@@ -137,6 +161,12 @@ export async function POST(request: NextRequest) {
           },
         },
         doctor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        assignedLabTech: {
           select: {
             id: true,
             name: true,
