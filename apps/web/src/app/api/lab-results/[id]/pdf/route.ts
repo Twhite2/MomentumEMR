@@ -26,6 +26,7 @@ export async function GET(
           },
         },
         labResultValues: true,
+        uploader: true,
         releaser: true,
       },
     });
@@ -225,6 +226,11 @@ function generatePDFHTML(labResult: any): string {
       
       <div class="info-label">Ordered By:</div>
       <div class="info-value">Dr. ${doctor.name}</div>
+      
+      ${labResult.uploader ? `
+        <div class="info-label">Handled By:</div>
+        <div class="info-value">${labResult.uploader.name} (Lab Scientist)</div>
+      ` : ''}
       
       <div class="info-label">Released Date:</div>
       <div class="info-value">${new Date(labResult.releasedAt).toLocaleString()}</div>

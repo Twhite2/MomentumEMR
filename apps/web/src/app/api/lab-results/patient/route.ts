@@ -47,6 +47,12 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        uploader: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         releaser: {
           select: {
             name: true,
