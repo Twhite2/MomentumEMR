@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button, Input, Textarea } from '@momentum/ui';
-import { ArrowLeft, TestTube, User, Calendar, Upload, Plus, Trash2, Send, CheckCircle } from 'lucide-react';
+import { ArrowLeft, TestTube, User, Calendar, Upload, Plus, Trash2, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
@@ -124,8 +124,9 @@ export default function LabOrderDetailPage() {
       toast.success('Lab result finalized and ready for doctor review!');
       queryClient.invalidateQueries({ queryKey: ['lab-order', orderId] });
     },
-    onError: () => {
-      toast.error('Failed to finalize result');
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.error || 'Failed to finalize result';
+      toast.error(errorMessage);
     },
   });
 
@@ -480,22 +481,33 @@ export default function LabOrderDetailPage() {
                       </div>
                     )}
 
-                    {/* Finalize Result Button (Lab Tech) */}
+                    {/* Finalize Result Button (Lab Tech - Only Uploader) */}
                     {!result.finalized && session?.user?.role === 'lab_tech' && (
-                      <div className="mt-4 pt-4 border-t border-border">
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => finalizeResult.mutate(result.id)}
-                          loading={finalizeResult.isPending}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Finalize Result
-                        </Button>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Mark this result as reviewed and ready for doctor approval
-                        </p>
-                      </div>
+                      result.uploader.id === parseInt(session.user.id) ? (
+                        <div className="mt-4 pt-4 border-t border-border">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => finalizeResult.mutate(result.id)}
+                            loading={finalizeResult.isPending}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Finalize Result
+                          </Button>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Mark this result as reviewed and ready for doctor approval
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="mt-4 pt-4 border-t border-border">
+                          <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
+                            <AlertCircle className="w-4 h-4" />
+                            <span>
+                              This result was handled by {result.uploader.name}. Only they can finalize it.
+                            </span>
+                          </div>
+                        </div>
+                      )
                     )}
 
                     {/* Release to Patient Button (Doctor) */}
