@@ -4,7 +4,8 @@ import { prisma } from '@momentum/database';
 
 // Define in-memory store for subscription plans (since they're not in the database)
 // In a production app, you'd store these in a database table
-let subscriptionPlans = [
+// Export this so it can be used as single source of truth by analytics API
+export let subscriptionPlans = [
   {
     id: 1,
     name: 'Basic',

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@momentum/database';
 
+// Import subscription plans from the subscriptions API
+import { subscriptionPlans } from '../../subscriptions/route';
+
 // GET /api/analytics/platform - Super admin platform-wide analytics
 export async function GET(request: NextRequest) {
   try {
@@ -119,13 +122,14 @@ export async function GET(request: NextRequest) {
       {} as Record<string, number>
     );
 
-    // Calculate subscription revenue (simplified - you can adjust pricing)
-    const subscriptionPricing: Record<string, number> = {
-      Basic: 50000, // NGN per month
-      Standard: 100000,
-      Premium: 200000,
-      Enterprise: 500000,
-    };
+    // Build pricing map from subscription plans (single source of truth)
+    const subscriptionPricing: Record<string, number> = subscriptionPlans.reduce(
+      (acc, plan) => {
+        acc[plan.name] = plan.price;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     const monthlyRevenue = hospitalsByPlan.reduce((total: number, plan: { subscriptionPlan: string | null; _count: { id: number } }) => {
       const planName = plan.subscriptionPlan || 'Basic';
