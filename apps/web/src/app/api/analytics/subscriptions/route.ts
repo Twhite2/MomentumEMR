@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@momentum/database';
-
-// Import subscription plans from the subscriptions API
-import { subscriptionPlans } from '../../subscriptions/route';
+import { subscriptionPlans } from '@/lib/subscription-plans';
 
 // GET /api/analytics/subscriptions - Subscription analytics for super admin
 export async function GET(request: NextRequest) {
