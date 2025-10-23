@@ -176,7 +176,9 @@ export default function SuperAdminDashboard() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Avg Cost/Patient</p>
-              <p className="text-lg font-bold text-primary">₦45,000</p>
+              <p className="text-lg font-bold text-primary">
+                ₦{(stats?.analytics?.avgCostPerPatient || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </p>
             </div>
           </div>
         </div>
@@ -187,8 +189,10 @@ export default function SuperAdminDashboard() {
               <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Follow-up Visits</p>
-              <p className="text-lg font-bold text-green-600">2,847</p>
+              <p className="text-xs text-muted-foreground">Total Appointments</p>
+              <p className="text-lg font-bold text-green-600">
+                {(stats?.analytics?.totalAppointments || 0).toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -200,7 +204,9 @@ export default function SuperAdminDashboard() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Total Investigations</p>
-              <p className="text-lg font-bold text-orange-600">4,523</p>
+              <p className="text-lg font-bold text-orange-600">
+                {(stats?.analytics?.totalInvestigations || 0).toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -211,8 +217,10 @@ export default function SuperAdminDashboard() {
               <Activity className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Surgeries</p>
-              <p className="text-lg font-bold text-red-600">187</p>
+              <p className="text-xs text-muted-foreground">Total Invoices</p>
+              <p className="text-lg font-bold text-red-600">
+                {(stats?.analytics?.totalInvoices || 0).toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
