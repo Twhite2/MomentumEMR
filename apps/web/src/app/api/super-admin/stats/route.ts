@@ -26,6 +26,9 @@ export async function GET(request: NextRequest) {
       patientsByType,
       totalSubscriptionRevenue,
       recentHospitals,
+      totalAppointments,
+      totalLabOrders,
+      totalInvoices,
     ] = await Promise.all([
       // Total hospitals
       prisma.hospital.count(),
@@ -80,6 +83,20 @@ export async function GET(request: NextRequest) {
           createdAt: true,
         },
       }),
+
+      // Total appointments across all hospitals
+      prisma.appointment.count(),
+
+      // Total lab orders (investigations)
+      prisma.labOrder.count(),
+
+      // Total invoices for average cost calculation
+      prisma.invoice.aggregate({
+        _avg: {
+          totalAmount: true,
+        },
+        _count: true,
+      }),
     ]);
 
     // Calculate patient type breakdown
@@ -112,6 +129,12 @@ export async function GET(request: NextRequest) {
       patientTypeBreakdown,
       ageDistribution,
       totalSubscriptionRevenue,
+      analytics: {
+        avgCostPerPatient: totalInvoices._avg.totalAmount || 0,
+        totalAppointments,
+        totalInvestigations: totalLabOrders,
+        totalInvoices: totalInvoices._count,
+      },
       recentHospitals: recentHospitals.map(h => ({
         id: h.id,
         name: h.name,
