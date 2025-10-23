@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Button, Input } from '@momentum/ui';
+import { Button } from '@momentum/ui';
 import { CreditCard, Plus, Edit, Check, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 interface SubscriptionPlan {
   id: number;
@@ -15,59 +16,17 @@ interface SubscriptionPlan {
 }
 
 export default function SubscriptionsPage() {
-  const [plans] = useState<SubscriptionPlan[]>([
-    {
-      id: 1,
-      name: 'Basic',
-      price: 50000,
-      interval: 'monthly',
-      features: [
-        'Up to 100 patients',
-        'Basic EMR features',
-        'Email support',
-        '5 staff accounts',
-        'Basic analytics',
-      ],
-      hospitals: 3,
-      active: true,
+  // Fetch subscription plans from API
+  const { data, isLoading } = useQuery({
+    queryKey: ['subscriptions'],
+    queryFn: async () => {
+      const response = await axios.get('/api/subscriptions');
+      return response.data;
     },
-    {
-      id: 2,
-      name: 'Standard',
-      price: 120000,
-      interval: 'monthly',
-      features: [
-        'Up to 500 patients',
-        'Full EMR features',
-        'Priority email support',
-        '20 staff accounts',
-        'Advanced analytics',
-        'Lab integration',
-        'Pharmacy management',
-      ],
-      hospitals: 8,
-      active: true,
-    },
-    {
-      id: 3,
-      name: 'Premium',
-      price: 250000,
-      interval: 'monthly',
-      features: [
-        'Unlimited patients',
-        'All features included',
-        '24/7 phone & email support',
-        'Unlimited staff accounts',
-        'Custom analytics',
-        'Full integrations',
-        'API access',
-        'White-label option',
-        'Dedicated account manager',
-      ],
-      hospitals: 13,
-      active: true,
-    },
-  ]);
+  });
+
+  const plans: SubscriptionPlan[] = data?.plans || [];
+  const summary = data?.summary || { totalRevenue: 0, totalHospitals: 0, activePlans: 0 };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -76,6 +35,25 @@ export default function SubscriptionsPage() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
+            <CreditCard className="w-8 h-8" />
+            Subscription Plans
+          </h1>
+          <p className="text-muted-foreground mt-1">Loading subscription data...</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -101,19 +79,19 @@ export default function SubscriptionsPage() {
         <div className="bg-white p-6 rounded-lg border border-border">
           <p className="text-sm text-muted-foreground">Total Revenue (Monthly)</p>
           <p className="text-3xl font-bold text-primary mt-1">
-            {formatCurrency(plans.reduce((sum, plan) => sum + plan.price * plan.hospitals, 0))}
+            {formatCurrency(summary.totalRevenue)}
           </p>
         </div>
         <div className="bg-white p-6 rounded-lg border border-border">
           <p className="text-sm text-muted-foreground">Active Plans</p>
           <p className="text-3xl font-bold text-green-600 mt-1">
-            {plans.filter(p => p.active).length}
+            {summary.activePlans}
           </p>
         </div>
         <div className="bg-white p-6 rounded-lg border border-border">
           <p className="text-sm text-muted-foreground">Subscribed Hospitals</p>
           <p className="text-3xl font-bold text-primary mt-1">
-            {plans.reduce((sum, plan) => sum + plan.hospitals, 0)}
+            {summary.totalHospitals}
           </p>
         </div>
       </div>
