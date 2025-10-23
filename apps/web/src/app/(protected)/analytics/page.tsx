@@ -19,8 +19,9 @@ import Link from 'next/link';
 import axios from 'axios';
 
 export default function AnalyticsPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const isSuperAdmin = session?.user?.role === 'super_admin';
+  const isLoading = status === 'loading';
   const [dateRange, setDateRange] = useState({
     startDate: '',
     endDate: '',
@@ -36,7 +37,7 @@ export default function AnalyticsPage() {
       const response = await axios.get(`/api/analytics/platform?${params}`);
       return response.data;
     },
-    enabled: isSuperAdmin,
+    enabled: !isLoading && isSuperAdmin,
   });
 
   const { data: subscriptionData } = useQuery({
@@ -45,7 +46,7 @@ export default function AnalyticsPage() {
       const response = await axios.get('/api/analytics/subscriptions');
       return response.data;
     },
-    enabled: isSuperAdmin,
+    enabled: !isLoading && isSuperAdmin,
   });
 
   const { data: systemData } = useQuery({
@@ -54,7 +55,7 @@ export default function AnalyticsPage() {
       const response = await axios.get('/api/analytics/system');
       return response.data;
     },
-    enabled: isSuperAdmin,
+    enabled: !isLoading && isSuperAdmin,
   });
 
   // Fetch hospital analytics data for hospital staff
@@ -67,7 +68,7 @@ export default function AnalyticsPage() {
       const response = await axios.get(`/api/analytics/revenue?${params}`);
       return response.data;
     },
-    enabled: !isSuperAdmin,
+    enabled: !isLoading && !isSuperAdmin,
   });
 
   const { data: patientData } = useQuery({
@@ -79,7 +80,7 @@ export default function AnalyticsPage() {
       const response = await axios.get(`/api/analytics/patients?${params}`);
       return response.data;
     },
-    enabled: !isSuperAdmin,
+    enabled: !isLoading && !isSuperAdmin,
   });
 
   const { data: appointmentData } = useQuery({
@@ -91,7 +92,7 @@ export default function AnalyticsPage() {
       const response = await axios.get(`/api/analytics/appointments?${params}`);
       return response.data;
     },
-    enabled: !isSuperAdmin,
+    enabled: !isLoading && !isSuperAdmin,
   });
 
   const { data: inventoryData } = useQuery({
@@ -100,7 +101,7 @@ export default function AnalyticsPage() {
       const response = await axios.get('/api/analytics/inventory');
       return response.data;
     },
-    enabled: !isSuperAdmin,
+    enabled: !isLoading && !isSuperAdmin,
   });
 
   const formatCurrency = (amount: number) => {
