@@ -6,6 +6,32 @@ import Link from 'next/link';
 import { Button } from '@momentum/ui';
 
 export default function SuperAdminDashboard() {
+  // Fetch super admin statistics
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['super-admin-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/super-admin/stats');
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      return response.json();
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-primary">Momentum Super Admin Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Platform-wide overview and hospital management</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -22,8 +48,8 @@ export default function SuperAdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Hospitals</p>
-              <p className="text-3xl font-bold text-primary mt-1">24</p>
-              <p className="text-xs text-green-600 mt-1">+3 this month</p>
+              <p className="text-3xl font-bold text-primary mt-1">{stats?.totalHospitals || 0}</p>
+              <p className="text-xs text-green-600 mt-1">+{stats?.hospitalsThisMonth || 0} this month</p>
             </div>
             <Building2 className="w-12 h-12 text-primary/20" />
           </div>
@@ -33,8 +59,8 @@ export default function SuperAdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Active Subscriptions</p>
-              <p className="text-3xl font-bold text-green-600 mt-1">22</p>
-              <p className="text-xs text-muted-foreground mt-1">2 pending renewal</p>
+              <p className="text-3xl font-bold text-green-600 mt-1">{stats?.activeSubscriptions || 0}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stats?.pendingSubscriptions || 0} pending</p>
             </div>
             <CreditCard className="w-12 h-12 text-green-600/20" />
           </div>
@@ -43,9 +69,9 @@ export default function SuperAdminDashboard() {
         <div className="bg-white p-6 rounded-lg border border-border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Pending Payments</p>
-              <p className="text-3xl font-bold text-orange-600 mt-1">5</p>
-              <p className="text-xs text-muted-foreground mt-1">₦2.4M outstanding</p>
+              <p className="text-sm text-muted-foreground">Total Patients</p>
+              <p className="text-3xl font-bold text-orange-600 mt-1">{stats?.totalPatients?.toLocaleString() || 0}</p>
+              <p className="text-xs text-muted-foreground mt-1">Across all hospitals</p>
             </div>
             <AlertCircle className="w-12 h-12 text-orange-600/20" />
           </div>
@@ -66,28 +92,28 @@ export default function SuperAdminDashboard() {
               <div>
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span>HMO Patients</span>
-                  <span className="font-semibold">45%</span>
+                  <span className="font-semibold">{stats?.patientTypeBreakdown?.hmo?.percentage || 0}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: '45%' }}></div>
+                  <div className="bg-primary h-2 rounded-full" style={{ width: `${stats?.patientTypeBreakdown?.hmo?.percentage || 0}%` }}></div>
                 </div>
               </div>
               <div>
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span>Corporate Clients</span>
-                  <span className="font-semibold">30%</span>
+                  <span className="font-semibold">{stats?.patientTypeBreakdown?.corporate?.percentage || 0}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '30%' }}></div>
+                  <div className="bg-green-600 h-2 rounded-full" style={{ width: `${stats?.patientTypeBreakdown?.corporate?.percentage || 0}%` }}></div>
                 </div>
               </div>
               <div>
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span>Self-Pay</span>
-                  <span className="font-semibold">25%</span>
+                  <span className="font-semibold">{stats?.patientTypeBreakdown?.self_pay?.percentage || 0}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-orange-600 h-2 rounded-full" style={{ width: '25%' }}></div>
+                  <div className="bg-orange-600 h-2 rounded-full" style={{ width: `${stats?.patientTypeBreakdown?.self_pay?.percentage || 0}%` }}></div>
                 </div>
               </div>
             </div>
@@ -103,37 +129,37 @@ export default function SuperAdminDashboard() {
               <div>
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span>0-18 years</span>
-                  <span className="font-semibold">18%</span>
+                  <span className="font-semibold">{stats?.ageDistribution?.['0-18']?.percentage || 0}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: '18%' }}></div>
+                  <div className="bg-primary h-2 rounded-full" style={{ width: `${stats?.ageDistribution?.['0-18']?.percentage || 0}%` }}></div>
                 </div>
               </div>
               <div>
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span>19-35 years</span>
-                  <span className="font-semibold">35%</span>
+                  <span className="font-semibold">{stats?.ageDistribution?.['19-35']?.percentage || 0}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '35%' }}></div>
+                  <div className="bg-green-600 h-2 rounded-full" style={{ width: `${stats?.ageDistribution?.['19-35']?.percentage || 0}%` }}></div>
                 </div>
               </div>
               <div>
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span>36-60 years</span>
-                  <span className="font-semibold">32%</span>
+                  <span className="font-semibold">{stats?.ageDistribution?.['36-60']?.percentage || 0}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-orange-600 h-2 rounded-full" style={{ width: '32%' }}></div>
+                  <div className="bg-orange-600 h-2 rounded-full" style={{ width: `${stats?.ageDistribution?.['36-60']?.percentage || 0}%` }}></div>
                 </div>
               </div>
               <div>
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span>60+ years</span>
-                  <span className="font-semibold">15%</span>
+                  <span className="font-semibold">{stats?.ageDistribution?.['60+']?.percentage || 0}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-red-600 h-2 rounded-full" style={{ width: '15%' }}></div>
+                  <div className="bg-red-600 h-2 rounded-full" style={{ width: `${stats?.ageDistribution?.['60+']?.percentage || 0}%` }}></div>
                 </div>
               </div>
             </div>
@@ -266,34 +292,39 @@ export default function SuperAdminDashboard() {
           </Link>
         </div>
         <div className="divide-y divide-border">
-          {[
-            { name: 'City General Hospital', plan: 'Premium', status: 'Active', date: '2 days ago' },
-            { name: 'St. Mary Medical Center', plan: 'Standard', status: 'Active', date: '5 days ago' },
-            { name: 'Metro Health Clinic', plan: 'Basic', status: 'Pending', date: '1 week ago' },
-          ].map((hospital, idx) => (
-            <div key={idx} className="p-4 hover:bg-muted/30 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Building2 className="w-5 h-5 text-primary" />
+          {stats?.recentHospitals && stats.recentHospitals.length > 0 ? (
+            stats.recentHospitals.map((hospital: any) => (
+              <div key={hospital.id} className="p-4 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Building2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">{hospital.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {hospital.plan} • {new Date(hospital.date).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold">{hospital.name}</p>
-                    <p className="text-sm text-muted-foreground">{hospital.plan} Plan • {hospital.date}</p>
-                  </div>
+                  <span
+                    className={`text-xs px-3 py-1 rounded-full ${
+                      hospital.status === 'Active'
+                        ? 'bg-green-600/10 text-green-600'
+                        : 'bg-orange-600/10 text-orange-600'
+                    }`}
+                  >
+                    {hospital.status}
+                  </span>
                 </div>
-                <span
-                  className={`text-xs px-3 py-1 rounded-full ${
-                    hospital.status === 'Active'
-                      ? 'bg-green-600/10 text-green-600'
-                      : 'bg-orange-600/10 text-orange-600'
-                  }`}
-                >
-                  {hospital.status}
-                </span>
               </div>
+            ))
+          ) : (
+            <div className="p-8 text-center text-muted-foreground">
+              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p>No recent hospital registrations</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
