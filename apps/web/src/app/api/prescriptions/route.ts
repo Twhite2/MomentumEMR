@@ -84,12 +84,23 @@ export async function GET(request: NextRequest) {
 // POST /api/prescriptions - Create new prescription
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['doctor', 'nurse', 'admin']);
+    const session = await requireRole(['doctor', 'nurse', 'pharmacist', 'admin']);
     const hospitalId = parseInt(session.user.hospitalId);
-    const doctorId = parseInt(session.user.id);
+    const userId = parseInt(session.user.id);
+    const userRole = session.user.role;
 
     const body = await request.json();
-    const { patientId, treatmentPlan, medications } = body;
+    const { patientId, treatmentPlan, medications, doctorId: requestDoctorId } = body;
+
+    // Determine doctorId: use provided doctorId, or session user ID if they're a doctor
+    let doctorId: number;
+    if (requestDoctorId) {
+      doctorId = parseInt(requestDoctorId);
+    } else if (userRole === 'doctor') {
+      doctorId = userId;
+    } else {
+      return apiResponse({ error: 'doctorId is required for non-doctor users' }, 400);
+    }
 
     // Validation
     if (!patientId || !medications || medications.length === 0) {

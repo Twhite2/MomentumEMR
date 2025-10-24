@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
 import { ArrowLeft, Save, Plus, Trash2, Pill } from 'lucide-react';
 import Link from 'next/link';
@@ -13,6 +14,11 @@ interface Patient {
   id: number;
   firstName: string;
   lastName: string;
+}
+
+interface Doctor {
+  id: number;
+  name: string;
 }
 
 interface Medication {
@@ -27,8 +33,12 @@ export default function NewPrescriptionPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preSelectedPatientId = searchParams.get('patientId');
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  const requiresDoctorSelection = userRole && ['nurse', 'pharmacist', 'admin'].includes(userRole);
 
   const [patientId, setPatientId] = useState(preSelectedPatientId || '');
+  const [doctorId, setDoctorId] = useState('');
   const [treatmentPlan, setTreatmentPlan] = useState('');
   const [medications, setMedications] = useState<Medication[]>([
     { drugName: '', dosage: '', frequency: '', duration: '', notes: '' },
@@ -41,6 +51,16 @@ export default function NewPrescriptionPage() {
       const response = await axios.get('/api/patients?limit=100');
       return response.data;
     },
+  });
+
+  // Fetch doctors (only if user is not a doctor)
+  const { data: doctors } = useQuery<{ users: Doctor[] }>({
+    queryKey: ['doctors-all'],
+    queryFn: async () => {
+      const response = await axios.get('/api/users?role=doctor&limit=100');
+      return response.data;
+    },
+    enabled: requiresDoctorSelection,
   });
 
   // Create prescription mutation
@@ -88,11 +108,20 @@ export default function NewPrescriptionPage() {
       return;
     }
 
-    const payload = {
+    const payload: any = {
       patientId,
       treatmentPlan: treatmentPlan || null,
       medications: validMedications,
     };
+
+    // Add doctorId if required
+    if (requiresDoctorSelection) {
+      if (!doctorId) {
+        toast.error('Please select a prescribing doctor');
+        return;
+      }
+      payload.doctorId = doctorId;
+    }
 
     createPrescription.mutate(payload);
   };
@@ -135,6 +164,26 @@ export default function NewPrescriptionPage() {
               ))}
             </Select>
           </div>
+
+          {/* Doctor Selection (for non-doctors) */}
+          {requiresDoctorSelection && (
+            <div className="bg-white rounded-lg border border-border p-6">
+              <h2 className="text-lg font-semibold mb-4">Prescribing Doctor</h2>
+              <Select
+                label="Doctor"
+                value={doctorId}
+                onChange={(e) => setDoctorId(e.target.value)}
+                required
+              >
+                <option value="">Select doctor</option>
+                {doctors?.users.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    Dr. {doctor.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
 
           {/* Treatment Plan */}
           <div className="bg-white rounded-lg border border-border p-6">
