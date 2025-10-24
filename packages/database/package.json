@@ -11,8 +11,7 @@
     "migrate": "prisma migrate dev",
     "studio": "prisma studio",
     "seed": "tsx prisma/seed.ts",
-    "link-patients": "tsx scripts/link-patients-to-users.ts",
-    "migrate-lab-tech": "tsx scripts/migrate-lab-tech-to-nurse.ts"
+    "link-patients": "tsx scripts/link-patients-to-users.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

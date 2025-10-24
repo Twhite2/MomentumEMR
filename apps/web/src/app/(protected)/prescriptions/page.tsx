@@ -44,7 +44,7 @@ interface PrescriptionsResponse {
 export default function PrescriptionsPage() {
   const { data: session } = useSession();
   const userRole = session?.user?.role;
-  const canCreatePrescription = ['doctor', 'nurse', 'admin', 'super_admin'].includes(userRole || '');
+  const canCreatePrescription = ['doctor', 'nurse', 'pharmacist', 'admin', 'super_admin'].includes(userRole || '');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
 

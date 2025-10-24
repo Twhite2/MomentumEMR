@@ -98,7 +98,7 @@ export async function DELETE(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'doctor']);
+    const session = await requireRole(['admin', 'doctor', 'pharmacist']);
     const hospitalId = parseInt(session.user.hospitalId);
     const prescriptionId = parseInt(params.id);
 
