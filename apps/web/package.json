@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "cd ../../packages/database && pnpm generate",
     "build": "next build",
+    "postbuild": "cd ../../packages/database && pnpm prisma db push --accept-data-loss --skip-generate || true",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
