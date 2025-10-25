@@ -1,0 +1,5 @@
+railway variables --set "DATABASE_URL=postgresql://postgres:YeBhLWVVMGLnRklInXBQWSVpggsLmcyd@postgres.railway.internal:5432/railway"
+railway variables --set "AUTH_SECRET=IntvTL55UgdgdKxHjqbcHRdxcSNdG/A74t2YtTLYp8U="
+railway variables --set "AUTH_URL=https://momentumweb-production-dbc7.up.railway.app"
+railway variables --set "AUTH_TRUST_HOST=true"
+railway variables --set "NODE_ENV=production"
