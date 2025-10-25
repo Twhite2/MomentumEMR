@@ -1,6 +1,6 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "pnpm install && pnpm --filter @momentum/database prisma migrate deploy && pnpm --filter @momentum/web build"
+buildCommand = "pnpm install && pnpm --filter @momentum/database prisma migrate deploy && npx tsx packages/database/scripts/import-data.ts && pnpm --filter @momentum/web build"
 
 [deploy]
 startCommand = "pnpm --filter @momentum/web start"
