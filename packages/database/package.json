@@ -8,6 +8,7 @@
     "generate": "prisma generate",
     "postinstall": "prisma generate",
     "push": "prisma db push",
+    "push:force": "prisma db push --accept-data-loss --skip-generate",
     "migrate": "prisma migrate dev",
     "studio": "prisma studio",
     "seed": "tsx prisma/seed.ts",
