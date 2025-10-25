@@ -3,6 +3,5 @@ builder = "nixpacks"
 
 [deploy]
 startCommand = "pnpm --filter @momentum/web start"
-restartPolicyType = "always"
-healthcheckPath = "/"
-healthcheckTimeout = 300
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10
