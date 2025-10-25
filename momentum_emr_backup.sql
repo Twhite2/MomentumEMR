@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict OtearZyi6Pxh1zJsGCcKZtaLBBGburcq5ED8EjEVWDhyi9ann4vyvz7KhdiIUXC
+\restrict yogWyg2DdrjJVnFVyXqVjB4GeFRDppEMwYffTP6nRQTiV8FM0b1PCmlpga2fktT
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -19,215 +19,24 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.prescriptions DROP CONSTRAINT IF EXISTS prescriptions_patient_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.prescriptions DROP CONSTRAINT IF EXISTS prescriptions_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.prescriptions DROP CONSTRAINT IF EXISTS prescriptions_doctor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.prescription_items DROP CONSTRAINT IF EXISTS prescription_items_prescription_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.payments DROP CONSTRAINT IF EXISTS payments_invoice_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.patients DROP CONSTRAINT IF EXISTS patients_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.patients DROP CONSTRAINT IF EXISTS patients_primary_doctor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.patients DROP CONSTRAINT IF EXISTS patients_insurance_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.patients DROP CONSTRAINT IF EXISTS patients_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.patients DROP CONSTRAINT IF EXISTS patients_corporate_client_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.patient_surveys DROP CONSTRAINT IF EXISTS patient_surveys_patient_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.patient_surveys DROP CONSTRAINT IF EXISTS patient_surveys_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.notifications DROP CONSTRAINT IF EXISTS notifications_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.notifications DROP CONSTRAINT IF EXISTS notifications_sender_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.notifications DROP CONSTRAINT IF EXISTS notifications_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.medical_records DROP CONSTRAINT IF EXISTS medical_records_patient_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.medical_records DROP CONSTRAINT IF EXISTS medical_records_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.medical_records DROP CONSTRAINT IF EXISTS medical_records_doctor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.lab_results DROP CONSTRAINT IF EXISTS lab_results_uploaded_by_fkey;
-ALTER TABLE IF EXISTS ONLY public.lab_results DROP CONSTRAINT IF EXISTS lab_results_released_by_fkey;
-ALTER TABLE IF EXISTS ONLY public.lab_results DROP CONSTRAINT IF EXISTS lab_results_lab_order_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.lab_result_values DROP CONSTRAINT IF EXISTS lab_result_values_lab_result_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.lab_orders DROP CONSTRAINT IF EXISTS lab_orders_patient_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.lab_orders DROP CONSTRAINT IF EXISTS lab_orders_ordered_by_fkey;
-ALTER TABLE IF EXISTS ONLY public.lab_orders DROP CONSTRAINT IF EXISTS lab_orders_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_patient_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoice_items DROP CONSTRAINT IF EXISTS invoice_items_invoice_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.inventory DROP CONSTRAINT IF EXISTS inventory_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.hmo DROP CONSTRAINT IF EXISTS hmo_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.corporate_clients DROP CONSTRAINT IF EXISTS corporate_clients_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.appointments DROP CONSTRAINT IF EXISTS appointments_patient_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.appointments DROP CONSTRAINT IF EXISTS appointments_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.appointments DROP CONSTRAINT IF EXISTS appointments_doctor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.analytics_reports DROP CONSTRAINT IF EXISTS analytics_reports_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.analytics_reports DROP CONSTRAINT IF EXISTS analytics_reports_generated_by_fkey;
-ALTER TABLE IF EXISTS ONLY public.analytics_metrics DROP CONSTRAINT IF EXISTS analytics_metrics_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.analytics_dashboards DROP CONSTRAINT IF EXISTS analytics_dashboards_hospital_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.analytics_dashboards DROP CONSTRAINT IF EXISTS analytics_dashboards_created_by_fkey;
-DROP INDEX IF EXISTS public.users_password_reset_token_idx;
-DROP INDEX IF EXISTS public.users_hospital_id_idx;
-DROP INDEX IF EXISTS public.users_email_key;
-DROP INDEX IF EXISTS public.users_email_idx;
-DROP INDEX IF EXISTS public.prescriptions_patient_id_idx;
-DROP INDEX IF EXISTS public.prescriptions_hospital_id_idx;
-DROP INDEX IF EXISTS public.prescriptions_doctor_id_idx;
-DROP INDEX IF EXISTS public.prescription_items_prescription_id_idx;
-DROP INDEX IF EXISTS public.payments_transaction_ref_key;
-DROP INDEX IF EXISTS public.payments_invoice_id_idx;
-DROP INDEX IF EXISTS public.patients_user_id_key;
-DROP INDEX IF EXISTS public.patients_user_id_idx;
-DROP INDEX IF EXISTS public.patients_primary_doctor_id_idx;
-DROP INDEX IF EXISTS public.patients_insurance_id_idx;
-DROP INDEX IF EXISTS public.patients_hospital_id_idx;
-DROP INDEX IF EXISTS public.patients_corporate_client_id_idx;
-DROP INDEX IF EXISTS public.patient_surveys_patient_id_idx;
-DROP INDEX IF EXISTS public.patient_surveys_hospital_id_idx;
-DROP INDEX IF EXISTS public.notifications_user_id_idx;
-DROP INDEX IF EXISTS public.notifications_status_idx;
-DROP INDEX IF EXISTS public.notifications_hospital_id_idx;
-DROP INDEX IF EXISTS public.medical_records_patient_id_idx;
-DROP INDEX IF EXISTS public.medical_records_hospital_id_idx;
-DROP INDEX IF EXISTS public.medical_records_doctor_id_idx;
-DROP INDEX IF EXISTS public.lab_results_uploaded_by_idx;
-DROP INDEX IF EXISTS public.lab_results_released_to_patient_idx;
-DROP INDEX IF EXISTS public.lab_results_released_by_idx;
-DROP INDEX IF EXISTS public.lab_results_lab_order_id_idx;
-DROP INDEX IF EXISTS public.lab_result_values_lab_result_id_idx;
-DROP INDEX IF EXISTS public.lab_orders_status_idx;
-DROP INDEX IF EXISTS public.lab_orders_patient_id_idx;
-DROP INDEX IF EXISTS public.lab_orders_ordered_by_idx;
-DROP INDEX IF EXISTS public.lab_orders_hospital_id_idx;
-DROP INDEX IF EXISTS public.invoices_status_idx;
-DROP INDEX IF EXISTS public.invoices_patient_id_idx;
-DROP INDEX IF EXISTS public.invoices_hospital_id_idx;
-DROP INDEX IF EXISTS public.invoice_items_invoice_id_idx;
-DROP INDEX IF EXISTS public.inventory_stock_quantity_idx;
-DROP INDEX IF EXISTS public.inventory_item_code_key;
-DROP INDEX IF EXISTS public.inventory_hospital_id_idx;
-DROP INDEX IF EXISTS public.hmo_hospital_id_idx;
-DROP INDEX IF EXISTS public.corporate_clients_hospital_id_idx;
-DROP INDEX IF EXISTS public.appointments_start_time_idx;
-DROP INDEX IF EXISTS public.appointments_patient_id_idx;
-DROP INDEX IF EXISTS public.appointments_hospital_id_idx;
-DROP INDEX IF EXISTS public.appointments_doctor_id_idx;
-DROP INDEX IF EXISTS public.analytics_reports_status_idx;
-DROP INDEX IF EXISTS public.analytics_reports_hospital_id_idx;
-DROP INDEX IF EXISTS public.analytics_metrics_metric_type_idx;
-DROP INDEX IF EXISTS public.analytics_metrics_metric_date_idx;
-DROP INDEX IF EXISTS public.analytics_metrics_hospital_id_idx;
-DROP INDEX IF EXISTS public.analytics_dashboards_hospital_id_idx;
-ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_pkey;
-ALTER TABLE IF EXISTS ONLY public.prescriptions DROP CONSTRAINT IF EXISTS prescriptions_pkey;
-ALTER TABLE IF EXISTS ONLY public.prescription_items DROP CONSTRAINT IF EXISTS prescription_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.payments DROP CONSTRAINT IF EXISTS payments_pkey;
-ALTER TABLE IF EXISTS ONLY public.patients DROP CONSTRAINT IF EXISTS patients_pkey;
-ALTER TABLE IF EXISTS ONLY public.patient_surveys DROP CONSTRAINT IF EXISTS patient_surveys_pkey;
-ALTER TABLE IF EXISTS ONLY public.notifications DROP CONSTRAINT IF EXISTS notifications_pkey;
-ALTER TABLE IF EXISTS ONLY public.medical_records DROP CONSTRAINT IF EXISTS medical_records_pkey;
-ALTER TABLE IF EXISTS ONLY public.lab_results DROP CONSTRAINT IF EXISTS lab_results_pkey;
-ALTER TABLE IF EXISTS ONLY public.lab_result_values DROP CONSTRAINT IF EXISTS lab_result_values_pkey;
-ALTER TABLE IF EXISTS ONLY public.lab_orders DROP CONSTRAINT IF EXISTS lab_orders_pkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_pkey;
-ALTER TABLE IF EXISTS ONLY public.invoice_items DROP CONSTRAINT IF EXISTS invoice_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.inventory DROP CONSTRAINT IF EXISTS inventory_pkey;
-ALTER TABLE IF EXISTS ONLY public.hospitals DROP CONSTRAINT IF EXISTS hospitals_pkey;
-ALTER TABLE IF EXISTS ONLY public.hmo DROP CONSTRAINT IF EXISTS hmo_pkey;
-ALTER TABLE IF EXISTS ONLY public.corporate_clients DROP CONSTRAINT IF EXISTS corporate_clients_pkey;
-ALTER TABLE IF EXISTS ONLY public.appointments DROP CONSTRAINT IF EXISTS appointments_pkey;
-ALTER TABLE IF EXISTS ONLY public.analytics_reports DROP CONSTRAINT IF EXISTS analytics_reports_pkey;
-ALTER TABLE IF EXISTS ONLY public.analytics_metrics DROP CONSTRAINT IF EXISTS analytics_metrics_pkey;
-ALTER TABLE IF EXISTS ONLY public.analytics_dashboards DROP CONSTRAINT IF EXISTS analytics_dashboards_pkey;
-ALTER TABLE IF EXISTS ONLY public._prisma_migrations DROP CONSTRAINT IF EXISTS _prisma_migrations_pkey;
-ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.prescriptions ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.prescription_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.payments ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.patients ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.patient_surveys ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.notifications ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.medical_records ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.lab_results ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.lab_result_values ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.lab_orders ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.invoices ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.invoice_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.inventory ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.hospitals ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.hmo ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.corporate_clients ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.appointments ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.analytics_reports ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.analytics_metrics ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.analytics_dashboards ALTER COLUMN id DROP DEFAULT;
-DROP SEQUENCE IF EXISTS public.users_id_seq;
-DROP TABLE IF EXISTS public.users;
-DROP SEQUENCE IF EXISTS public.prescriptions_id_seq;
-DROP TABLE IF EXISTS public.prescriptions;
-DROP SEQUENCE IF EXISTS public.prescription_items_id_seq;
-DROP TABLE IF EXISTS public.prescription_items;
-DROP SEQUENCE IF EXISTS public.payments_id_seq;
-DROP TABLE IF EXISTS public.payments;
-DROP SEQUENCE IF EXISTS public.patients_id_seq;
-DROP TABLE IF EXISTS public.patients;
-DROP SEQUENCE IF EXISTS public.patient_surveys_id_seq;
-DROP TABLE IF EXISTS public.patient_surveys;
-DROP SEQUENCE IF EXISTS public.notifications_id_seq;
-DROP TABLE IF EXISTS public.notifications;
-DROP SEQUENCE IF EXISTS public.medical_records_id_seq;
-DROP TABLE IF EXISTS public.medical_records;
-DROP SEQUENCE IF EXISTS public.lab_results_id_seq;
-DROP TABLE IF EXISTS public.lab_results;
-DROP SEQUENCE IF EXISTS public.lab_result_values_id_seq;
-DROP TABLE IF EXISTS public.lab_result_values;
-DROP SEQUENCE IF EXISTS public.lab_orders_id_seq;
-DROP TABLE IF EXISTS public.lab_orders;
-DROP SEQUENCE IF EXISTS public.invoices_id_seq;
-DROP TABLE IF EXISTS public.invoices;
-DROP SEQUENCE IF EXISTS public.invoice_items_id_seq;
-DROP TABLE IF EXISTS public.invoice_items;
-DROP SEQUENCE IF EXISTS public.inventory_id_seq;
-DROP TABLE IF EXISTS public.inventory;
-DROP SEQUENCE IF EXISTS public.hospitals_id_seq;
-DROP TABLE IF EXISTS public.hospitals;
-DROP SEQUENCE IF EXISTS public.hmo_id_seq;
-DROP TABLE IF EXISTS public.hmo;
-DROP SEQUENCE IF EXISTS public.corporate_clients_id_seq;
-DROP TABLE IF EXISTS public.corporate_clients;
-DROP SEQUENCE IF EXISTS public.appointments_id_seq;
-DROP TABLE IF EXISTS public.appointments;
-DROP SEQUENCE IF EXISTS public.analytics_reports_id_seq;
-DROP TABLE IF EXISTS public.analytics_reports;
-DROP SEQUENCE IF EXISTS public.analytics_metrics_id_seq;
-DROP TABLE IF EXISTS public.analytics_metrics;
-DROP SEQUENCE IF EXISTS public.analytics_dashboards_id_seq;
-DROP TABLE IF EXISTS public.analytics_dashboards;
-DROP TABLE IF EXISTS public._prisma_migrations;
-DROP TYPE IF EXISTS public."UserRole";
-DROP TYPE IF EXISTS public."ReportType";
-DROP TYPE IF EXISTS public."ReportStatus";
-DROP TYPE IF EXISTS public."PrescriptionStatus";
-DROP TYPE IF EXISTS public."PatientType";
-DROP TYPE IF EXISTS public."NotificationType";
-DROP TYPE IF EXISTS public."NotificationStatus";
-DROP TYPE IF EXISTS public."LabOrderType";
-DROP TYPE IF EXISTS public."LabOrderStatus";
-DROP TYPE IF EXISTS public."InvoiceStatus";
-DROP TYPE IF EXISTS public."DeliveryMethod";
-DROP TYPE IF EXISTS public."DashboardType";
-DROP TYPE IF EXISTS public."AppointmentType";
-DROP TYPE IF EXISTS public."AppointmentStatus";
--- *not* dropping schema, since initdb creates it
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
+-- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
 -- *not* creating schema, since initdb creates it
 
 
+ALTER SCHEMA public OWNER TO postgres;
+
 --
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
 --
 
 COMMENT ON SCHEMA public IS '';
 
 
 --
--- Name: AppointmentStatus; Type: TYPE; Schema: public; Owner: -
+-- Name: AppointmentStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."AppointmentStatus" AS ENUM (
@@ -238,8 +47,10 @@ CREATE TYPE public."AppointmentStatus" AS ENUM (
 );
 
 
+ALTER TYPE public."AppointmentStatus" OWNER TO postgres;
+
 --
--- Name: AppointmentType; Type: TYPE; Schema: public; Owner: -
+-- Name: AppointmentType; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."AppointmentType" AS ENUM (
@@ -251,8 +62,10 @@ CREATE TYPE public."AppointmentType" AS ENUM (
 );
 
 
+ALTER TYPE public."AppointmentType" OWNER TO postgres;
+
 --
--- Name: DashboardType; Type: TYPE; Schema: public; Owner: -
+-- Name: DashboardType; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."DashboardType" AS ENUM (
@@ -264,8 +77,10 @@ CREATE TYPE public."DashboardType" AS ENUM (
 );
 
 
+ALTER TYPE public."DashboardType" OWNER TO postgres;
+
 --
--- Name: DeliveryMethod; Type: TYPE; Schema: public; Owner: -
+-- Name: DeliveryMethod; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."DeliveryMethod" AS ENUM (
@@ -276,8 +91,10 @@ CREATE TYPE public."DeliveryMethod" AS ENUM (
 );
 
 
+ALTER TYPE public."DeliveryMethod" OWNER TO postgres;
+
 --
--- Name: InvoiceStatus; Type: TYPE; Schema: public; Owner: -
+-- Name: InvoiceStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."InvoiceStatus" AS ENUM (
@@ -288,8 +105,10 @@ CREATE TYPE public."InvoiceStatus" AS ENUM (
 );
 
 
+ALTER TYPE public."InvoiceStatus" OWNER TO postgres;
+
 --
--- Name: LabOrderStatus; Type: TYPE; Schema: public; Owner: -
+-- Name: LabOrderStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."LabOrderStatus" AS ENUM (
@@ -300,8 +119,10 @@ CREATE TYPE public."LabOrderStatus" AS ENUM (
 );
 
 
+ALTER TYPE public."LabOrderStatus" OWNER TO postgres;
+
 --
--- Name: LabOrderType; Type: TYPE; Schema: public; Owner: -
+-- Name: LabOrderType; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."LabOrderType" AS ENUM (
@@ -314,8 +135,10 @@ CREATE TYPE public."LabOrderType" AS ENUM (
 );
 
 
+ALTER TYPE public."LabOrderType" OWNER TO postgres;
+
 --
--- Name: NotificationStatus; Type: TYPE; Schema: public; Owner: -
+-- Name: NotificationStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."NotificationStatus" AS ENUM (
@@ -326,8 +149,10 @@ CREATE TYPE public."NotificationStatus" AS ENUM (
 );
 
 
+ALTER TYPE public."NotificationStatus" OWNER TO postgres;
+
 --
--- Name: NotificationType; Type: TYPE; Schema: public; Owner: -
+-- Name: NotificationType; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."NotificationType" AS ENUM (
@@ -336,12 +161,15 @@ CREATE TYPE public."NotificationType" AS ENUM (
     'inventory_low',
     'appointment_reminder',
     'lab_result_ready',
-    'payment_due'
+    'payment_due',
+    'account'
 );
 
 
+ALTER TYPE public."NotificationType" OWNER TO postgres;
+
 --
--- Name: PatientType; Type: TYPE; Schema: public; Owner: -
+-- Name: PatientType; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."PatientType" AS ENUM (
@@ -351,8 +179,10 @@ CREATE TYPE public."PatientType" AS ENUM (
 );
 
 
+ALTER TYPE public."PatientType" OWNER TO postgres;
+
 --
--- Name: PrescriptionStatus; Type: TYPE; Schema: public; Owner: -
+-- Name: PrescriptionStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."PrescriptionStatus" AS ENUM (
@@ -361,8 +191,28 @@ CREATE TYPE public."PrescriptionStatus" AS ENUM (
 );
 
 
+ALTER TYPE public."PrescriptionStatus" OWNER TO postgres;
+
 --
--- Name: ReportStatus; Type: TYPE; Schema: public; Owner: -
+-- Name: QuestionType; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."QuestionType" AS ENUM (
+    'short_text',
+    'long_text',
+    'multiple_choice',
+    'checkboxes',
+    'rating',
+    'yes_no',
+    'date',
+    'linear_scale'
+);
+
+
+ALTER TYPE public."QuestionType" OWNER TO postgres;
+
+--
+-- Name: ReportStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."ReportStatus" AS ENUM (
@@ -372,8 +222,10 @@ CREATE TYPE public."ReportStatus" AS ENUM (
 );
 
 
+ALTER TYPE public."ReportStatus" OWNER TO postgres;
+
 --
--- Name: ReportType; Type: TYPE; Schema: public; Owner: -
+-- Name: ReportType; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."ReportType" AS ENUM (
@@ -385,8 +237,23 @@ CREATE TYPE public."ReportType" AS ENUM (
 );
 
 
+ALTER TYPE public."ReportType" OWNER TO postgres;
+
 --
--- Name: UserRole; Type: TYPE; Schema: public; Owner: -
+-- Name: SurveyStatus; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."SurveyStatus" AS ENUM (
+    'draft',
+    'active',
+    'closed'
+);
+
+
+ALTER TYPE public."SurveyStatus" OWNER TO postgres;
+
+--
+-- Name: UserRole; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."UserRole" AS ENUM (
@@ -401,12 +268,14 @@ CREATE TYPE public."UserRole" AS ENUM (
 );
 
 
+ALTER TYPE public."UserRole" OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: _prisma_migrations; Type: TABLE; Schema: public; Owner: -
+-- Name: _prisma_migrations; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public._prisma_migrations (
@@ -421,8 +290,10 @@ CREATE TABLE public._prisma_migrations (
 );
 
 
+ALTER TABLE public._prisma_migrations OWNER TO postgres;
+
 --
--- Name: analytics_dashboards; Type: TABLE; Schema: public; Owner: -
+-- Name: analytics_dashboards; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.analytics_dashboards (
@@ -438,8 +309,10 @@ CREATE TABLE public.analytics_dashboards (
 );
 
 
+ALTER TABLE public.analytics_dashboards OWNER TO postgres;
+
 --
--- Name: analytics_dashboards_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: analytics_dashboards_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.analytics_dashboards_id_seq
@@ -451,15 +324,17 @@ CREATE SEQUENCE public.analytics_dashboards_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.analytics_dashboards_id_seq OWNER TO postgres;
+
 --
--- Name: analytics_dashboards_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: analytics_dashboards_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.analytics_dashboards_id_seq OWNED BY public.analytics_dashboards.id;
 
 
 --
--- Name: analytics_metrics; Type: TABLE; Schema: public; Owner: -
+-- Name: analytics_metrics; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.analytics_metrics (
@@ -475,8 +350,10 @@ CREATE TABLE public.analytics_metrics (
 );
 
 
+ALTER TABLE public.analytics_metrics OWNER TO postgres;
+
 --
--- Name: analytics_metrics_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: analytics_metrics_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.analytics_metrics_id_seq
@@ -488,15 +365,17 @@ CREATE SEQUENCE public.analytics_metrics_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.analytics_metrics_id_seq OWNER TO postgres;
+
 --
--- Name: analytics_metrics_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: analytics_metrics_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.analytics_metrics_id_seq OWNED BY public.analytics_metrics.id;
 
 
 --
--- Name: analytics_reports; Type: TABLE; Schema: public; Owner: -
+-- Name: analytics_reports; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.analytics_reports (
@@ -513,8 +392,10 @@ CREATE TABLE public.analytics_reports (
 );
 
 
+ALTER TABLE public.analytics_reports OWNER TO postgres;
+
 --
--- Name: analytics_reports_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: analytics_reports_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.analytics_reports_id_seq
@@ -526,15 +407,17 @@ CREATE SEQUENCE public.analytics_reports_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.analytics_reports_id_seq OWNER TO postgres;
+
 --
--- Name: analytics_reports_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: analytics_reports_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.analytics_reports_id_seq OWNED BY public.analytics_reports.id;
 
 
 --
--- Name: appointments; Type: TABLE; Schema: public; Owner: -
+-- Name: appointments; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.appointments (
@@ -552,8 +435,10 @@ CREATE TABLE public.appointments (
 );
 
 
+ALTER TABLE public.appointments OWNER TO postgres;
+
 --
--- Name: appointments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: appointments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.appointments_id_seq
@@ -565,15 +450,17 @@ CREATE SEQUENCE public.appointments_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.appointments_id_seq OWNER TO postgres;
+
 --
--- Name: appointments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: appointments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.appointments_id_seq OWNED BY public.appointments.id;
 
 
 --
--- Name: corporate_clients; Type: TABLE; Schema: public; Owner: -
+-- Name: corporate_clients; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.corporate_clients (
@@ -593,8 +480,10 @@ CREATE TABLE public.corporate_clients (
 );
 
 
+ALTER TABLE public.corporate_clients OWNER TO postgres;
+
 --
--- Name: corporate_clients_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: corporate_clients_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.corporate_clients_id_seq
@@ -606,15 +495,17 @@ CREATE SEQUENCE public.corporate_clients_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.corporate_clients_id_seq OWNER TO postgres;
+
 --
--- Name: corporate_clients_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: corporate_clients_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.corporate_clients_id_seq OWNED BY public.corporate_clients.id;
 
 
 --
--- Name: hmo; Type: TABLE; Schema: public; Owner: -
+-- Name: hmo; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.hmo (
@@ -629,8 +520,10 @@ CREATE TABLE public.hmo (
 );
 
 
+ALTER TABLE public.hmo OWNER TO postgres;
+
 --
--- Name: hmo_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: hmo_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.hmo_id_seq
@@ -642,15 +535,17 @@ CREATE SEQUENCE public.hmo_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.hmo_id_seq OWNER TO postgres;
+
 --
--- Name: hmo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: hmo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.hmo_id_seq OWNED BY public.hmo.id;
 
 
 --
--- Name: hospitals; Type: TABLE; Schema: public; Owner: -
+-- Name: hospitals; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.hospitals (
@@ -670,8 +565,10 @@ CREATE TABLE public.hospitals (
 );
 
 
+ALTER TABLE public.hospitals OWNER TO postgres;
+
 --
--- Name: hospitals_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: hospitals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.hospitals_id_seq
@@ -683,15 +580,17 @@ CREATE SEQUENCE public.hospitals_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.hospitals_id_seq OWNER TO postgres;
+
 --
--- Name: hospitals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: hospitals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.hospitals_id_seq OWNED BY public.hospitals.id;
 
 
 --
--- Name: inventory; Type: TABLE; Schema: public; Owner: -
+-- Name: inventory; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.inventory (
@@ -708,8 +607,10 @@ CREATE TABLE public.inventory (
 );
 
 
+ALTER TABLE public.inventory OWNER TO postgres;
+
 --
--- Name: inventory_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: inventory_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.inventory_id_seq
@@ -721,15 +622,17 @@ CREATE SEQUENCE public.inventory_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.inventory_id_seq OWNER TO postgres;
+
 --
--- Name: inventory_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: inventory_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.inventory_id_seq OWNED BY public.inventory.id;
 
 
 --
--- Name: invoice_items; Type: TABLE; Schema: public; Owner: -
+-- Name: invoice_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.invoice_items (
@@ -743,8 +646,10 @@ CREATE TABLE public.invoice_items (
 );
 
 
+ALTER TABLE public.invoice_items OWNER TO postgres;
+
 --
--- Name: invoice_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: invoice_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.invoice_items_id_seq
@@ -756,15 +661,17 @@ CREATE SEQUENCE public.invoice_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.invoice_items_id_seq OWNER TO postgres;
+
 --
--- Name: invoice_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: invoice_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.invoice_items_id_seq OWNED BY public.invoice_items.id;
 
 
 --
--- Name: invoices; Type: TABLE; Schema: public; Owner: -
+-- Name: invoices; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.invoices (
@@ -783,8 +690,10 @@ CREATE TABLE public.invoices (
 );
 
 
+ALTER TABLE public.invoices OWNER TO postgres;
+
 --
--- Name: invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.invoices_id_seq
@@ -796,15 +705,17 @@ CREATE SEQUENCE public.invoices_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.invoices_id_seq OWNER TO postgres;
+
 --
--- Name: invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.invoices_id_seq OWNED BY public.invoices.id;
 
 
 --
--- Name: lab_orders; Type: TABLE; Schema: public; Owner: -
+-- Name: lab_orders; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.lab_orders (
@@ -816,12 +727,15 @@ CREATE TABLE public.lab_orders (
     description text,
     status public."LabOrderStatus",
     created_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp(3) without time zone NOT NULL
+    updated_at timestamp(3) without time zone NOT NULL,
+    assigned_to integer
 );
 
 
+ALTER TABLE public.lab_orders OWNER TO postgres;
+
 --
--- Name: lab_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: lab_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.lab_orders_id_seq
@@ -833,15 +747,17 @@ CREATE SEQUENCE public.lab_orders_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.lab_orders_id_seq OWNER TO postgres;
+
 --
--- Name: lab_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: lab_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.lab_orders_id_seq OWNED BY public.lab_orders.id;
 
 
 --
--- Name: lab_result_values; Type: TABLE; Schema: public; Owner: -
+-- Name: lab_result_values; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.lab_result_values (
@@ -855,8 +771,10 @@ CREATE TABLE public.lab_result_values (
 );
 
 
+ALTER TABLE public.lab_result_values OWNER TO postgres;
+
 --
--- Name: lab_result_values_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: lab_result_values_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.lab_result_values_id_seq
@@ -868,15 +786,17 @@ CREATE SEQUENCE public.lab_result_values_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.lab_result_values_id_seq OWNER TO postgres;
+
 --
--- Name: lab_result_values_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: lab_result_values_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.lab_result_values_id_seq OWNED BY public.lab_result_values.id;
 
 
 --
--- Name: lab_results; Type: TABLE; Schema: public; Owner: -
+-- Name: lab_results; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.lab_results (
@@ -895,8 +815,10 @@ CREATE TABLE public.lab_results (
 );
 
 
+ALTER TABLE public.lab_results OWNER TO postgres;
+
 --
--- Name: lab_results_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: lab_results_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.lab_results_id_seq
@@ -908,15 +830,17 @@ CREATE SEQUENCE public.lab_results_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.lab_results_id_seq OWNER TO postgres;
+
 --
--- Name: lab_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: lab_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.lab_results_id_seq OWNED BY public.lab_results.id;
 
 
 --
--- Name: medical_records; Type: TABLE; Schema: public; Owner: -
+-- Name: medical_records; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.medical_records (
@@ -933,8 +857,10 @@ CREATE TABLE public.medical_records (
 );
 
 
+ALTER TABLE public.medical_records OWNER TO postgres;
+
 --
--- Name: medical_records_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: medical_records_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.medical_records_id_seq
@@ -946,15 +872,17 @@ CREATE SEQUENCE public.medical_records_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.medical_records_id_seq OWNER TO postgres;
+
 --
--- Name: medical_records_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: medical_records_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.medical_records_id_seq OWNED BY public.medical_records.id;
 
 
 --
--- Name: notifications; Type: TABLE; Schema: public; Owner: -
+-- Name: notifications; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.notifications (
@@ -974,8 +902,10 @@ CREATE TABLE public.notifications (
 );
 
 
+ALTER TABLE public.notifications OWNER TO postgres;
+
 --
--- Name: notifications_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: notifications_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.notifications_id_seq
@@ -987,15 +917,17 @@ CREATE SEQUENCE public.notifications_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.notifications_id_seq OWNER TO postgres;
+
 --
--- Name: notifications_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: notifications_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.notifications_id_seq OWNED BY public.notifications.id;
 
 
 --
--- Name: patient_surveys; Type: TABLE; Schema: public; Owner: -
+-- Name: patient_surveys; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.patient_surveys (
@@ -1007,8 +939,10 @@ CREATE TABLE public.patient_surveys (
 );
 
 
+ALTER TABLE public.patient_surveys OWNER TO postgres;
+
 --
--- Name: patient_surveys_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: patient_surveys_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.patient_surveys_id_seq
@@ -1020,15 +954,17 @@ CREATE SEQUENCE public.patient_surveys_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.patient_surveys_id_seq OWNER TO postgres;
+
 --
--- Name: patient_surveys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: patient_surveys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.patient_surveys_id_seq OWNED BY public.patient_surveys.id;
 
 
 --
--- Name: patients; Type: TABLE; Schema: public; Owner: -
+-- Name: patients; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.patients (
@@ -1051,8 +987,10 @@ CREATE TABLE public.patients (
 );
 
 
+ALTER TABLE public.patients OWNER TO postgres;
+
 --
--- Name: patients_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: patients_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.patients_id_seq
@@ -1064,15 +1002,17 @@ CREATE SEQUENCE public.patients_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.patients_id_seq OWNER TO postgres;
+
 --
--- Name: patients_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: patients_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.patients_id_seq OWNED BY public.patients.id;
 
 
 --
--- Name: payments; Type: TABLE; Schema: public; Owner: -
+-- Name: payments; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.payments (
@@ -1086,8 +1026,10 @@ CREATE TABLE public.payments (
 );
 
 
+ALTER TABLE public.payments OWNER TO postgres;
+
 --
--- Name: payments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: payments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.payments_id_seq
@@ -1099,15 +1041,17 @@ CREATE SEQUENCE public.payments_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.payments_id_seq OWNER TO postgres;
+
 --
--- Name: payments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: payments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.payments_id_seq OWNED BY public.payments.id;
 
 
 --
--- Name: prescription_items; Type: TABLE; Schema: public; Owner: -
+-- Name: prescription_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.prescription_items (
@@ -1121,8 +1065,10 @@ CREATE TABLE public.prescription_items (
 );
 
 
+ALTER TABLE public.prescription_items OWNER TO postgres;
+
 --
--- Name: prescription_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: prescription_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.prescription_items_id_seq
@@ -1134,15 +1080,17 @@ CREATE SEQUENCE public.prescription_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.prescription_items_id_seq OWNER TO postgres;
+
 --
--- Name: prescription_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: prescription_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.prescription_items_id_seq OWNED BY public.prescription_items.id;
 
 
 --
--- Name: prescriptions; Type: TABLE; Schema: public; Owner: -
+-- Name: prescriptions; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.prescriptions (
@@ -1157,8 +1105,10 @@ CREATE TABLE public.prescriptions (
 );
 
 
+ALTER TABLE public.prescriptions OWNER TO postgres;
+
 --
--- Name: prescriptions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: prescriptions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.prescriptions_id_seq
@@ -1170,15 +1120,169 @@ CREATE SEQUENCE public.prescriptions_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.prescriptions_id_seq OWNER TO postgres;
+
 --
--- Name: prescriptions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: prescriptions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.prescriptions_id_seq OWNED BY public.prescriptions.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -
+-- Name: survey_answers; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.survey_answers (
+    id integer NOT NULL,
+    response_id integer NOT NULL,
+    question_id integer NOT NULL,
+    answer text NOT NULL
+);
+
+
+ALTER TABLE public.survey_answers OWNER TO postgres;
+
+--
+-- Name: survey_answers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.survey_answers_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.survey_answers_id_seq OWNER TO postgres;
+
+--
+-- Name: survey_answers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.survey_answers_id_seq OWNED BY public.survey_answers.id;
+
+
+--
+-- Name: survey_questions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.survey_questions (
+    id integer NOT NULL,
+    survey_id integer NOT NULL,
+    question_text text NOT NULL,
+    question_type public."QuestionType" NOT NULL,
+    options jsonb,
+    required boolean DEFAULT false NOT NULL,
+    "order" integer DEFAULT 0 NOT NULL,
+    created_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.survey_questions OWNER TO postgres;
+
+--
+-- Name: survey_questions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.survey_questions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.survey_questions_id_seq OWNER TO postgres;
+
+--
+-- Name: survey_questions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.survey_questions_id_seq OWNED BY public.survey_questions.id;
+
+
+--
+-- Name: survey_responses; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.survey_responses (
+    id integer NOT NULL,
+    survey_id integer NOT NULL,
+    patient_id integer NOT NULL,
+    completed_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.survey_responses OWNER TO postgres;
+
+--
+-- Name: survey_responses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.survey_responses_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.survey_responses_id_seq OWNER TO postgres;
+
+--
+-- Name: survey_responses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.survey_responses_id_seq OWNED BY public.survey_responses.id;
+
+
+--
+-- Name: surveys; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.surveys (
+    id integer NOT NULL,
+    hospital_id integer NOT NULL,
+    title text NOT NULL,
+    description text,
+    status public."SurveyStatus" DEFAULT 'draft'::public."SurveyStatus" NOT NULL,
+    created_by integer NOT NULL,
+    created_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public.surveys OWNER TO postgres;
+
+--
+-- Name: surveys_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.surveys_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.surveys_id_seq OWNER TO postgres;
+
+--
+-- Name: surveys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.surveys_id_seq OWNED BY public.surveys.id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.users (
@@ -1193,12 +1297,15 @@ CREATE TABLE public.users (
     password_reset_token text,
     password_reset_expiry timestamp(3) without time zone,
     created_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp(3) without time zone NOT NULL
+    updated_at timestamp(3) without time zone NOT NULL,
+    must_change_password boolean DEFAULT false NOT NULL
 );
 
 
+ALTER TABLE public.users OWNER TO postgres;
+
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -1210,162 +1317,192 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
+
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: analytics_dashboards id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: analytics_dashboards id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_dashboards ALTER COLUMN id SET DEFAULT nextval('public.analytics_dashboards_id_seq'::regclass);
 
 
 --
--- Name: analytics_metrics id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: analytics_metrics id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_metrics ALTER COLUMN id SET DEFAULT nextval('public.analytics_metrics_id_seq'::regclass);
 
 
 --
--- Name: analytics_reports id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: analytics_reports id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_reports ALTER COLUMN id SET DEFAULT nextval('public.analytics_reports_id_seq'::regclass);
 
 
 --
--- Name: appointments id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: appointments id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.appointments ALTER COLUMN id SET DEFAULT nextval('public.appointments_id_seq'::regclass);
 
 
 --
--- Name: corporate_clients id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: corporate_clients id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.corporate_clients ALTER COLUMN id SET DEFAULT nextval('public.corporate_clients_id_seq'::regclass);
 
 
 --
--- Name: hmo id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: hmo id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.hmo ALTER COLUMN id SET DEFAULT nextval('public.hmo_id_seq'::regclass);
 
 
 --
--- Name: hospitals id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: hospitals id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.hospitals ALTER COLUMN id SET DEFAULT nextval('public.hospitals_id_seq'::regclass);
 
 
 --
--- Name: inventory id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: inventory id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.inventory ALTER COLUMN id SET DEFAULT nextval('public.inventory_id_seq'::regclass);
 
 
 --
--- Name: invoice_items id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: invoice_items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.invoice_items ALTER COLUMN id SET DEFAULT nextval('public.invoice_items_id_seq'::regclass);
 
 
 --
--- Name: invoices id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: invoices id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.invoices ALTER COLUMN id SET DEFAULT nextval('public.invoices_id_seq'::regclass);
 
 
 --
--- Name: lab_orders id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: lab_orders id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_orders ALTER COLUMN id SET DEFAULT nextval('public.lab_orders_id_seq'::regclass);
 
 
 --
--- Name: lab_result_values id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: lab_result_values id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_result_values ALTER COLUMN id SET DEFAULT nextval('public.lab_result_values_id_seq'::regclass);
 
 
 --
--- Name: lab_results id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: lab_results id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_results ALTER COLUMN id SET DEFAULT nextval('public.lab_results_id_seq'::regclass);
 
 
 --
--- Name: medical_records id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: medical_records id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.medical_records ALTER COLUMN id SET DEFAULT nextval('public.medical_records_id_seq'::regclass);
 
 
 --
--- Name: notifications id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: notifications id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.notifications ALTER COLUMN id SET DEFAULT nextval('public.notifications_id_seq'::regclass);
 
 
 --
--- Name: patient_surveys id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: patient_surveys id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patient_surveys ALTER COLUMN id SET DEFAULT nextval('public.patient_surveys_id_seq'::regclass);
 
 
 --
--- Name: patients id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: patients id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patients ALTER COLUMN id SET DEFAULT nextval('public.patients_id_seq'::regclass);
 
 
 --
--- Name: payments id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: payments id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.payments ALTER COLUMN id SET DEFAULT nextval('public.payments_id_seq'::regclass);
 
 
 --
--- Name: prescription_items id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: prescription_items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescription_items ALTER COLUMN id SET DEFAULT nextval('public.prescription_items_id_seq'::regclass);
 
 
 --
--- Name: prescriptions id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: prescriptions id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescriptions ALTER COLUMN id SET DEFAULT nextval('public.prescriptions_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: survey_answers id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_answers ALTER COLUMN id SET DEFAULT nextval('public.survey_answers_id_seq'::regclass);
+
+
+--
+-- Name: survey_questions id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_questions ALTER COLUMN id SET DEFAULT nextval('public.survey_questions_id_seq'::regclass);
+
+
+--
+-- Name: survey_responses id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_responses ALTER COLUMN id SET DEFAULT nextval('public.survey_responses_id_seq'::regclass);
+
+
+--
+-- Name: surveys id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.surveys ALTER COLUMN id SET DEFAULT nextval('public.surveys_id_seq'::regclass);
+
+
+--
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Data for Name: _prisma_migrations; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: _prisma_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public._prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) FROM stdin;
@@ -1374,11 +1511,16 @@ f16d7b3a-4776-4a05-a5d1-e7f95bd1049b	422a900898a971c4ac39eff1fc768e378711bf53fe5
 c7efde0b-c6a8-423a-9bc7-97c74b9080b1	826140aee452a70787fc850c643f9bac72a1d166031652a574e4146dc1fe43ca	2025-10-17 22:25:31.511184+01	20251017212531_add_patient_user_link	\N	\N	2025-10-17 22:25:31.498745+01	1
 0530d9f6-e807-46f3-8380-32285a6a6b28	c77b27eef45e0a4f829a7e8716f7902728f4395e59a1a5582149f9087677c9ec	2025-10-18 00:26:34.052055+01	20251018_add_primary_doctor	\N	\N	2025-10-18 00:26:34.033094+01	1
 736b7052-0334-4522-a412-9bd37093e793	38175ab1479657629a115f978b23eb058b94c993a9f066b55b3414f7b21643ce	2025-10-18 00:58:51.429347+01	20251018_add_doctor_note	\N	\N	2025-10-18 00:58:51.42481+01	1
+ed9b9bc4-06f3-445e-b80d-5bab357a5446	36e0f77b2ac0638953d341bb400800a94f48cef6c66cbc4bf7ca8dffab7749f2	2025-10-19 22:43:06.056729+01	20251019214306_add_surveys	\N	\N	2025-10-19 22:43:06.026239+01	1
+93c73a77-a828-417d-bb3b-2fdd3c6c903f	4383c65638a77fdd4947b2a304fab70737c9d3e1ee7706fc32334038e0279582	2025-10-19 23:16:44.082093+01	20251019221644_update_surveys_with_questions	\N	\N	2025-10-19 23:16:44.053128+01	1
+42b1522a-9270-4e6e-a7a6-f405a0b09132	ca6e9c7c753eda0796d0cc98d2f3b6572c284a4ac7269ba02604680e049244a4	2025-10-21 08:51:20.693496+01	20251021075120_add_must_change_password	\N	\N	2025-10-21 08:51:20.68738+01	1
+9ce79f39-fe8e-46c5-8c61-feb05e729efe	aaceacc5e5c653fc40e6ce9536b6a5106a37e47c7f3f5f3e7403d922a1c050b0	2025-10-21 09:24:03.879109+01	20251021082403_add_account_notification_type	\N	\N	2025-10-21 09:24:03.872775+01	1
+9a61910a-88d9-4c0a-b873-6889ae75b1bd	a8b994a95347a51e6a249481bf41dae76943bb4c1eedc1e61e4078d1a9692e0c	2025-10-21 19:35:10.490253+01	20251021183510_add_lab_order_assignment	\N	\N	2025-10-21 19:35:10.47271+01	1
 \.
 
 
 --
--- Data for Name: analytics_dashboards; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: analytics_dashboards; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.analytics_dashboards (id, hospital_id, dashboard_name, dashboard_type, config, created_by, active, created_at, updated_at) FROM stdin;
@@ -1386,7 +1528,7 @@ COPY public.analytics_dashboards (id, hospital_id, dashboard_name, dashboard_typ
 
 
 --
--- Data for Name: analytics_metrics; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: analytics_metrics; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.analytics_metrics (id, hospital_id, metric_date, metric_type, metric_value, metric_unit, patient_type, additional_data, created_at) FROM stdin;
@@ -1394,7 +1536,7 @@ COPY public.analytics_metrics (id, hospital_id, metric_date, metric_type, metric
 
 
 --
--- Data for Name: analytics_reports; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: analytics_reports; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.analytics_reports (id, hospital_id, report_type, report_period_start, report_period_end, generated_by, report_data, file_url, status, created_at) FROM stdin;
@@ -1402,16 +1544,17 @@ COPY public.analytics_reports (id, hospital_id, report_type, report_period_start
 
 
 --
--- Data for Name: appointments; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: appointments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.appointments (id, hospital_id, patient_id, doctor_id, department, appointment_type, status, start_time, end_time, created_at, updated_at) FROM stdin;
 1	1	1	6	General	OPD	scheduled	2025-10-30 16:37:00	2025-10-30 17:07:00	2025-10-17 23:31:21.617	2025-10-17 23:31:21.617
+2	1	1	6	Cardiology	IPD	scheduled	2025-10-30 09:00:00	2025-10-30 09:30:00	2025-10-22 07:45:04.031	2025-10-22 07:45:04.031
 \.
 
 
 --
--- Data for Name: corporate_clients; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: corporate_clients; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.corporate_clients (id, hospital_id, company_name, contact_person, contact_email, contact_phone, billing_address, payment_terms, discount_rate, credit_limit, active, created_at, updated_at) FROM stdin;
@@ -1419,7 +1562,7 @@ COPY public.corporate_clients (id, hospital_id, company_name, contact_person, co
 
 
 --
--- Data for Name: hmo; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: hmo; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.hmo (id, hospital_id, policy_name, provider, coverage_details, active, created_at, updated_at) FROM stdin;
@@ -1427,24 +1570,25 @@ COPY public.hmo (id, hospital_id, policy_name, provider, coverage_details, activ
 
 
 --
--- Data for Name: hospitals; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: hospitals; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.hospitals (id, name, address, contact_email, phone_number, subscription_plan, active, logo_url, primary_color, secondary_color, tagline, created_at, updated_at) FROM stdin;
-1	City General Hospital	123 Medical Center Drive, Health City, HC 12345	info@citygeneralhospital.com	+1-555-123-4567	Premium	t	\N	#0F4C81	#4A90E2	\N	2025-10-17 19:09:30.985	2025-10-17 19:09:30.985
+1	City General Hospital	123 Medical Center Drive, Health City, HC 12345	info@citygeneralhospital.com	+1-555-123-4567	Premium	t	https://f005.backblazeb2.com/file/emr-uploads/logos/b990a4f0-0d4f-40d6-b38c-a420999bd6b8.png	#0F4C81	#4A90E2		2025-10-17 19:09:30.985	2025-10-20 10:33:04.781
 \.
 
 
 --
--- Data for Name: inventory; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: inventory; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.inventory (id, hospital_id, item_name, item_code, stock_quantity, reorder_level, unit_price, expiry_date, created_at, updated_at) FROM stdin;
+1	1	Paracetamol	\N	1	10	400.00	2028-06-22	2025-10-19 20:06:55.45	2025-10-19 20:06:55.45
 \.
 
 
 --
--- Data for Name: invoice_items; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: invoice_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.invoice_items (id, invoice_id, description, quantity, unit_price, amount, created_at) FROM stdin;
@@ -1452,7 +1596,7 @@ COPY public.invoice_items (id, invoice_id, description, quantity, unit_price, am
 
 
 --
--- Data for Name: invoices; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: invoices; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.invoices (id, hospital_id, patient_id, appointment_id, total_amount, paid_amount, status, payment_method, hmo_id, notes, created_at, updated_at) FROM stdin;
@@ -1460,37 +1604,49 @@ COPY public.invoices (id, hospital_id, patient_id, appointment_id, total_amount,
 
 
 --
--- Data for Name: lab_orders; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: lab_orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.lab_orders (id, hospital_id, patient_id, ordered_by, order_type, description, status, created_at, updated_at) FROM stdin;
-1	1	1	6	Lab_Test	start it	completed	2025-10-17 23:34:04.802	2025-10-17 23:35:35.867
-2	1	1	6	Lab_Test	new test again	completed	2025-10-18 01:17:57.442	2025-10-18 01:19:42.877
+COPY public.lab_orders (id, hospital_id, patient_id, ordered_by, order_type, description, status, created_at, updated_at, assigned_to) FROM stdin;
+1	1	1	6	Lab_Test	start it	completed	2025-10-17 23:34:04.802	2025-10-17 23:35:35.867	\N
+2	1	1	6	Lab_Test	new test again	completed	2025-10-18 01:17:57.442	2025-10-18 01:19:42.877	\N
+3	1	1	6	Lab_Test	yuguyg	completed	2025-10-21 15:35:37.493	2025-10-21 15:37:17.004	\N
+4	1	1	6	Lab_Test	rggrgw	completed	2025-10-21 15:54:10.499	2025-10-21 15:55:00.093	\N
+5	1	1	6	Ultrasound	New one	completed	2025-10-21 18:23:21.931	2025-10-21 18:24:20.999	\N
+6	1	1	6	Pathology	Pathological test type	completed	2025-10-22 06:54:10.998	2025-10-22 06:55:16.666	\N
 \.
 
 
 --
--- Data for Name: lab_result_values; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: lab_result_values; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.lab_result_values (id, lab_result_id, test_name, result_value, unit, normal_range, created_at) FROM stdin;
 1	1	good	new	23	Normal	2025-10-17 23:35:35.852
 2	2	r	rr33	44	normal	2025-10-18 01:19:42.859
+3	3	new	sult	3	Normal	2025-10-21 15:37:16.923
+4	4	chilll	sdf	34	normal	2025-10-21 15:55:00.07
+5	5	new test	result clean	5	normal	2025-10-21 18:24:20.977
+6	6	main	new	0.02	Abnormal	2025-10-22 06:55:16.65
 \.
 
 
 --
--- Data for Name: lab_results; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: lab_results; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.lab_results (id, lab_order_id, uploaded_by, file_url, result_notes, finalized, created_at, updated_at, released_at, released_by, released_to_patient, doctor_note) FROM stdin;
-1	1	19	\N	new test again	f	2025-10-17 23:35:35.852	2025-10-17 23:35:35.852	\N	\N	f	\N
 2	2	18	\N	egerg	t	2025-10-18 01:19:42.859	2025-10-18 01:19:48.424	\N	\N	f	\N
+3	3	18	\N	new update	t	2025-10-21 15:37:16.923	2025-10-21 15:37:33.463	\N	\N	f	\N
+4	4	18	\N	rfrf	t	2025-10-21 15:55:00.07	2025-10-21 15:55:53.476	2025-10-21 15:55:53.474	6	t	\N
+1	1	19	\N	new test again	t	2025-10-17 23:35:35.852	2025-10-21 18:14:01.58	\N	\N	f	\N
+5	5	18	\N	good	t	2025-10-21 18:24:20.977	2025-10-21 18:24:40.36	2025-10-21 18:24:40.359	6	t	\N
+6	6	18	\N	New pathology	f	2025-10-22 06:55:16.65	2025-10-22 06:55:16.65	\N	\N	f	\N
 \.
 
 
 --
--- Data for Name: medical_records; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: medical_records; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.medical_records (id, hospital_id, patient_id, doctor_id, visit_date, diagnosis, notes, attachments, created_at, updated_at) FROM stdin;
@@ -1498,15 +1654,16 @@ COPY public.medical_records (id, hospital_id, patient_id, doctor_id, visit_date,
 
 
 --
--- Data for Name: notifications; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: notifications; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.notifications (id, hospital_id, user_id, sender_id, notification_type, reference_id, reference_table, delivery_method, message, status, created_at, sent_at, read_at) FROM stdin;
+3	1	34	\N	account	5	patients	in_app	Welcome! Your patient account has been created. Please check your email for login credentials.	sent	2025-10-21 09:49:46.711	2025-10-21 09:49:46.705	\N
 \.
 
 
 --
--- Data for Name: patient_surveys; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: patient_surveys; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.patient_surveys (id, hospital_id, patient_id, survey_data, submitted_at) FROM stdin;
@@ -1514,16 +1671,17 @@ COPY public.patient_surveys (id, hospital_id, patient_id, survey_data, submitted
 
 
 --
--- Data for Name: patients; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: patients; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.patients (id, hospital_id, patient_type, corporate_client_id, first_name, last_name, dob, gender, contact_info, address, emergency_contact, insurance_id, created_at, updated_at, user_id, primary_doctor_id) FROM stdin;
 1	1	self_pay	\N	John	Doe	2021-02-02	Male	{"email": "john@doe.com", "phone": "2334244"}	opolo	Emma father 09080994	\N	2025-10-17 23:30:09.119	2025-10-17 23:30:09.119	\N	6
+5	1	self_pay	\N	Emmanuel	Frank-Opigo	2022-05-10	Male	{"email": "emmanuelmieye@gmail.com", "phone": "+2347050322778"}	No.5 Road 5 D44	+2347050322778	\N	2025-10-21 09:49:46.693	2025-10-21 09:49:46.693	34	8
 \.
 
 
 --
--- Data for Name: payments; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: payments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.payments (id, invoice_id, amount_paid, payment_date, payment_gateway, transaction_ref, created_at) FROM stdin;
@@ -1531,7 +1689,7 @@ COPY public.payments (id, invoice_id, amount_paid, payment_date, payment_gateway
 
 
 --
--- Data for Name: prescription_items; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: prescription_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.prescription_items (id, prescription_id, drug_name, dosage, frequency, duration, notes) FROM stdin;
@@ -1539,7 +1697,7 @@ COPY public.prescription_items (id, prescription_id, drug_name, dosage, frequenc
 
 
 --
--- Data for Name: prescriptions; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: prescriptions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.prescriptions (id, hospital_id, patient_id, doctor_id, treatment_plan, status, created_at, updated_at) FROM stdin;
@@ -1547,190 +1705,253 @@ COPY public.prescriptions (id, hospital_id, patient_id, doctor_id, treatment_pla
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: survey_answers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (id, hospital_id, name, email, hashed_password, role, active, last_login, password_reset_token, password_reset_expiry, created_at, updated_at) FROM stdin;
-1	1	Momentum Super Admin	superadmin@momentum.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	super_admin	t	\N	\N	\N	2025-10-17 19:09:31.081	2025-10-17 19:09:31.081
-3	1	Dr. Sarah Johnson	sarah.johnson@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.091	2025-10-17 19:09:31.091
-5	1	Dr. Michael Chen	michael.chen@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.099	2025-10-17 19:09:31.099
-7	1	Eneyi Odey	vivieneneyiodey@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.102	2025-10-17 19:09:31.102
-8	1	Glorious Kate Akpegah	gloriouskateakpegah@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.103	2025-10-17 19:09:31.103
-9	1	Hope Adeyi	ayoigbala15@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.104	2025-10-17 19:09:31.104
-10	1	Goroti Samuel	gorotisunkanmi@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.105	2025-10-17 19:09:31.105
-11	1	Pharmacist David Brown	david.brown@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	\N	\N	\N	2025-10-17 19:09:31.107	2025-10-17 19:09:31.107
-12	1	Babalola Oluwafemi	oluwafemibabalola99@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	\N	\N	\N	2025-10-17 19:09:31.108	2025-10-17 19:09:31.108
-13	1	Shehu Arafah	missarafah@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	\N	\N	\N	2025-10-17 19:09:31.109	2025-10-17 19:09:31.109
-14	1	Sadiq Abdulkadir	sadiqdahir323@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	\N	\N	\N	2025-10-17 19:09:31.111	2025-10-17 19:09:31.111
-15	1	Tormene	torinco2020@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	\N	\N	\N	2025-10-17 19:09:31.112	2025-10-17 19:09:31.112
-17	1	Lab Tech James Wilson	james.wilson@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	lab_tech	t	\N	\N	\N	2025-10-17 19:09:31.114	2025-10-17 19:09:31.114
-20	1	Nnorom Iheoma	nnoromiheoma33@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	lab_tech	t	\N	\N	\N	2025-10-17 19:09:31.118	2025-10-17 19:09:31.118
-21	1	Jumoke Johnson	damilolaj442@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	lab_tech	t	\N	\N	\N	2025-10-17 19:09:31.119	2025-10-17 19:09:31.119
-22	1	Oluwanifemi Lanre-Adigun	nifemiadewura@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	lab_tech	t	\N	\N	\N	2025-10-17 19:09:31.12	2025-10-17 19:09:31.12
-23	1	Cashier Lisa Anderson	lisa.anderson@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	cashier	t	\N	\N	\N	2025-10-17 19:09:31.122	2025-10-17 19:09:31.122
-24	1	Olaide Olawuwo	truorganicafricafoundation@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	\N	\N	\N	2025-10-17 19:09:31.123	2025-10-17 19:09:31.123
-25	1	Olajide Adara	olajideadara@yahoo.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	\N	\N	\N	2025-10-17 19:09:31.125	2025-10-17 19:09:31.125
-27	1	Bello Ibrahim	ayindebolaji97@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	\N	\N	\N	2025-10-17 19:09:31.127	2025-10-17 19:09:31.127
-28	1	Igbayilola Ruth	ruthigbayilola@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	\N	\N	\N	2025-10-17 19:09:31.128	2025-10-17 19:09:31.128
-26	1	David Adeyinka	adeyinkad46@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	2025-10-17 19:16:41.364	\N	\N	2025-10-17 19:09:31.126	2025-10-17 19:16:41.368
-19	1	Samuel Ajewole	samuelajewolesa@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	lab_tech	t	2025-10-18 00:08:10.564	\N	\N	2025-10-17 19:09:31.117	2025-10-18 00:08:10.567
-16	1	Ukeme Udo	ukemeudo72@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	2025-10-18 00:13:43.075	\N	\N	2025-10-17 19:09:31.113	2025-10-18 00:13:43.078
-6	1	Sylvia Aputazie	aputaziesylvia@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	2025-10-18 00:42:08.992	\N	\N	2025-10-17 19:09:31.101	2025-10-18 00:42:08.995
-18	1	Baridueh Badon	baridueh@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	lab_tech	t	2025-10-18 01:19:01.394	\N	\N	2025-10-17 19:09:31.116	2025-10-18 01:19:01.398
-2	1	Admin User	admin@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	admin	t	2025-10-18 01:22:02.705	\N	\N	2025-10-17 19:09:31.088	2025-10-18 01:22:02.708
-4	1	Nurse Mary	nurse@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	nurse	t	2025-10-18 07:42:13.42	\N	\N	2025-10-17 19:09:31.094	2025-10-18 07:42:13.425
+COPY public.survey_answers (id, response_id, question_id, answer) FROM stdin;
 \.
 
 
 --
--- Name: analytics_dashboards_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Data for Name: survey_questions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.survey_questions (id, survey_id, question_text, question_type, options, required, "order", created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: survey_responses; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.survey_responses (id, survey_id, patient_id, completed_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: surveys; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.surveys (id, hospital_id, title, description, status, created_by, created_at, updated_at) FROM stdin;
+1	1	Test	about doctors	draft	2	2025-10-19 22:03:01.972	2025-10-19 22:03:01.972
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.users (id, hospital_id, name, email, hashed_password, role, active, last_login, password_reset_token, password_reset_expiry, created_at, updated_at, must_change_password) FROM stdin;
+5	1	Dr. Michael Chen	michael.chen@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.099	2025-10-17 19:09:31.099	f
+7	1	Eneyi Odey	vivieneneyiodey@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.102	2025-10-17 19:09:31.102	f
+8	1	Glorious Kate Akpegah	gloriouskateakpegah@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.103	2025-10-17 19:09:31.103	f
+9	1	Hope Adeyi	ayoigbala15@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.104	2025-10-17 19:09:31.104	f
+10	1	Goroti Samuel	gorotisunkanmi@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	\N	\N	\N	2025-10-17 19:09:31.105	2025-10-17 19:09:31.105	f
+11	1	Pharmacist David Brown	david.brown@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	\N	\N	\N	2025-10-17 19:09:31.107	2025-10-17 19:09:31.107	f
+12	1	Babalola Oluwafemi	oluwafemibabalola99@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	\N	\N	\N	2025-10-17 19:09:31.108	2025-10-17 19:09:31.108	f
+14	1	Sadiq Abdulkadir	sadiqdahir323@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	\N	\N	\N	2025-10-17 19:09:31.111	2025-10-17 19:09:31.111	f
+15	1	Tormene	torinco2020@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	\N	\N	\N	2025-10-17 19:09:31.112	2025-10-17 19:09:31.112	f
+23	1	Cashier Lisa Anderson	lisa.anderson@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	cashier	t	\N	\N	\N	2025-10-17 19:09:31.122	2025-10-17 19:09:31.122	f
+24	1	Olaide Olawuwo	truorganicafricafoundation@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	\N	\N	\N	2025-10-17 19:09:31.123	2025-10-17 19:09:31.123	f
+27	1	Bello Ibrahim	ayindebolaji97@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	\N	\N	\N	2025-10-17 19:09:31.127	2025-10-17 19:09:31.127	f
+28	1	Igbayilola Ruth	ruthigbayilola@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	\N	\N	\N	2025-10-17 19:09:31.128	2025-10-17 19:09:31.128	f
+26	1	David Adeyinka	adeyinkad46@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	2025-10-17 19:16:41.364	\N	\N	2025-10-17 19:09:31.126	2025-10-17 19:16:41.368	f
+2	1	Admin User	admin@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	admin	t	2025-10-21 07:46:45.422	\N	\N	2025-10-17 19:09:31.088	2025-10-21 07:46:45.424	f
+16	1	Ukeme Udo	ukemeudo72@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	2025-10-18 00:13:43.075	\N	\N	2025-10-17 19:09:31.113	2025-10-18 00:13:43.078	f
+6	1	Sylvia Aputazie	aputaziesylvia@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	2025-10-18 00:42:08.992	\N	\N	2025-10-17 19:09:31.101	2025-10-18 00:42:08.995	f
+17	1	Lab Tech James Wilson	james.wilson@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	nurse	t	\N	\N	\N	2025-10-17 19:09:31.114	2025-10-24 07:16:11.806	f
+4	1	Nurse Mary	nurse@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	nurse	t	2025-10-18 07:42:13.42	\N	\N	2025-10-17 19:09:31.094	2025-10-18 07:42:13.425	f
+20	1	Nnorom Iheoma	nnoromiheoma33@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	nurse	t	\N	\N	\N	2025-10-17 19:09:31.118	2025-10-24 07:16:11.806	f
+34	1	Emmanuel Frank-Opigo	emmanuelmieye@gmail.com	$2a$10$ZyN5z0gu/vFzdKGUFtwvvO2z2BChzygqz6VLL.DW1PEBtF5PpJWGq	patient	t	\N	\N	\N	2025-10-21 09:49:46.684	2025-10-21 09:49:46.684	t
+25	1	Olajide Adara	olajideadara@yahoo.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	patient	t	2025-10-22 07:25:08.892	\N	\N	2025-10-17 19:09:31.125	2025-10-22 07:25:08.895	f
+3	1	Dr. Sarah Johnson	sarah.johnson@citygeneralhospital.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	doctor	t	2025-10-22 17:29:58.004	\N	\N	2025-10-17 19:09:31.091	2025-10-22 17:29:58.01	f
+21	1	Jumoke Johnson	damilolaj442@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	nurse	t	\N	\N	\N	2025-10-17 19:09:31.119	2025-10-24 07:16:11.806	f
+22	1	Oluwanifemi Lanre-Adigun	nifemiadewura@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	nurse	t	\N	\N	\N	2025-10-17 19:09:31.12	2025-10-24 07:16:11.806	f
+1	1	Momentum Super Admin	superadmin@momentum.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	super_admin	t	2025-10-23 09:05:23.515	\N	\N	2025-10-17 19:09:31.081	2025-10-23 09:05:23.522	f
+30	1	Peter Imonte	imontepez@gmail.com	$2a$10$DPZXcUii31VG3QE/LgZbiul6ATVizdO8XIb61y6y5qgP0Y8T59dzy	nurse	t	2025-10-21 07:38:36.895	\N	\N	2025-10-21 07:38:02.742	2025-10-24 07:16:11.806	f
+19	1	Samuel Ajewole	samuelajewolesa@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	nurse	t	2025-10-18 00:08:10.564	\N	\N	2025-10-17 19:09:31.117	2025-10-24 07:16:11.806	f
+18	1	Baridueh Badon	baridueh@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	nurse	t	2025-10-21 14:21:41.621	\N	\N	2025-10-17 19:09:31.116	2025-10-24 07:16:11.806	f
+13	1	Shehu Arafah	missarafah@gmail.com	$2a$10$HLXCTUQD4D2WKymp3xj9NuA2oEavDhZi0LaC6ZOgOAyYIHaNmQl4W	pharmacist	t	2025-10-24 18:32:06.36	\N	\N	2025-10-17 19:09:31.109	2025-10-24 18:32:06.363	f
+\.
+
+
+--
+-- Name: analytics_dashboards_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.analytics_dashboards_id_seq', 1, false);
 
 
 --
--- Name: analytics_metrics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: analytics_metrics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.analytics_metrics_id_seq', 1, false);
 
 
 --
--- Name: analytics_reports_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: analytics_reports_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.analytics_reports_id_seq', 1, false);
 
 
 --
--- Name: appointments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: appointments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.appointments_id_seq', 1, true);
+SELECT pg_catalog.setval('public.appointments_id_seq', 2, true);
 
 
 --
--- Name: corporate_clients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: corporate_clients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.corporate_clients_id_seq', 1, false);
 
 
 --
--- Name: hmo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: hmo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.hmo_id_seq', 1, false);
 
 
 --
--- Name: hospitals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: hospitals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.hospitals_id_seq', 1, false);
 
 
 --
--- Name: inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.inventory_id_seq', 1, false);
+SELECT pg_catalog.setval('public.inventory_id_seq', 1, true);
 
 
 --
--- Name: invoice_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: invoice_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.invoice_items_id_seq', 1, false);
 
 
 --
--- Name: invoices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: invoices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.invoices_id_seq', 1, false);
 
 
 --
--- Name: lab_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: lab_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.lab_orders_id_seq', 2, true);
-
-
---
--- Name: lab_result_values_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.lab_result_values_id_seq', 2, true);
+SELECT pg_catalog.setval('public.lab_orders_id_seq', 6, true);
 
 
 --
--- Name: lab_results_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: lab_result_values_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.lab_results_id_seq', 2, true);
+SELECT pg_catalog.setval('public.lab_result_values_id_seq', 6, true);
 
 
 --
--- Name: medical_records_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: lab_results_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.lab_results_id_seq', 6, true);
+
+
+--
+-- Name: medical_records_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.medical_records_id_seq', 1, false);
 
 
 --
--- Name: notifications_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: notifications_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.notifications_id_seq', 1, false);
+SELECT pg_catalog.setval('public.notifications_id_seq', 3, true);
 
 
 --
--- Name: patient_surveys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: patient_surveys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.patient_surveys_id_seq', 1, false);
 
 
 --
--- Name: patients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: patients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.patients_id_seq', 1, true);
+SELECT pg_catalog.setval('public.patients_id_seq', 5, true);
 
 
 --
--- Name: payments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: payments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.payments_id_seq', 1, false);
 
 
 --
--- Name: prescription_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: prescription_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.prescription_items_id_seq', 1, false);
 
 
 --
--- Name: prescriptions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: prescriptions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.prescriptions_id_seq', 1, false);
 
 
 --
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: survey_answers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 28, true);
+SELECT pg_catalog.setval('public.survey_answers_id_seq', 1, false);
 
 
 --
--- Name: _prisma_migrations _prisma_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: survey_questions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.survey_questions_id_seq', 1, false);
+
+
+--
+-- Name: survey_responses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.survey_responses_id_seq', 1, false);
+
+
+--
+-- Name: surveys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.surveys_id_seq', 1, true);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 34, true);
+
+
+--
+-- Name: _prisma_migrations _prisma_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public._prisma_migrations
@@ -1738,7 +1959,7 @@ ALTER TABLE ONLY public._prisma_migrations
 
 
 --
--- Name: analytics_dashboards analytics_dashboards_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: analytics_dashboards analytics_dashboards_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_dashboards
@@ -1746,7 +1967,7 @@ ALTER TABLE ONLY public.analytics_dashboards
 
 
 --
--- Name: analytics_metrics analytics_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: analytics_metrics analytics_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_metrics
@@ -1754,7 +1975,7 @@ ALTER TABLE ONLY public.analytics_metrics
 
 
 --
--- Name: analytics_reports analytics_reports_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: analytics_reports analytics_reports_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_reports
@@ -1762,7 +1983,7 @@ ALTER TABLE ONLY public.analytics_reports
 
 
 --
--- Name: appointments appointments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: appointments appointments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.appointments
@@ -1770,7 +1991,7 @@ ALTER TABLE ONLY public.appointments
 
 
 --
--- Name: corporate_clients corporate_clients_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: corporate_clients corporate_clients_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.corporate_clients
@@ -1778,7 +1999,7 @@ ALTER TABLE ONLY public.corporate_clients
 
 
 --
--- Name: hmo hmo_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: hmo hmo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.hmo
@@ -1786,7 +2007,7 @@ ALTER TABLE ONLY public.hmo
 
 
 --
--- Name: hospitals hospitals_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: hospitals hospitals_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.hospitals
@@ -1794,7 +2015,7 @@ ALTER TABLE ONLY public.hospitals
 
 
 --
--- Name: inventory inventory_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: inventory inventory_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.inventory
@@ -1802,7 +2023,7 @@ ALTER TABLE ONLY public.inventory
 
 
 --
--- Name: invoice_items invoice_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: invoice_items invoice_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.invoice_items
@@ -1810,7 +2031,7 @@ ALTER TABLE ONLY public.invoice_items
 
 
 --
--- Name: invoices invoices_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: invoices invoices_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.invoices
@@ -1818,7 +2039,7 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- Name: lab_orders lab_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_orders lab_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_orders
@@ -1826,7 +2047,7 @@ ALTER TABLE ONLY public.lab_orders
 
 
 --
--- Name: lab_result_values lab_result_values_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_result_values lab_result_values_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_result_values
@@ -1834,7 +2055,7 @@ ALTER TABLE ONLY public.lab_result_values
 
 
 --
--- Name: lab_results lab_results_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_results lab_results_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_results
@@ -1842,7 +2063,7 @@ ALTER TABLE ONLY public.lab_results
 
 
 --
--- Name: medical_records medical_records_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: medical_records medical_records_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.medical_records
@@ -1850,7 +2071,7 @@ ALTER TABLE ONLY public.medical_records
 
 
 --
--- Name: notifications notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: notifications notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.notifications
@@ -1858,7 +2079,7 @@ ALTER TABLE ONLY public.notifications
 
 
 --
--- Name: patient_surveys patient_surveys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: patient_surveys patient_surveys_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patient_surveys
@@ -1866,7 +2087,7 @@ ALTER TABLE ONLY public.patient_surveys
 
 
 --
--- Name: patients patients_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: patients patients_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patients
@@ -1874,7 +2095,7 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- Name: payments payments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: payments payments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.payments
@@ -1882,7 +2103,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- Name: prescription_items prescription_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: prescription_items prescription_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescription_items
@@ -1890,7 +2111,7 @@ ALTER TABLE ONLY public.prescription_items
 
 
 --
--- Name: prescriptions prescriptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: prescriptions prescriptions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescriptions
@@ -1898,7 +2119,39 @@ ALTER TABLE ONLY public.prescriptions
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: survey_answers survey_answers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_answers
+    ADD CONSTRAINT survey_answers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: survey_questions survey_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_questions
+    ADD CONSTRAINT survey_questions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: survey_responses survey_responses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_responses
+    ADD CONSTRAINT survey_responses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: surveys surveys_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.surveys
+    ADD CONSTRAINT surveys_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -1906,371 +2159,434 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: analytics_dashboards_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: analytics_dashboards_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX analytics_dashboards_hospital_id_idx ON public.analytics_dashboards USING btree (hospital_id);
 
 
 --
--- Name: analytics_metrics_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: analytics_metrics_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX analytics_metrics_hospital_id_idx ON public.analytics_metrics USING btree (hospital_id);
 
 
 --
--- Name: analytics_metrics_metric_date_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: analytics_metrics_metric_date_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX analytics_metrics_metric_date_idx ON public.analytics_metrics USING btree (metric_date);
 
 
 --
--- Name: analytics_metrics_metric_type_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: analytics_metrics_metric_type_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX analytics_metrics_metric_type_idx ON public.analytics_metrics USING btree (metric_type);
 
 
 --
--- Name: analytics_reports_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: analytics_reports_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX analytics_reports_hospital_id_idx ON public.analytics_reports USING btree (hospital_id);
 
 
 --
--- Name: analytics_reports_status_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: analytics_reports_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX analytics_reports_status_idx ON public.analytics_reports USING btree (status);
 
 
 --
--- Name: appointments_doctor_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: appointments_doctor_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX appointments_doctor_id_idx ON public.appointments USING btree (doctor_id);
 
 
 --
--- Name: appointments_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: appointments_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX appointments_hospital_id_idx ON public.appointments USING btree (hospital_id);
 
 
 --
--- Name: appointments_patient_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: appointments_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX appointments_patient_id_idx ON public.appointments USING btree (patient_id);
 
 
 --
--- Name: appointments_start_time_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: appointments_start_time_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX appointments_start_time_idx ON public.appointments USING btree (start_time);
 
 
 --
--- Name: corporate_clients_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: corporate_clients_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX corporate_clients_hospital_id_idx ON public.corporate_clients USING btree (hospital_id);
 
 
 --
--- Name: hmo_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: hmo_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX hmo_hospital_id_idx ON public.hmo USING btree (hospital_id);
 
 
 --
--- Name: inventory_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: inventory_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX inventory_hospital_id_idx ON public.inventory USING btree (hospital_id);
 
 
 --
--- Name: inventory_item_code_key; Type: INDEX; Schema: public; Owner: -
+-- Name: inventory_item_code_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE UNIQUE INDEX inventory_item_code_key ON public.inventory USING btree (item_code);
 
 
 --
--- Name: inventory_stock_quantity_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: inventory_stock_quantity_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX inventory_stock_quantity_idx ON public.inventory USING btree (stock_quantity);
 
 
 --
--- Name: invoice_items_invoice_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: invoice_items_invoice_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX invoice_items_invoice_id_idx ON public.invoice_items USING btree (invoice_id);
 
 
 --
--- Name: invoices_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: invoices_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX invoices_hospital_id_idx ON public.invoices USING btree (hospital_id);
 
 
 --
--- Name: invoices_patient_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: invoices_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX invoices_patient_id_idx ON public.invoices USING btree (patient_id);
 
 
 --
--- Name: invoices_status_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: invoices_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX invoices_status_idx ON public.invoices USING btree (status);
 
 
 --
--- Name: lab_orders_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lab_orders_assigned_to_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX lab_orders_assigned_to_idx ON public.lab_orders USING btree (assigned_to);
+
+
+--
+-- Name: lab_orders_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX lab_orders_hospital_id_idx ON public.lab_orders USING btree (hospital_id);
 
 
 --
--- Name: lab_orders_ordered_by_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lab_orders_ordered_by_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX lab_orders_ordered_by_idx ON public.lab_orders USING btree (ordered_by);
 
 
 --
--- Name: lab_orders_patient_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lab_orders_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX lab_orders_patient_id_idx ON public.lab_orders USING btree (patient_id);
 
 
 --
--- Name: lab_orders_status_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lab_orders_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX lab_orders_status_idx ON public.lab_orders USING btree (status);
 
 
 --
--- Name: lab_result_values_lab_result_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lab_result_values_lab_result_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX lab_result_values_lab_result_id_idx ON public.lab_result_values USING btree (lab_result_id);
 
 
 --
--- Name: lab_results_lab_order_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lab_results_lab_order_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX lab_results_lab_order_id_idx ON public.lab_results USING btree (lab_order_id);
 
 
 --
--- Name: lab_results_released_by_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lab_results_released_by_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX lab_results_released_by_idx ON public.lab_results USING btree (released_by);
 
 
 --
--- Name: lab_results_released_to_patient_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lab_results_released_to_patient_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX lab_results_released_to_patient_idx ON public.lab_results USING btree (released_to_patient);
 
 
 --
--- Name: lab_results_uploaded_by_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: lab_results_uploaded_by_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX lab_results_uploaded_by_idx ON public.lab_results USING btree (uploaded_by);
 
 
 --
--- Name: medical_records_doctor_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: medical_records_doctor_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX medical_records_doctor_id_idx ON public.medical_records USING btree (doctor_id);
 
 
 --
--- Name: medical_records_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: medical_records_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX medical_records_hospital_id_idx ON public.medical_records USING btree (hospital_id);
 
 
 --
--- Name: medical_records_patient_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: medical_records_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX medical_records_patient_id_idx ON public.medical_records USING btree (patient_id);
 
 
 --
--- Name: notifications_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: notifications_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX notifications_hospital_id_idx ON public.notifications USING btree (hospital_id);
 
 
 --
--- Name: notifications_status_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: notifications_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX notifications_status_idx ON public.notifications USING btree (status);
 
 
 --
--- Name: notifications_user_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: notifications_user_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX notifications_user_id_idx ON public.notifications USING btree (user_id);
 
 
 --
--- Name: patient_surveys_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: patient_surveys_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX patient_surveys_hospital_id_idx ON public.patient_surveys USING btree (hospital_id);
 
 
 --
--- Name: patient_surveys_patient_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: patient_surveys_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX patient_surveys_patient_id_idx ON public.patient_surveys USING btree (patient_id);
 
 
 --
--- Name: patients_corporate_client_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: patients_corporate_client_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX patients_corporate_client_id_idx ON public.patients USING btree (corporate_client_id);
 
 
 --
--- Name: patients_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: patients_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX patients_hospital_id_idx ON public.patients USING btree (hospital_id);
 
 
 --
--- Name: patients_insurance_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: patients_insurance_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX patients_insurance_id_idx ON public.patients USING btree (insurance_id);
 
 
 --
--- Name: patients_primary_doctor_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: patients_primary_doctor_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX patients_primary_doctor_id_idx ON public.patients USING btree (primary_doctor_id);
 
 
 --
--- Name: patients_user_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: patients_user_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX patients_user_id_idx ON public.patients USING btree (user_id);
 
 
 --
--- Name: patients_user_id_key; Type: INDEX; Schema: public; Owner: -
+-- Name: patients_user_id_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE UNIQUE INDEX patients_user_id_key ON public.patients USING btree (user_id);
 
 
 --
--- Name: payments_invoice_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: payments_invoice_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX payments_invoice_id_idx ON public.payments USING btree (invoice_id);
 
 
 --
--- Name: payments_transaction_ref_key; Type: INDEX; Schema: public; Owner: -
+-- Name: payments_transaction_ref_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE UNIQUE INDEX payments_transaction_ref_key ON public.payments USING btree (transaction_ref);
 
 
 --
--- Name: prescription_items_prescription_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: prescription_items_prescription_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX prescription_items_prescription_id_idx ON public.prescription_items USING btree (prescription_id);
 
 
 --
--- Name: prescriptions_doctor_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: prescriptions_doctor_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX prescriptions_doctor_id_idx ON public.prescriptions USING btree (doctor_id);
 
 
 --
--- Name: prescriptions_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: prescriptions_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX prescriptions_hospital_id_idx ON public.prescriptions USING btree (hospital_id);
 
 
 --
--- Name: prescriptions_patient_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: prescriptions_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX prescriptions_patient_id_idx ON public.prescriptions USING btree (patient_id);
 
 
 --
--- Name: users_email_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: survey_answers_question_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX survey_answers_question_id_idx ON public.survey_answers USING btree (question_id);
+
+
+--
+-- Name: survey_answers_response_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX survey_answers_response_id_idx ON public.survey_answers USING btree (response_id);
+
+
+--
+-- Name: survey_questions_survey_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX survey_questions_survey_id_idx ON public.survey_questions USING btree (survey_id);
+
+
+--
+-- Name: survey_responses_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX survey_responses_patient_id_idx ON public.survey_responses USING btree (patient_id);
+
+
+--
+-- Name: survey_responses_survey_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX survey_responses_survey_id_idx ON public.survey_responses USING btree (survey_id);
+
+
+--
+-- Name: survey_responses_survey_id_patient_id_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX survey_responses_survey_id_patient_id_key ON public.survey_responses USING btree (survey_id, patient_id);
+
+
+--
+-- Name: surveys_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX surveys_hospital_id_idx ON public.surveys USING btree (hospital_id);
+
+
+--
+-- Name: surveys_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX surveys_status_idx ON public.surveys USING btree (status);
+
+
+--
+-- Name: users_email_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX users_email_idx ON public.users USING btree (email);
 
 
 --
--- Name: users_email_key; Type: INDEX; Schema: public; Owner: -
+-- Name: users_email_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email);
 
 
 --
--- Name: users_hospital_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: users_hospital_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX users_hospital_id_idx ON public.users USING btree (hospital_id);
 
 
 --
--- Name: users_password_reset_token_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: users_password_reset_token_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX users_password_reset_token_idx ON public.users USING btree (password_reset_token);
 
 
 --
--- Name: analytics_dashboards analytics_dashboards_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: analytics_dashboards analytics_dashboards_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_dashboards
@@ -2278,7 +2594,7 @@ ALTER TABLE ONLY public.analytics_dashboards
 
 
 --
--- Name: analytics_dashboards analytics_dashboards_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: analytics_dashboards analytics_dashboards_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_dashboards
@@ -2286,7 +2602,7 @@ ALTER TABLE ONLY public.analytics_dashboards
 
 
 --
--- Name: analytics_metrics analytics_metrics_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: analytics_metrics analytics_metrics_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_metrics
@@ -2294,7 +2610,7 @@ ALTER TABLE ONLY public.analytics_metrics
 
 
 --
--- Name: analytics_reports analytics_reports_generated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: analytics_reports analytics_reports_generated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_reports
@@ -2302,7 +2618,7 @@ ALTER TABLE ONLY public.analytics_reports
 
 
 --
--- Name: analytics_reports analytics_reports_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: analytics_reports analytics_reports_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.analytics_reports
@@ -2310,7 +2626,7 @@ ALTER TABLE ONLY public.analytics_reports
 
 
 --
--- Name: appointments appointments_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: appointments appointments_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.appointments
@@ -2318,7 +2634,7 @@ ALTER TABLE ONLY public.appointments
 
 
 --
--- Name: appointments appointments_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: appointments appointments_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.appointments
@@ -2326,7 +2642,7 @@ ALTER TABLE ONLY public.appointments
 
 
 --
--- Name: appointments appointments_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: appointments appointments_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.appointments
@@ -2334,7 +2650,7 @@ ALTER TABLE ONLY public.appointments
 
 
 --
--- Name: corporate_clients corporate_clients_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: corporate_clients corporate_clients_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.corporate_clients
@@ -2342,7 +2658,7 @@ ALTER TABLE ONLY public.corporate_clients
 
 
 --
--- Name: hmo hmo_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: hmo hmo_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.hmo
@@ -2350,7 +2666,7 @@ ALTER TABLE ONLY public.hmo
 
 
 --
--- Name: inventory inventory_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: inventory inventory_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.inventory
@@ -2358,7 +2674,7 @@ ALTER TABLE ONLY public.inventory
 
 
 --
--- Name: invoice_items invoice_items_invoice_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: invoice_items invoice_items_invoice_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.invoice_items
@@ -2366,7 +2682,7 @@ ALTER TABLE ONLY public.invoice_items
 
 
 --
--- Name: invoices invoices_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: invoices invoices_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.invoices
@@ -2374,7 +2690,7 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- Name: invoices invoices_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: invoices invoices_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.invoices
@@ -2382,7 +2698,15 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- Name: lab_orders lab_orders_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_orders lab_orders_assigned_to_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lab_orders
+    ADD CONSTRAINT lab_orders_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: lab_orders lab_orders_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_orders
@@ -2390,7 +2714,7 @@ ALTER TABLE ONLY public.lab_orders
 
 
 --
--- Name: lab_orders lab_orders_ordered_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_orders lab_orders_ordered_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_orders
@@ -2398,7 +2722,7 @@ ALTER TABLE ONLY public.lab_orders
 
 
 --
--- Name: lab_orders lab_orders_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_orders lab_orders_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_orders
@@ -2406,7 +2730,7 @@ ALTER TABLE ONLY public.lab_orders
 
 
 --
--- Name: lab_result_values lab_result_values_lab_result_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_result_values lab_result_values_lab_result_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_result_values
@@ -2414,7 +2738,7 @@ ALTER TABLE ONLY public.lab_result_values
 
 
 --
--- Name: lab_results lab_results_lab_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_results lab_results_lab_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_results
@@ -2422,7 +2746,7 @@ ALTER TABLE ONLY public.lab_results
 
 
 --
--- Name: lab_results lab_results_released_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_results lab_results_released_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_results
@@ -2430,7 +2754,7 @@ ALTER TABLE ONLY public.lab_results
 
 
 --
--- Name: lab_results lab_results_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: lab_results lab_results_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.lab_results
@@ -2438,7 +2762,7 @@ ALTER TABLE ONLY public.lab_results
 
 
 --
--- Name: medical_records medical_records_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: medical_records medical_records_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.medical_records
@@ -2446,7 +2770,7 @@ ALTER TABLE ONLY public.medical_records
 
 
 --
--- Name: medical_records medical_records_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: medical_records medical_records_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.medical_records
@@ -2454,7 +2778,7 @@ ALTER TABLE ONLY public.medical_records
 
 
 --
--- Name: medical_records medical_records_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: medical_records medical_records_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.medical_records
@@ -2462,7 +2786,7 @@ ALTER TABLE ONLY public.medical_records
 
 
 --
--- Name: notifications notifications_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: notifications notifications_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.notifications
@@ -2470,7 +2794,7 @@ ALTER TABLE ONLY public.notifications
 
 
 --
--- Name: notifications notifications_sender_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: notifications notifications_sender_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.notifications
@@ -2478,7 +2802,7 @@ ALTER TABLE ONLY public.notifications
 
 
 --
--- Name: notifications notifications_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: notifications notifications_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.notifications
@@ -2486,7 +2810,7 @@ ALTER TABLE ONLY public.notifications
 
 
 --
--- Name: patient_surveys patient_surveys_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: patient_surveys patient_surveys_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patient_surveys
@@ -2494,7 +2818,7 @@ ALTER TABLE ONLY public.patient_surveys
 
 
 --
--- Name: patient_surveys patient_surveys_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: patient_surveys patient_surveys_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patient_surveys
@@ -2502,7 +2826,7 @@ ALTER TABLE ONLY public.patient_surveys
 
 
 --
--- Name: patients patients_corporate_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: patients patients_corporate_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patients
@@ -2510,7 +2834,7 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- Name: patients patients_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: patients patients_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patients
@@ -2518,7 +2842,7 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- Name: patients patients_insurance_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: patients patients_insurance_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patients
@@ -2526,7 +2850,7 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- Name: patients patients_primary_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: patients patients_primary_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patients
@@ -2534,7 +2858,7 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- Name: patients patients_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: patients patients_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patients
@@ -2542,7 +2866,7 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- Name: payments payments_invoice_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: payments payments_invoice_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.payments
@@ -2550,7 +2874,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- Name: prescription_items prescription_items_prescription_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: prescription_items prescription_items_prescription_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescription_items
@@ -2558,7 +2882,7 @@ ALTER TABLE ONLY public.prescription_items
 
 
 --
--- Name: prescriptions prescriptions_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: prescriptions prescriptions_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescriptions
@@ -2566,7 +2890,7 @@ ALTER TABLE ONLY public.prescriptions
 
 
 --
--- Name: prescriptions prescriptions_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: prescriptions prescriptions_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescriptions
@@ -2574,7 +2898,7 @@ ALTER TABLE ONLY public.prescriptions
 
 
 --
--- Name: prescriptions prescriptions_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: prescriptions prescriptions_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescriptions
@@ -2582,7 +2906,63 @@ ALTER TABLE ONLY public.prescriptions
 
 
 --
--- Name: users users_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: survey_answers survey_answers_question_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_answers
+    ADD CONSTRAINT survey_answers_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.survey_questions(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: survey_answers survey_answers_response_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_answers
+    ADD CONSTRAINT survey_answers_response_id_fkey FOREIGN KEY (response_id) REFERENCES public.survey_responses(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: survey_questions survey_questions_survey_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_questions
+    ADD CONSTRAINT survey_questions_survey_id_fkey FOREIGN KEY (survey_id) REFERENCES public.surveys(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: survey_responses survey_responses_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_responses
+    ADD CONSTRAINT survey_responses_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: survey_responses survey_responses_survey_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.survey_responses
+    ADD CONSTRAINT survey_responses_survey_id_fkey FOREIGN KEY (survey_id) REFERENCES public.surveys(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: surveys surveys_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.surveys
+    ADD CONSTRAINT surveys_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: surveys surveys_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.surveys
+    ADD CONSTRAINT surveys_hospital_id_fkey FOREIGN KEY (hospital_id) REFERENCES public.hospitals(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: users users_hospital_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -2590,8 +2970,15 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict OtearZyi6Pxh1zJsGCcKZtaLBBGburcq5ED8EjEVWDhyi9ann4vyvz7KhdiIUXC
+\unrestrict yogWyg2DdrjJVnFVyXqVjB4GeFRDppEMwYffTP6nRQTiV8FM0b1PCmlpga2fktT
 

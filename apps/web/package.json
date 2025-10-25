@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "cd ../../packages/database && pnpm generate",
+    "prebuild": "cd ../../packages/database && pnpm generate && pnpm prisma db push --accept-data-loss --skip-generate",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

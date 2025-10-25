@@ -1,9 +1,18 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "pnpm install && pnpm --filter @momentum/database prisma migrate deploy && npx tsx packages/database/scripts/import-data.ts && pnpm --filter @momentum/web build"
+builder = "nixpacks"
 
 [deploy]
 startCommand = "pnpm --filter @momentum/web start"
+restartPolicyType = "always"
+
+# Health check
 healthcheckPath = "/"
-healthcheckTimeout = 100
-restartPolicyType = "ON_FAILURE"
+healthcheckTimeout = 300
+
+# Build settings
+[build.nixpacksConfigPath]
+
+# Environment-specific build command
+[[deploy.environmentVariables]]
+name = "NODE_ENV"
+value = "production"
