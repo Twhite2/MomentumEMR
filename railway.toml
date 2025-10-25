@@ -4,15 +4,5 @@ builder = "nixpacks"
 [deploy]
 startCommand = "pnpm --filter @momentum/web start"
 restartPolicyType = "always"
-
-# Health check
 healthcheckPath = "/"
 healthcheckTimeout = 300
-
-# Build settings
-[build.nixpacksConfigPath]
-
-# Environment-specific build command
-[[deploy.environmentVariables]]
-name = "NODE_ENV"
-value = "production"
