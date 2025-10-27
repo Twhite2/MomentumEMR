@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@momentum/ui';
 import { Plus, FileText, Calendar, User } from 'lucide-react';
@@ -35,7 +36,11 @@ interface MedicalRecordsResponse {
 }
 
 export default function MedicalRecordsPage() {
+  const { data: session } = useSession();
   const [page, setPage] = useState(1);
+  
+  // Check if user can create/edit medical records (admin or doctor only, not nurse)
+  const canEditRecords = session?.user?.role === 'admin' || session?.user?.role === 'doctor';
 
   const { data, isLoading, error } = useQuery<MedicalRecordsResponse>({
     queryKey: ['medical-records', page],
@@ -67,12 +72,14 @@ export default function MedicalRecordsPage() {
           <h1 className="text-3xl font-bold">Medical Records</h1>
           <p className="text-muted-foreground mt-1">Patient visit documentation and clinical notes</p>
         </div>
-        <Link href="/medical-records/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4 mr-2" />
-            New Record
-          </Button>
-        </Link>
+        {canEditRecords && (
+          <Link href="/medical-records/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4 mr-2" />
+              New Record
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Records List */}
@@ -87,14 +94,16 @@ export default function MedicalRecordsPage() {
             <p className="text-red-ribbon">Failed to load medical records</p>
           </div>
         ) : data?.records.length === 0 ? (
-          <div className="p-8 text-center">
+          <div className="text-center py-12">
             <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">No medical records found</p>
-            <Link href="/medical-records/new">
-              <Button variant="primary" size="sm" className="mt-4">
-                Create First Record
-              </Button>
-            </Link>
+            {canEditRecords && (
+              <Link href="/medical-records/new">
+                <Button variant="primary" size="sm" className="mt-4">
+                  Create First Record
+                </Button>
+              </Link>
+            )}
           </div>
         ) : (
           <>

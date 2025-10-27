@@ -205,3 +205,100 @@ Since multiple hospitals use the system:
 * Audit logging table (every change should be tracked).
 * Strict access control: RBAC and possibly ABAC (attribute-based access control) for fine-grained permissions.
 * GDPR/HIPAA-like compliance — especially if storing lab results, scans.
+
+---
+
+## 👨‍⚕️ Doctor Role Permissions (Complete List)
+
+### ✅ Editor Access (Create, Read, Update)
+
+| # | Feature | API Endpoint | Status |
+|---|---------|--------------|--------|
+| 1 | **Patient Medical Records** | `/api/medical-records` | ✅ Full Editor Access |
+| 2 | **Prescriptions** | `/api/prescriptions` | ✅ Full Editor Access |
+| 3 | **Lab Orders (Order Lab Test)** | `/api/lab-orders` | ✅ Full Editor Access |
+| 4 | **Lab Results** | `/api/lab-results` | ✅ View & Edit |
+| 5 | **Appointments** | `/api/appointments` | ✅ Full Editor Access |
+| 6 | **Vitals Input** | Part of Medical Records | ✅ Via Medical Records |
+| 7 | **Admission & Discharge** | Part of Appointments | ✅ Via Appointments |
+
+### 📖 View-Only Access (Read Only)
+
+| # | Feature | API Endpoint | Status |
+|---|---------|--------------|--------|
+| 1 | **Patient Queue (Check-in/out)** | `/api/appointments` | ✅ View via Appointments |
+| 2 | **Pharmacy Inventory** | `/api/inventory` | ✅ View Access (Fixed) |
+| 3 | **Dashboard & Analytics** | `/analytics` | ✅ Full View Access |
+| 4 | **Patients List** | `/api/patients` | ✅ View Access |
+
+### 🔍 Detailed Permission Breakdown
+
+#### 1. Medical Records (`/api/medical-records`)
+- **GET**: ✅ View their own patients' records
+- **POST**: ✅ Create new medical records
+- **PUT**: ✅ Update medical records
+- Includes: Diagnosis, Notes, Attachments, Vitals
+
+#### 2. Prescriptions (`/api/prescriptions`)
+- **GET**: ✅ View their own prescriptions
+- **POST**: ✅ Create new prescriptions with medications
+- **PUT**: ✅ Update prescription status
+- **DELETE**: ✅ Cancel prescriptions
+
+#### 3. Lab Orders (`/api/lab-orders`)
+- **GET**: ✅ View their own lab orders
+- **POST**: ✅ Order new lab tests (X-ray, CT, MRI, Ultrasound, Pathology)
+- **PUT**: ✅ Update lab order details
+- Assigns to lab technicians automatically
+
+#### 4. Lab Results (`/api/lab-results`)
+- **GET**: ✅ View all lab results for their patients
+- Can view finalized and pending results
+- Can add doctor notes to results
+- Cannot upload/release results (lab tech only)
+
+#### 5. Appointments (`/api/appointments`)
+- **GET**: ✅ View their own appointments
+- **POST**: ✅ Create new appointments
+- **PUT**: ✅ Update appointment status (check-in, complete, cancel)
+- Handles patient queue via status updates
+
+#### 6. Patients (`/api/patients`)
+- **GET**: ✅ View their assigned patients by default
+- **GET** with `showAll=true`: ✅ View all hospital patients
+- Cannot create/edit/delete patients (admin only)
+
+#### 7. Pharmacy Inventory (`/api/inventory`) **[NEWLY ADDED]**
+- **GET**: ✅ View inventory list (search, filter by low stock, expiry)
+- **GET** individual item: ✅ View item details
+- ❌ Cannot create/update/delete inventory items (pharmacist/admin only)
+
+#### 8. Dashboard & Analytics (`/analytics`)
+- **GET**: ✅ View analytics dashboards
+- **GET**: ✅ View reports (appointments, patients, consultations)
+- Types: Patient volume, Revenue, Drug statistics, Consultation metrics
+
+### 🚫 Restricted Access (Not Allowed)
+
+Doctors **cannot** access:
+- User management (creating staff accounts)
+- Inventory management (adding/editing drugs)
+- Billing/Invoice management (cashier only)
+- Survey creation (admin only)
+- Hospital settings (admin only)
+
+### 🔐 Data Isolation Rules
+
+Doctors automatically see:
+1. **Own patients only** - filtered by `primaryDoctorId` or `doctorId`
+2. **Own appointments** - filtered by `doctorId`
+3. **Own prescriptions** - filtered by `doctorId`
+4. **Own lab orders** - filtered by `orderedBy`
+5. Can override with `showAll=true` for patients (requires admin approval)
+
+### 📝 Notes
+
+- **Patient Allergy Summary**: Currently part of Medical Records notes field
+- **Vitals Input**: Stored in Medical Records attachments/notes (no separate table yet)
+- **Admission/Discharge**: Managed via Appointment status changes
+- All permissions enforced via `requireRole(['doctor'])` middleware

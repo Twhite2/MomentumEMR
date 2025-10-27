@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
 // POST /api/appointments - Create new appointment
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse']);
+    const session = await requireRole(['admin', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const body = await request.json();

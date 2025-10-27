@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@momentum/ui';
 import { Plus, Search, Filter, User, Calendar } from 'lucide-react';
@@ -53,9 +54,13 @@ interface PatientsResponse {
 }
 
 export default function PatientsPage() {
+  const { data: session } = useSession();
   const [search, setSearch] = useState('');
   const [patientType, setPatientType] = useState('');
   const [page, setPage] = useState(1);
+  
+  // Check if user can create patients (admin only - nurses can only view)
+  const canCreatePatients = session?.user?.role === 'admin';
 
   const { data, isLoading, error } = useQuery<PatientsResponse>({
     queryKey: ['patients', search, patientType, page],
@@ -106,12 +111,14 @@ export default function PatientsPage() {
             Manage patient records and information
           </p>
         </div>
-        <Link href="/patients/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Patient
-          </Button>
-        </Link>
+        {canCreatePatients && (
+          <Link href="/patients/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Patient
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Filters */}

@@ -43,6 +43,8 @@ interface LabOrdersResponse {
 export default function LabOrdersPage() {
   const { data: session } = useSession();
   const isLabTech = session?.user?.role === 'lab_tech';
+  // Only doctors and admin can create lab orders (not nurses or lab techs)
+  const canCreateLabOrder = session?.user?.role === 'admin' || session?.user?.role === 'doctor';
   
   const [status, setStatus] = useState('');
   const [orderType, setOrderType] = useState('');
@@ -113,7 +115,7 @@ export default function LabOrdersPage() {
               : 'Manage diagnostic tests and laboratory orders'}
           </p>
         </div>
-        {!isLabTech && (
+        {canCreateLabOrder && (
           <Link href="/lab-orders/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4 mr-2" />
@@ -174,9 +176,9 @@ export default function LabOrdersPage() {
           <div className="p-8 text-center">
             <TestTube className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">
-              {isLabTech ? 'No incoming lab orders at the moment' : 'No lab orders found'}
+              No lab orders found
             </p>
-            {!isLabTech && (
+            {canCreateLabOrder && (
               <Link href="/lab-orders/new">
                 <Button variant="primary" size="sm" className="mt-4">
                   Create First Lab Order

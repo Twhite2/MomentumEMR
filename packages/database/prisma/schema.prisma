@@ -194,6 +194,10 @@ model User {
   surveysCreated          Survey[]
   analyticsDashboards     AnalyticsDashboard[]  @relation("DashboardCreator")
   analyticsReports        AnalyticsReport[]     @relation("ReportGenerator")
+  vitalsRecorded          Vital[]               @relation("VitalsRecordedBy")
+  admissionsAdmitted      Admission[]           @relation("AdmissionsAdmittedBy")
+  admissionsDischarged    Admission[]           @relation("AdmissionsDischarged")
+  nursingNotes            NursingNote[]         @relation("NursingNotes")
 
   @@index([hospitalId])
   @@index([email])
@@ -216,6 +220,8 @@ model Patient {
   address             String?      @db.Text
   emergencyContact    String?      @map("emergency_contact") @db.Text
   insuranceId         Int?         @map("insurance_id")
+  bloodGroup          String?      @map("blood_group")
+  allergies           Json?        // Allergy summary: ["Penicillin", "Peanuts", etc.]
   createdAt           DateTime     @default(now()) @map("created_at")
   updatedAt           DateTime     @updatedAt @map("updated_at")
 
@@ -232,6 +238,9 @@ model Patient {
   patientSurveys    PatientSurvey[]
   labOrders         LabOrder[]
   surveyResponses   SurveyResponse[]
+  vitals            Vital[]
+  admissions        Admission[]
+  nursingNotes      NursingNote[]
 
   @@index([hospitalId])
   @@index([userId])
@@ -299,6 +308,8 @@ model Appointment {
   hospital Hospital @relation(fields: [hospitalId], references: [id])
   patient  Patient  @relation(fields: [patientId], references: [id])
   doctor   User     @relation(fields: [doctorId], references: [id])
+  vitals   Vital[]
+  nursingNotes NursingNote[]
 
   @@index([hospitalId])
   @@index([patientId])
@@ -704,4 +715,101 @@ model SurveyAnswer {
   @@index([responseId])
   @@index([questionId])
   @@map("survey_answers")
+}
+
+// ===================================
+// VITALS & ADMISSIONS
+// ===================================
+
+enum AdmissionStatus {
+  admitted
+  in_treatment
+  discharged
+  transferred
+}
+
+model Vital {
+  id               Int      @id @default(autoincrement())
+  hospitalId       Int      @map("hospital_id")
+  patientId        Int      @map("patient_id")
+  recordedBy       Int      @map("recorded_by")
+  appointmentId    Int?     @map("appointment_id")
+  temperature      Decimal? @db.Decimal(4, 1) // Celsius, e.g., 37.5
+  bloodPressureSys Int?     @map("blood_pressure_sys") // Systolic, e.g., 120
+  bloodPressureDia Int?     @map("blood_pressure_dia") // Diastolic, e.g., 80
+  heartRate        Int?     @map("heart_rate") // BPM
+  respiratoryRate  Int?     @map("respiratory_rate") // Breaths per minute
+  oxygenSaturation Decimal? @map("oxygen_saturation") @db.Decimal(5, 2) // SpO2, e.g., 98.5
+  weight           Decimal? @db.Decimal(5, 2) // kg
+  height           Decimal? @db.Decimal(5, 2) // cm
+  bmi              Decimal? @db.Decimal(4, 2) // Calculated
+  notes            String?  @db.Text
+  recordedAt       DateTime @default(now()) @map("recorded_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  // Relations
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  recordedByUser User       @relation("VitalsRecordedBy", fields: [recordedBy], references: [id])
+  appointment  Appointment? @relation(fields: [appointmentId], references: [id])
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([recordedBy])
+  @@index([appointmentId])
+  @@index([recordedAt])
+  @@map("vitals")
+}
+
+model Admission {
+  id                 Int              @id @default(autoincrement())
+  hospitalId         Int              @map("hospital_id")
+  patientId          Int              @map("patient_id")
+  admittedBy         Int              @map("admitted_by")
+  dischargedBy       Int?             @map("discharged_by")
+  ward               String?
+  bedNumber          String?          @map("bed_number")
+  admissionReason    String           @map("admission_reason") @db.Text
+  admissionDate      DateTime         @map("admission_date")
+  dischargeDate      DateTime?        @map("discharge_date")
+  status             AdmissionStatus  @default(admitted)
+  dischargeSummary   String?          @map("discharge_summary") @db.Text
+  followUpInstructions String?        @map("follow_up_instructions") @db.Text
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  patient         Patient @relation(fields: [patientId], references: [id])
+  admittingDoctor User    @relation("AdmissionsAdmittedBy", fields: [admittedBy], references: [id])
+  dischargingDoctor User? @relation("AdmissionsDischarged", fields: [dischargedBy], references: [id])
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([admittedBy])
+  @@index([status])
+  @@index([admissionDate])
+  @@map("admissions")
+}
+
+model NursingNote {
+  id            Int      @id @default(autoincrement())
+  hospitalId    Int      @map("hospital_id")
+  patientId     Int      @map("patient_id")
+  nurseId       Int      @map("nurse_id")
+  appointmentId Int?     @map("appointment_id")
+  noteType      String   @map("note_type") // e.g., "assessment", "intervention", "progress", "discharge_planning"
+  note          String   @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  nurse        User         @relation("NursingNotes", fields: [nurseId], references: [id])
+  appointment  Appointment? @relation(fields: [appointmentId], references: [id])
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([nurseId])
+  @@index([appointmentId])
+  @@index([createdAt])
+  @@map("nursing_notes")
 }

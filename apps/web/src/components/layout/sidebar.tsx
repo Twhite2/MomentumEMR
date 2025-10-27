@@ -20,6 +20,9 @@ import {
   TestTube,
   MessageSquare,
   X,
+  Activity,
+  Stethoscope,
+  BedDouble,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -96,6 +99,24 @@ const navItems: NavItem[] = [
     label: 'Medical Records',
     href: '/medical-records',
     icon: FileText,
+    roles: ['admin', 'doctor', 'nurse'],
+  },
+  {
+    label: 'Vitals',
+    href: '/vitals',
+    icon: Activity,
+    roles: ['admin', 'doctor', 'nurse'],
+  },
+  {
+    label: 'Nursing Notes',
+    href: '/nursing-notes',
+    icon: Stethoscope,
+    roles: ['admin', 'nurse'],
+  },
+  {
+    label: 'Admissions',
+    href: '/admissions',
+    icon: BedDouble,
     roles: ['admin', 'doctor', 'nurse'],
   },
   {

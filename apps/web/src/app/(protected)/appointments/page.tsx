@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Select } from '@momentum/ui';
 import { Plus, Calendar, Clock, User } from 'lucide-react';
@@ -37,9 +38,13 @@ interface AppointmentsResponse {
 }
 
 export default function AppointmentsPage() {
+  const { data: session } = useSession();
   const [status, setStatus] = useState('');
   const [date, setDate] = useState('');
   const [page, setPage] = useState(1);
+  
+  // Check if user can create appointments (admin or nurse only)
+  const canCreateAppointments = session?.user?.role === 'admin' || session?.user?.role === 'nurse';
 
   const { data, isLoading, error } = useQuery<AppointmentsResponse>({
     queryKey: ['appointments', status, date, page],
@@ -114,12 +119,14 @@ export default function AppointmentsPage() {
           <h1 className="text-3xl font-bold">Appointments</h1>
           <p className="text-muted-foreground mt-1">Manage patient appointments and schedules</p>
         </div>
-        <Link href="/appointments/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4 mr-2" />
-            Book Appointment
-          </Button>
-        </Link>
+        {canCreateAppointments && (
+          <Link href="/appointments/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4 mr-2" />
+              Book Appointment
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Filters */}

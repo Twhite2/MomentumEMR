@@ -104,6 +104,8 @@ export async function PUT(
       emergencyContact,
       insuranceId,
       corporateClientId,
+      allergies,
+      bloodGroup,
     } = body;
 
     // Verify patient belongs to hospital
@@ -129,6 +131,8 @@ export async function PUT(
         emergencyContact,
         insuranceId: insuranceId ? parseInt(insuranceId) : null,
         corporateClientId: corporateClientId ? parseInt(corporateClientId) : null,
+        allergies: allergies !== undefined ? (typeof allergies === 'string' ? JSON.parse(allergies) : allergies) : undefined,
+        bloodGroup: bloodGroup || undefined,
       },
       include: {
         hmo: true,

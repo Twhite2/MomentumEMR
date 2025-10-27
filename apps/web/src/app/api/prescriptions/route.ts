@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
 // POST /api/prescriptions - Create new prescription
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['doctor', 'nurse', 'pharmacist', 'admin']);
+    const session = await requireRole(['doctor', 'pharmacist', 'admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(session.user.id);
     const userRole = session.user.role;
