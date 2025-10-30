@@ -56,3 +56,11 @@ next-env.d.ts
 
 # Prisma
 prisma/migrations
+
+# Scripts with sensitive data
+push-to-railway-db.ps1
+seed-railway-db.ps1
+verify-railway-users.ps1
+import-to-railway-postgres.ps1
+railway-push-schema.ps1
+*.ps1
