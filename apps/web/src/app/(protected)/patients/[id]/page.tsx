@@ -46,9 +46,11 @@ export default function PatientDetailPage() {
   // Role-based permissions
   const userRole = session?.user?.role;
   const isNurse = userRole === 'nurse';
+  const isReceptionist = userRole === 'receptionist';
   const isDoctor = userRole === 'doctor';
   const canPrescribe = isDoctor; // Only doctors can prescribe
   const canOrderLabs = isDoctor; // Only doctors can order lab tests
+  const canCreateMedicalRecords = !isNurse && !isReceptionist; // Nurses and receptionists cannot create medical records
   const canCreateInvoices = ['admin', 'receptionist'].includes(userRole || ''); // Only admins/receptionists handle billing
 
   const { data: patient, isLoading, error } = useQuery<Patient>({
@@ -234,13 +236,15 @@ export default function PatientDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Quick Actions - Role-based */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* All staff can add medical records/notes */}
-            <Link href={`/medical-records/new?patientId=${patient.id}`}>
-              <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
-                <FileText className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
-                <p className="text-sm font-medium">Add Record</p>
-              </button>
-            </Link>
+            {/* Only doctors and admins can add medical records (nurses have view-only) */}
+            {canCreateMedicalRecords && (
+              <Link href={`/medical-records/new?patientId=${patient.id}`}>
+                <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+                  <FileText className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+                  <p className="text-sm font-medium">Add Record</p>
+                </button>
+              </Link>
+            )}
             
             {/* Only doctors can prescribe */}
             {canPrescribe && (
@@ -313,34 +317,36 @@ export default function PatientDetailPage() {
             )}
           </div>
 
-          {/* Medical Records */}
-          <div className="bg-white rounded-lg border border-border p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Medical Records
-            </h3>
-            {patient.medicalRecords && patient.medicalRecords.length > 0 ? (
-              <div className="space-y-2">
-                {patient.medicalRecords.map((record: any) => (
-                  <div key={record.id} className="p-3 border rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-sm">{record.diagnosis || 'No diagnosis'}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Dr. {record.doctor?.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(record.visitDate).toLocaleDateString()}
-                        </p>
+          {/* Medical Records - Hidden from receptionists */}
+          {!isReceptionist && (
+            <div className="bg-white rounded-lg border border-border p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Medical Records
+              </h3>
+              {patient.medicalRecords && patient.medicalRecords.length > 0 ? (
+                <div className="space-y-2">
+                  {patient.medicalRecords.map((record: any) => (
+                    <div key={record.id} className="p-3 border rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-sm">{record.diagnosis || 'No diagnosis'}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Dr. {record.doctor?.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(record.visitDate).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">No medical records yet</p>
-            )}
-          </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-4">No medical records yet</p>
+              )}
+            </div>
+          )}
 
           {/* Prescriptions */}
           <div className="bg-white rounded-lg border border-border p-6">

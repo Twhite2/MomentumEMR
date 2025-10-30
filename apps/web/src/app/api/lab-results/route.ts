@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/lab-results - Get all lab results (for lab technicians)
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['lab_tech', 'admin', 'doctor']);
+    const session = await requireRole(['lab_tech', 'admin', 'doctor', 'pharmacist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const { searchParams } = new URL(request.url);

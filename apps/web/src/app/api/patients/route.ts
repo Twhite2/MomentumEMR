@@ -8,7 +8,7 @@ import crypto from 'crypto';
 // GET /api/patients - List patients for hospital
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'cashier', 'lab_tech']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'cashier', 'lab_tech']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(session.user.id);
     const userRole = session.user.role;
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
 // POST /api/patients - Create new patient
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'nurse']);
+    const session = await requireRole(['admin', 'nurse', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const body = await request.json();

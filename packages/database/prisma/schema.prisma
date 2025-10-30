@@ -20,6 +20,7 @@ enum UserRole {
   doctor
   nurse
   pharmacist
+  receptionist
   cashier
   patient
   lab_tech
@@ -198,6 +199,12 @@ model User {
   admissionsAdmitted      Admission[]           @relation("AdmissionsAdmittedBy")
   admissionsDischarged    Admission[]           @relation("AdmissionsDischarged")
   nursingNotes            NursingNote[]         @relation("NursingNotes")
+  chatRoomsCreated        ChatRoom[]            @relation("ChatRoomCreator")
+  chatParticipants        ChatParticipant[]     @relation("ChatParticipants")
+  chatMessagesSent        ChatMessage[]         @relation("ChatMessages")
+  chatAttachmentsUploaded ChatAttachment[]      @relation("ChatAttachments")
+  chatReadReceipts        ChatReadReceipt[]     @relation("ChatReadReceipts")
+  chatAuditLogs           ChatAuditLog[]        @relation("ChatAuditLogs")
 
   @@index([hospitalId])
   @@index([email])
@@ -541,10 +548,11 @@ model LabResult {
   updatedAt          DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  labOrder        LabOrder           @relation(fields: [labOrderId], references: [id])
-  uploader        User               @relation("UploadedBy", fields: [uploadedBy], references: [id])
-  releaser        User?              @relation("ReleasedBy", fields: [releasedBy], references: [id])
+  labOrder        LabOrder                @relation(fields: [labOrderId], references: [id])
+  uploader        User                    @relation("UploadedBy", fields: [uploadedBy], references: [id])
+  releaser        User?                   @relation("ReleasedBy", fields: [releasedBy], references: [id])
   labResultValues LabResultValue[]
+  attachments     LabResultAttachment[]
 
   @@index([labOrderId])
   @@index([uploadedBy])
@@ -567,6 +575,21 @@ model LabResultValue {
 
   @@index([labResultId])
   @@map("lab_result_values")
+}
+
+model LabResultAttachment {
+  id          Int      @id @default(autoincrement())
+  labResultId Int      @map("lab_result_id")
+  fileName    String   @map("file_name")
+  fileType    String   @map("file_type")
+  fileData    String   @map("file_data") @db.Text
+  uploadedAt  DateTime @default(now()) @map("uploaded_at")
+
+  // Relations
+  labResult LabResult @relation(fields: [labResultId], references: [id], onDelete: Cascade)
+
+  @@index([labResultId])
+  @@map("lab_result_attachments")
 }
 
 model AnalyticsDashboard {
@@ -812,4 +835,144 @@ model NursingNote {
   @@index([appointmentId])
   @@index([createdAt])
   @@map("nursing_notes")
+}
+
+// ===================================
+// SECURE CHAT SYSTEM (NDPR/HIPAA Compliant)
+// ===================================
+
+enum ChatRoomType {
+  general
+  private
+}
+
+enum MessageStatus {
+  sent
+  delivered
+  read
+}
+
+model ChatRoom {
+  id          Int          @id @default(autoincrement())
+  hospitalId  Int          @map("hospital_id")
+  roomType    ChatRoomType @map("room_type")
+  name        String?      // Name for general chats
+  createdBy   Int          @map("created_by")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  creator      User                @relation("ChatRoomCreator", fields: [createdBy], references: [id])
+  messages     ChatMessage[]
+  participants ChatParticipant[]
+  attachments  ChatAttachment[]
+
+  @@index([hospitalId])
+  @@index([roomType])
+  @@index([createdBy])
+  @@map("chat_rooms")
+}
+
+model ChatParticipant {
+  id             Int       @id @default(autoincrement())
+  roomId         Int       @map("room_id")
+  userId         Int       @map("user_id")
+  lastRead       DateTime? @map("last_read")
+  joinedAt       DateTime  @default(now()) @map("joined_at")
+  unreadCount    Int       @default(0) @map("unread_count")
+
+  // Relations
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation("ChatParticipants", fields: [userId], references: [id])
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@map("chat_participants")
+}
+
+model ChatMessage {
+  id                Int           @id @default(autoincrement())
+  roomId            Int           @map("room_id")
+  senderId          Int           @map("sender_id")
+  encryptedContent  String        @map("encrypted_content") @db.Text
+  status            MessageStatus @default(sent)
+  mentionedUserIds  Int[]         @map("mentioned_user_ids") // Array of user IDs tagged with @
+  replyToMessageId  Int?          @map("reply_to_message_id")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+  deletedAt         DateTime?     @map("deleted_at")
+
+  // Relations
+  room           ChatRoom          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender         User              @relation("ChatMessages", fields: [senderId], references: [id])
+  replyTo        ChatMessage?      @relation("MessageReplies", fields: [replyToMessageId], references: [id])
+  replies        ChatMessage[]     @relation("MessageReplies")
+  attachments    ChatAttachment[]
+  readReceipts   ChatReadReceipt[]
+
+  @@index([roomId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@map("chat_messages")
+}
+
+model ChatAttachment {
+  id                Int      @id @default(autoincrement())
+  roomId            Int      @map("room_id")
+  messageId         Int?     @map("message_id")
+  uploadedBy        Int      @map("uploaded_by")
+  originalFileName  String   @map("original_file_name")
+  fileType          String   @map("file_type")
+  fileSize          Int      @map("file_size") // In bytes
+  encryptedData     String   @map("encrypted_data") @db.Text
+  encryptionKey     String   @map("encryption_key") @db.Text // Encrypted with master key
+  uploadedAt        DateTime @default(now()) @map("uploaded_at")
+
+  // Relations
+  room     ChatRoom     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  message  ChatMessage? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  uploader User         @relation("ChatAttachments", fields: [uploadedBy], references: [id])
+
+  @@index([roomId])
+  @@index([messageId])
+  @@index([uploadedBy])
+  @@map("chat_attachments")
+}
+
+model ChatReadReceipt {
+  id        Int      @id @default(autoincrement())
+  messageId Int      @map("message_id")
+  userId    Int      @map("user_id")
+  readAt    DateTime @default(now()) @map("read_at")
+
+  // Relations
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User        @relation("ChatReadReceipts", fields: [userId], references: [id])
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+  @@map("chat_read_receipts")
+}
+
+model ChatAuditLog {
+  id          Int      @id @default(autoincrement())
+  hospitalId  Int      @map("hospital_id")
+  userId      Int      @map("user_id")
+  action      String   // "send", "read", "download", "delete"
+  resourceType String  @map("resource_type") // "message", "attachment"
+  resourceId   Int     @map("resource_id")
+  metadata    Json?    // Additional context
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation("ChatAuditLogs", fields: [userId], references: [id])
+
+  @@index([hospitalId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("chat_audit_logs")
 }

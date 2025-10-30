@@ -43,6 +43,15 @@ export async function GET(
             labResultValues: {
               orderBy: { id: 'asc' },
             },
+            attachments: {
+              select: {
+                id: true,
+                fileName: true,
+                fileType: true,
+                fileData: true,
+                uploadedAt: true,
+              },
+            },
           },
           orderBy: { createdAt: 'desc' },
         },

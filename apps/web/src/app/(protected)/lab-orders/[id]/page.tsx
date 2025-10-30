@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button, Input, Textarea } from '@momentum/ui';
-import { ArrowLeft, TestTube, User, Calendar, Upload, Plus, Trash2, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, TestTube, User, Calendar, Upload, Plus, Trash2, Send, CheckCircle, AlertCircle, Paperclip, Download, FileText, X } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
@@ -49,6 +49,13 @@ interface LabOrder {
       unit: string | null;
       normalRange: string | null;
     }>;
+    attachments?: Array<{
+      id: number;
+      fileName: string;
+      fileType: string;
+      fileData: string;
+      uploadedAt: string;
+    }>;
     createdAt: string;
   }>;
   createdAt: string;
@@ -74,6 +81,7 @@ export default function LabOrderDetailPage() {
   const [doctorNote, setDoctorNote] = useState('');
   const [selectedResultId, setSelectedResultId] = useState<number | null>(null);
   const [resultNotes, setResultNotes] = useState('');
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [testValues, setTestValues] = useState<TestValue[]>([
     { testName: '', resultValue: '', unit: '', normalRange: '' },
   ]);
@@ -96,6 +104,7 @@ export default function LabOrderDetailPage() {
       toast.success('Lab result uploaded successfully!');
       setShowUploadForm(false);
       setResultNotes('');
+      setUploadedFiles([]);
       setTestValues([{ testName: '', resultValue: '', unit: '', normalRange: '' }]);
       queryClient.invalidateQueries({ queryKey: ['lab-order', orderId] });
     },
@@ -242,17 +251,41 @@ export default function LabOrderDetailPage() {
     setTestValues(updated);
   };
 
-  const handleUploadSubmit = (e: React.FormEvent) => {
+  const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const validTests = testValues.filter((test) => test.testName.trim() !== '');
 
-    const payload = {
-      resultNotes: resultNotes || null,
-      testValues: validTests.length > 0 ? validTests : null,
-    };
+    // Convert files to base64
+    const filePromises = uploadedFiles.map((file) => {
+      return new Promise<{ name: string; type: string; data: string }>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          resolve({
+            name: file.name,
+            type: file.type,
+            data: base64.split(',')[1], // Remove data:image/png;base64, prefix
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    });
 
-    uploadResult.mutate(payload);
+    try {
+      const attachments = await Promise.all(filePromises);
+
+      const payload = {
+        resultNotes: resultNotes || null,
+        testValues: validTests.length > 0 ? validTests : null,
+        attachments: attachments.length > 0 ? attachments : null,
+      };
+
+      uploadResult.mutate(payload);
+    } catch (error) {
+      toast.error('Failed to process file uploads');
+    }
   };
 
   const calculateAge = (dob: string) => {
@@ -388,7 +421,7 @@ export default function LabOrderDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Lab Results ({order.labResults.length})</h2>
-              {order.status !== 'cancelled' && !showUploadForm && (
+              {order.status !== 'cancelled' && !showUploadForm && session?.user?.role === 'lab_tech' && (
                 <Button
                   variant="primary"
                   size="sm"
@@ -460,6 +493,50 @@ export default function LabOrderDetailPage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Document Upload */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      <Paperclip className="w-4 h-4 inline mr-1" />
+                      Attach Documents (Scans, Images, PDFs)
+                    </label>
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setUploadedFiles([...uploadedFiles, ...Array.from(e.target.files)]);
+                        }
+                      }}
+                      className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-tory-blue file:text-white hover:file:bg-tory-blue/90"
+                    />
+                    {uploadedFiles.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {uploadedFiles.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-tory-blue" />
+                              <span className="text-sm">{file.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                ({(file.size / 1024).toFixed(1)} KB)
+                              </span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setUploadedFiles(uploadedFiles.filter((_, i) => i !== index));
+                              }}
+                            >
+                              <X className="w-4 h-4 text-red-ribbon" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
@@ -475,7 +552,10 @@ export default function LabOrderDetailPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowUploadForm(false)}
+                    onClick={() => {
+                      setShowUploadForm(false);
+                      setUploadedFiles([]);
+                    }}
                   >
                     Cancel
                   </Button>
@@ -637,6 +717,39 @@ export default function LabOrderDetailPage() {
                       </div>
                     )}
 
+                    {/* Attached Documents */}
+                    {result.attachments && result.attachments.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium mb-2 flex items-center gap-1">
+                          <Paperclip className="w-4 h-4" />
+                          Attached Documents:
+                        </p>
+                        <div className="space-y-2">
+                          {result.attachments.map((attachment) => {
+                            // Convert base64 to downloadable data URL
+                            const dataUrl = `data:${attachment.fileType};base64,${attachment.fileData}`;
+                            
+                            return (
+                              <div key={attachment.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="w-4 h-4 text-tory-blue" />
+                                  <span className="text-sm">{attachment.fileName}</span>
+                                </div>
+                                <a
+                                  href={dataUrl}
+                                  download={attachment.fileName}
+                                  className="flex items-center gap-1 text-sm text-tory-blue hover:underline cursor-pointer"
+                                >
+                                  <Download className="w-4 h-4" />
+                                  Download
+                                </a>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Edit and Finalize Result Buttons (Lab Tech - Only Uploader) */}
                     {!result.finalized && session?.user?.role === 'lab_tech' && (
                       result.uploader.id === parseInt(session.user.id) ? (
@@ -734,8 +847,8 @@ export default function LabOrderDetailPage() {
             </Link>
           </div>
 
-          {/* Actions */}
-          {order.status === 'pending' && (
+          {/* Actions - Lab Tech Only */}
+          {order.status === 'pending' && session?.user?.role === 'lab_tech' && (
             <div className="bg-white rounded-lg border border-border p-6">
               <h2 className="text-lg font-semibold mb-4">Actions</h2>
               <div className="space-y-2">
@@ -762,6 +875,7 @@ export default function LabOrderDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
             <div className="space-y-2">
+              {/* Send Results - All roles */}
               {order.labResults.some(r => r.finalized && !r.releasedToPatient) && (
                 <Button 
                   variant="primary" 
@@ -772,21 +886,47 @@ export default function LabOrderDetailPage() {
                   Send Results to Patient
                 </Button>
               )}
-              <Link href={`/prescriptions/new?patientId=${order.patient.id}`}>
-                <Button variant="outline" className="w-full">
-                  Create Prescription
-                </Button>
-              </Link>
-              <Link href={`/appointments/new?patientId=${order.patient.id}`}>
-                <Button variant="outline" className="w-full">
-                  Schedule Follow-up
-                </Button>
-              </Link>
-              <Link href={`/medical-records/new?patientId=${order.patient.id}`}>
-                <Button variant="outline" className="w-full">
-                  Add Medical Record
-                </Button>
-              </Link>
+              
+              {/* Lab Tech Actions */}
+              {session?.user?.role === 'lab_tech' ? (
+                <>
+                  {order.status !== 'cancelled' && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setShowUploadForm(true)}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Test Results
+                    </Button>
+                  )}
+                  <Link href={`/patients/${order.patient.id}`}>
+                    <Button variant="outline" className="w-full">
+                      <User className="w-4 h-4 mr-2" />
+                      View Patient Details
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                /* Doctor/Nurse/Admin Actions */
+                <>
+                  <Link href={`/prescriptions/new?patientId=${order.patient.id}`}>
+                    <Button variant="outline" className="w-full">
+                      Create Prescription
+                    </Button>
+                  </Link>
+                  <Link href={`/appointments/new?patientId=${order.patient.id}`}>
+                    <Button variant="outline" className="w-full">
+                      Schedule Follow-up
+                    </Button>
+                  </Link>
+                  <Link href={`/medical-records/new?patientId=${order.patient.id}`}>
+                    <Button variant="outline" className="w-full">
+                      Add Medical Record
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

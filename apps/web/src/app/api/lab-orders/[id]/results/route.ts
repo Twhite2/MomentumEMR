@@ -15,7 +15,7 @@ export async function POST(
     const uploadedBy = parseInt(session.user.id);
 
     const body = await request.json();
-    const { resultNotes, testValues } = body;
+    const { resultNotes, testValues, attachments } = body;
 
     // Verify lab order exists and belongs to hospital
     const labOrder = await prisma.labOrder.findFirst({
@@ -26,12 +26,12 @@ export async function POST(
       return apiResponse({ error: 'Lab order not found' }, 404);
     }
 
-    // Create lab result with values
+    // Create lab result with values and attachments
     const result = await prisma.labResult.create({
       data: {
         labOrderId,
         uploadedBy,
-        fileUrl: null, // TODO: Implement file upload
+        fileUrl: null,
         resultNotes: resultNotes || null,
         finalized: false,
         labResultValues: testValues
@@ -44,6 +44,15 @@ export async function POST(
               })),
             }
           : undefined,
+        attachments: attachments
+          ? {
+              create: attachments.map((file: any) => ({
+                fileName: file.name,
+                fileType: file.type,
+                fileData: file.data, // Base64 encoded file data
+              })),
+            }
+          : undefined,
       },
       include: {
         uploader: {
@@ -53,6 +62,7 @@ export async function POST(
           },
         },
         labResultValues: true,
+        attachments: true,
       },
     });
 

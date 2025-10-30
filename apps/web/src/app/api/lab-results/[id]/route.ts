@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['lab_tech', 'admin', 'doctor']);
+    const session = await requireRole(['lab_tech', 'admin', 'doctor', 'pharmacist']);
     const resultId = parseInt(params.id);
 
     const result = await prisma.labResult.findUnique({

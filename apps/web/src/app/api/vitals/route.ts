@@ -1,11 +1,11 @@
-﻿import { NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@momentum/database';
 import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 
 // GET /api/vitals - List vitals records
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'pharmacist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const { searchParams } = new URL(request.url);

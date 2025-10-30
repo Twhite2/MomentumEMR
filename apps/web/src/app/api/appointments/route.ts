@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/appointments - List appointments for hospital
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'patient']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(session.user.id);
     const userRole = session.user.role;
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
 // POST /api/appointments - Create new appointment
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'nurse']);
+    const session = await requireRole(['admin', 'nurse', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const body = await request.json();

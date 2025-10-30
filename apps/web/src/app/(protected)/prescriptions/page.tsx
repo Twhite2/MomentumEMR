@@ -44,8 +44,8 @@ interface PrescriptionsResponse {
 export default function PrescriptionsPage() {
   const { data: session } = useSession();
   const userRole = session?.user?.role;
-  // Nurses can only VIEW prescriptions, not create them
-  const canCreatePrescription = ['doctor', 'pharmacist', 'admin', 'super_admin'].includes(userRole || '');
+  // Only doctors and admins can create prescriptions (nurses and pharmacists can only view)
+  const canCreatePrescription = ['doctor', 'admin', 'super_admin'].includes(userRole || '');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
 

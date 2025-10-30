@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/admissions - List admissions
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const { searchParams } = new URL(request.url);

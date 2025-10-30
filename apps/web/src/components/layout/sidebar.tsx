@@ -19,10 +19,12 @@ import {
   ShoppingCart,
   TestTube,
   MessageSquare,
+  MessageCircle,
   X,
   Activity,
   Stethoscope,
   BedDouble,
+  UserCheck,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -44,7 +46,7 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
-    roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'cashier', 'lab_tech', 'patient'],
+    roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'receptionist', 'cashier', 'lab_tech', 'patient'],
   },
   // Super Admin specific navigation
   {
@@ -87,25 +89,31 @@ const navItems: NavItem[] = [
     label: 'Patients',
     href: '/patients',
     icon: Users,
-    roles: ['admin', 'doctor', 'nurse', 'cashier'],
+    roles: ['admin', 'doctor', 'nurse', 'receptionist', 'cashier'],
   },
   {
     label: 'Appointments',
     href: '/appointments',
     icon: Calendar,
-    roles: ['admin', 'doctor', 'nurse', 'patient'],
+    roles: ['admin', 'doctor', 'nurse', 'receptionist', 'patient'],
+  },
+  {
+    label: 'Patient Queue',
+    href: '/patient-queue',
+    icon: UserCheck,
+    roles: ['admin', 'doctor', 'nurse', 'receptionist'],
   },
   {
     label: 'Medical Records',
     href: '/medical-records',
     icon: FileText,
-    roles: ['admin', 'doctor', 'nurse'],
+    roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech'],
   },
   {
     label: 'Vitals',
     href: '/vitals',
     icon: Activity,
-    roles: ['admin', 'doctor', 'nurse'],
+    roles: ['admin', 'doctor', 'nurse', 'pharmacist'],
   },
   {
     label: 'Nursing Notes',
@@ -117,13 +125,13 @@ const navItems: NavItem[] = [
     label: 'Admissions',
     href: '/admissions',
     icon: BedDouble,
-    roles: ['admin', 'doctor', 'nurse'],
+    roles: ['admin', 'doctor', 'nurse', 'receptionist'],
   },
   {
     label: 'Lab Orders',
     href: '/lab-orders',
     icon: TestTube,
-    roles: ['admin', 'doctor', 'nurse'],
+    roles: ['admin', 'doctor', 'nurse', 'receptionist'],
   },
   {
     label: 'Incoming Orders',
@@ -135,7 +143,7 @@ const navItems: NavItem[] = [
     label: 'Lab Results',
     href: '/lab-results',
     icon: ClipboardList,
-    roles: ['lab_tech', 'patient'],
+    roles: ['lab_tech', 'patient', 'pharmacist'],
   },
   {
     label: 'Prescriptions',
@@ -159,13 +167,19 @@ const navItems: NavItem[] = [
     label: 'Billing',
     href: '/billing',
     icon: DollarSign,
-    roles: ['admin', 'cashier', 'patient'],
+    roles: ['admin', 'receptionist', 'cashier', 'pharmacist', 'lab_tech', 'patient'],
   },
   {
     label: 'Notifications',
     href: '/notifications',
     icon: Bell,
-    roles: ['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'cashier', 'lab_tech', 'patient'],
+    roles: ['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'receptionist', 'cashier', 'lab_tech', 'patient'],
+  },
+  {
+    label: 'Chat',
+    href: '/chat',
+    icon: MessageCircle,
+    roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'receptionist', 'cashier', 'lab_tech'], // Exclude super_admin and patient
   },
   {
     label: 'Surveys',

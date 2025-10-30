@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/lab-orders - List lab orders
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'lab_tech']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'lab_tech']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(session.user.id);
     const userRole = session.user.role;
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
 // POST /api/lab-orders - Create new lab order
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor']);
+    const session = await requireRole(['admin', 'doctor', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
     const orderedBy = parseInt(session.user.id);
 

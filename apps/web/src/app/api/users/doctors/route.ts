@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/users/doctors - List doctors for hospital
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'patient']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const doctors = await prisma.user.findMany({

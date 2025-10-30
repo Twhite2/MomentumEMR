@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/users/lab-scientists - Get list of lab scientists for assignment
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     // Fetch all active lab technicians in the hospital

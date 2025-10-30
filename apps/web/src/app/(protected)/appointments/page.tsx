@@ -43,8 +43,8 @@ export default function AppointmentsPage() {
   const [date, setDate] = useState('');
   const [page, setPage] = useState(1);
   
-  // Check if user can create appointments (admin or nurse only)
-  const canCreateAppointments = session?.user?.role === 'admin' || session?.user?.role === 'nurse';
+  // Check if user can create appointments (admin, nurse, or receptionist)
+  const canCreateAppointments = ['admin', 'nurse', 'receptionist'].includes(session?.user?.role || '');
 
   const { data, isLoading, error } = useQuery<AppointmentsResponse>({
     queryKey: ['appointments', status, date, page],

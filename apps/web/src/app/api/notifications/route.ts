@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/notifications - Get user's notifications
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
+    const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'receptionist', 'lab_tech', 'cashier', 'patient']);
     const userId = parseInt(session.user.id);
     const hospitalId = session.user.hospitalId ? parseInt(session.user.hospitalId) : null;
 
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 // POST /api/notifications/mark-read - Mark notifications as read
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech', 'cashier', 'patient']);
+    const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'receptionist', 'lab_tech', 'cashier', 'patient']);
     const userId = parseInt(session.user.id);
     const hospitalId = session.user.hospitalId ? parseInt(session.user.hospitalId) : null;
 

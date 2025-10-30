@@ -43,8 +43,8 @@ interface LabOrdersResponse {
 export default function LabOrdersPage() {
   const { data: session } = useSession();
   const isLabTech = session?.user?.role === 'lab_tech';
-  // Only doctors and admin can create lab orders (not nurses or lab techs)
-  const canCreateLabOrder = session?.user?.role === 'admin' || session?.user?.role === 'doctor';
+  // Doctors, admin, and receptionist can create lab orders
+  const canCreateLabOrder = ['admin', 'doctor', 'receptionist'].includes(session?.user?.role || '');
   
   const [status, setStatus] = useState('');
   const [orderType, setOrderType] = useState('');

@@ -6,7 +6,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 export async function GET(request: NextRequest) {
   try {
     console.log('[INVOICES API] Starting GET request...');
-    const session = await requireRole(['admin', 'cashier', 'doctor', 'patient']);
+    const session = await requireRole(['admin', 'cashier', 'doctor', 'patient', 'lab_tech']);
     console.log('[INVOICES API] Session:', { 
       userId: session.user.id, 
       role: session.user.role, 
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 // POST /api/invoices - Create new invoice
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'cashier', 'doctor']);
+    const session = await requireRole(['admin', 'cashier', 'doctor', 'lab_tech']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const body = await request.json();

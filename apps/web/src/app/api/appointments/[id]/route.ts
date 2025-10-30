@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'patient']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
     const appointmentId = parseInt(params.id);
 
@@ -47,7 +47,7 @@ export async function PUT(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'doctor', 'nurse']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
     const appointmentId = parseInt(params.id);
 
@@ -90,6 +90,50 @@ export async function PUT(
   }
 }
 
+// PATCH /api/appointments/[id] - Update appointment status (for check-in/check-out)
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params;
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist']);
+    const hospitalId = parseInt(session.user.hospitalId);
+    const appointmentId = parseInt(params.id);
+
+    const body = await request.json();
+    const { status } = body;
+
+    // Verify appointment exists
+    const existing = await prisma.appointment.findFirst({
+      where: { id: appointmentId, hospitalId },
+    });
+
+    if (!existing) {
+      return apiResponse({ error: 'Appointment not found' }, 404);
+    }
+
+    // Update appointment status
+    const appointment = await prisma.appointment.update({
+      where: { id: appointmentId },
+      data: { status },
+      include: {
+        patient: true,
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    return apiResponse(appointment);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
 // DELETE /api/appointments/[id] - Cancel appointment
 export async function DELETE(
   request: NextRequest,
@@ -97,7 +141,7 @@ export async function DELETE(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'doctor', 'nurse']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
     const appointmentId = parseInt(params.id);
 

@@ -4,12 +4,13 @@ import AdminDashboard from '@/components/dashboard/admin-dashboard';
 import DoctorDashboard from '@/components/dashboard/doctor-dashboard';
 import NurseDashboard from '@/components/dashboard/nurse-dashboard';
 import PharmacistDashboard from '@/components/dashboard/pharmacist-dashboard';
+import ReceptionistDashboard from '@/components/dashboard/receptionist-dashboard';
 import CashierDashboard from '@/components/dashboard/cashier-dashboard';
 import LabTechDashboard from '@/components/dashboard/lab-tech-dashboard';
 import PatientDashboard from '@/components/dashboard/patient-dashboard';
 import SuperAdminDashboard from '@/app/(protected)/super-admin/page';
 
-type UserRole = 'super_admin' | 'admin' | 'doctor' | 'nurse' | 'pharmacist' | 'cashier' | 'lab_tech' | 'patient';
+type UserRole = 'super_admin' | 'admin' | 'doctor' | 'nurse' | 'pharmacist' | 'receptionist' | 'cashier' | 'lab_tech' | 'patient';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -32,6 +33,7 @@ export default async function DashboardPage() {
     doctor: DoctorDashboard,
     nurse: NurseDashboard,
     pharmacist: PharmacistDashboard,
+    receptionist: ReceptionistDashboard,
     cashier: CashierDashboard,
     lab_tech: LabTechDashboard,
     patient: PatientDashboard,

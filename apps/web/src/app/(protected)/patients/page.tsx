@@ -59,8 +59,8 @@ export default function PatientsPage() {
   const [patientType, setPatientType] = useState('');
   const [page, setPage] = useState(1);
   
-  // Check if user can create patients (admin only - nurses can only view)
-  const canCreatePatients = session?.user?.role === 'admin';
+  // Check if user can create patients (admin, nurse, or receptionist for front desk registration)
+  const canCreatePatients = ['admin', 'nurse', 'receptionist'].includes(session?.user?.role || '');
 
   const { data, isLoading, error } = useQuery<PatientsResponse>({
     queryKey: ['patients', search, patientType, page],
