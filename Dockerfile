@@ -68,17 +68,28 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next ./apps/web/.next
 COPY --from=builder /app/apps/web/node_modules ./apps/web/node_modules
 
-# Switch to non-root user
-USER nextjs
-
 # Expose port
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start command: Push schema, seed database, then start server
-CMD cd packages/database && \
-    pnpm prisma db push --accept-data-loss --skip-generate || true && \
-    pnpm seed || true && \
-    cd ../.. && \
-    pnpm --filter @momentum/web start
+# Create startup script
+RUN echo '#!/bin/sh\n\
+set -e\n\
+echo "🚀 Starting deployment..."\n\
+echo "📊 DATABASE_URL is set: $([ -n "$DATABASE_URL" ] && echo "YES" || echo "NO")"\n\
+cd /app/packages/database\n\
+echo "🔄 Pushing database schema..."\n\
+pnpm prisma db push --accept-data-loss --skip-generate || echo "⚠️ Schema push failed or already up to date"\n\
+echo "🌱 Running seed script..."\n\
+pnpm seed || echo "⚠️ Seed failed or already completed"\n\
+cd /app\n\
+echo "✅ Starting Next.js server..."\n\
+exec pnpm --filter @momentum/web start\n\
+' > /start.sh && chmod +x /start.sh
+
+# Switch to non-root user
+USER nextjs
+
+# Start command
+CMD ["/start.sh"]
