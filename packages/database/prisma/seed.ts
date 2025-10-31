@@ -90,6 +90,28 @@ async function main() {
 
   console.log('✅ Nurse user created:', nurse.email);
 
+  // Create receptionist user
+  const receptionistPassword = await bcrypt.hash('receptionist123', 10);
+  const receptionist = await prisma.user.upsert({
+    where: { email: 'receptionist@citygeneralhospital.com' },
+    update: {
+      name: 'Sarah Martinez',
+      hashedPassword: receptionistPassword,
+      role: 'receptionist',
+      active: true,
+    },
+    create: {
+      name: 'Sarah Martinez',
+      email: 'receptionist@citygeneralhospital.com',
+      hashedPassword: receptionistPassword,
+      role: 'receptionist',
+      hospitalId: hospital.id,
+      active: true,
+    },
+  });
+
+  console.log('✅ Receptionist user created:', receptionist.email);
+
   // Additional Doctors
   console.log('👨‍⚕️ Creating additional doctors...');
   await prisma.user.create({
