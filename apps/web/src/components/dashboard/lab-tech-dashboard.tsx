@@ -12,7 +12,7 @@ interface LabTechDashboardProps {
 }
 
 export default function LabTechDashboard({ session }: LabTechDashboardProps) {
-  // Fetch lab orders data
+  // Fetch investigations data
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['lab-orders-dashboard'],
     queryFn: async () => {
@@ -114,10 +114,10 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
         </Link>
       </div>
 
-      {/* Lab Orders Queue */}
+      {/* Investigations Queue */}
       <div className="bg-white rounded-lg border p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Recent Lab Orders</h2>
+          <h2 className="text-lg font-semibold">Recent Investigations</h2>
           <Link href="/lab-orders" className="text-sm text-primary hover:underline">
             View All
           </Link>
@@ -131,7 +131,7 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
           ) : recentOrders.length === 0 ? (
             <div className="p-8 text-center">
               <TestTube className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-20" />
-              <p className="text-sm text-muted-foreground">No recent lab orders</p>
+              <p className="text-sm text-muted-foreground">No recent investigations</p>
             </div>
           ) : (
             recentOrders.map((order: any) => (

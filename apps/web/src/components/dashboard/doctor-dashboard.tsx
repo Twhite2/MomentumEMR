@@ -89,7 +89,7 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
         </Link>
         <Link href="/lab-orders">
           <StatCard
-            title="Pending Lab Orders"
+            title="Pending Investigations"
             value={isLoading ? '...' : (stats?.pendingLabOrders || 0)}
             icon={TestTube}
             color="yellow"
@@ -161,7 +161,7 @@ export default function DoctorDashboard({ session }: DoctorDashboardProps) {
           <div className="grid grid-cols-2 gap-4">
             <Link href="/lab-orders" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
               <TestTube className="w-6 h-6 mx-auto mb-2 text-primary" />
-              <p className="text-sm font-medium">Lab Orders</p>
+              <p className="text-sm font-medium">Investigations</p>
             </Link>
             <Link href="/prescriptions" className="p-4 border border-border rounded-lg hover:bg-spindle transition-colors text-center">
               <Pill className="w-6 h-6 mx-auto mb-2 text-primary" />

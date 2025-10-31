@@ -7,6 +7,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useSession } from 'next-auth/react';
 
 interface Prescription {
   id: number;
@@ -41,6 +42,7 @@ export default function PrescriptionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
   const prescriptionId = params.id as string;
 
   const { data: prescription, isLoading, error } = useQuery<Prescription>({
@@ -254,8 +256,30 @@ export default function PrescriptionDetailPage() {
             </Link>
           </div>
 
-          {/* Actions */}
-          {prescription.status === 'active' && (
+          {/* Prescription Summary */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4">Prescription Summary</h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-green-haze/10 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Pill className="w-5 h-5 text-green-haze" />
+                  <span className="text-sm font-medium text-muted-foreground">Total Drugs</span>
+                </div>
+                <span className="text-2xl font-bold text-green-haze">
+                  {prescription.prescriptionItems.length}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span className="text-sm font-medium text-muted-foreground">Status</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(prescription.status)}`}>
+                  {prescription.status.toUpperCase()}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Pharmacy Actions */}
+          {(session?.user?.role === 'pharmacist' || session?.user?.role === 'admin') && prescription.status === 'active' && (
             <div className="bg-white rounded-lg border border-border p-6">
               <h2 className="text-lg font-semibold mb-4">Pharmacy Actions</h2>
               <div className="space-y-2">

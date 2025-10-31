@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Patient not found' }, 404);
     }
 
-    // Create prescription with items
+    // Create prescription with items (calculate drug count)
     const prescription = await prisma.prescription.create({
       data: {
         hospitalId,
@@ -124,6 +124,7 @@ export async function POST(request: NextRequest) {
         doctorId,
         treatmentPlan: treatmentPlan || null,
         status: 'active',
+        drugCount: medications.length,
         prescriptionItems: {
           create: medications.map((med: any) => ({
             drugName: med.drugName,

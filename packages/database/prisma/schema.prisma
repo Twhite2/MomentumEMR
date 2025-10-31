@@ -355,6 +355,7 @@ model Prescription {
   doctorId      Int                  @map("doctor_id")
   treatmentPlan String?              @map("treatment_plan") @db.Text
   status        PrescriptionStatus?
+  drugCount     Int                  @default(0) @map("drug_count")
   createdAt     DateTime             @default(now()) @map("created_at")
   updatedAt     DateTime             @updatedAt @map("updated_at")
 
