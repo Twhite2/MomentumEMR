@@ -2,4 +2,4 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "cd packages/database && pnpm prisma db push --accept-data-loss --skip-generate || true; cd ../.. && pnpm --filter @momentum/web start"
+startCommand = "cd packages/database && pnpm prisma db push --accept-data-loss --skip-generate || true; pnpm seed || true; cd ../.. && pnpm --filter @momentum/web start"
