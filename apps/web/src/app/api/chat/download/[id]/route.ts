@@ -57,8 +57,8 @@ export async function GET(
       },
     });
 
-    // Return file
-    return new Response(fileBuffer, {
+    // Return file - Convert Buffer to Uint8Array for Response compatibility
+    return new Response(new Uint8Array(fileBuffer), {
       headers: {
         'Content-Type': attachment.fileType,
         'Content-Disposition': `attachment; filename="${attachment.originalFileName}"`,
