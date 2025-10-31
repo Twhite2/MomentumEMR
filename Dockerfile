@@ -73,23 +73,8 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Create startup script
-RUN echo '#!/bin/sh\n\
-set -e\n\
-echo "🚀 Starting deployment..."\n\
-echo "📊 DATABASE_URL is set: $([ -n "$DATABASE_URL" ] && echo "YES" || echo "NO")"\n\
-cd /app/packages/database\n\
-echo "🔄 Pushing database schema..."\n\
-pnpm prisma db push --accept-data-loss --skip-generate || echo "⚠️ Schema push failed or already up to date"\n\
-echo "🌱 Running seed script..."\n\
-pnpm seed || echo "⚠️ Seed failed or already completed"\n\
-cd /app\n\
-echo "✅ Starting Next.js server..."\n\
-exec pnpm --filter @momentum/web start\n\
-' > /start.sh && chmod +x /start.sh
-
 # Switch to non-root user
 USER nextjs
 
-# Start command
-CMD ["/start.sh"]
+# Start command - run schema push, seed, then start server
+CMD ["/bin/sh", "-c", "cd /app/packages/database && pnpm prisma db push --accept-data-loss --skip-generate 2>&1 && pnpm seed 2>&1 && cd /app && exec pnpm --filter @momentum/web start"]
