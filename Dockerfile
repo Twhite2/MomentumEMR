@@ -14,6 +14,9 @@ COPY packages/database/package.json ./packages/database/
 COPY packages/ui/package.json ./packages/ui/
 COPY apps/web/package.json ./apps/web/
 
+# Copy Prisma schema BEFORE installing (needed for postinstall hook)
+COPY packages/database/prisma ./packages/database/prisma
+
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
