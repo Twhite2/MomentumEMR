@@ -1,5 +1,7 @@
 [build]
-builder = "nixpacks"
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "cd packages/database && pnpm prisma db push --accept-data-loss --skip-generate || true; pnpm seed || true; cd ../.. && pnpm --filter @momentum/web start"
+# The Dockerfile's CMD handles schema push, seed, and server start
+# No need for startCommand here
