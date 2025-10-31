@@ -127,13 +127,11 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Patient not found' }, 404);
     }
 
-    // Calculate totals
-    const subtotal = items.reduce(
+    // Calculate totals (no VAT)
+    const totalAmount = items.reduce(
       (sum: number, item: any) => sum + parseFloat(item.amount),
       0
     );
-    const tax = subtotal * 0.075; // 7.5% VAT
-    const totalAmount = subtotal + tax;
 
     // Create invoice with items
     const invoice = await prisma.invoice.create({

@@ -86,12 +86,8 @@ export default function NewInvoicePage() {
     return items.reduce((sum, item) => sum + item.amount, 0);
   };
 
-  const calculateTax = () => {
-    return calculateSubtotal() * 0.075; // 7.5% VAT
-  };
-
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateTax();
+    return calculateSubtotal(); // No VAT
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -244,14 +240,6 @@ export default function NewInvoicePage() {
             <div className="mt-6 pt-6 border-t border-border">
               <div className="flex justify-end">
                 <div className="w-full md:w-1/2 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal:</span>
-                    <span className="font-medium">{formatCurrency(calculateSubtotal())}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">VAT (7.5%):</span>
-                    <span className="font-medium">{formatCurrency(calculateTax())}</span>
-                  </div>
                   <div className="flex justify-between pt-2 border-t">
                     <span className="font-semibold text-lg">Total:</span>
                     <span className="font-bold text-lg text-green-haze">

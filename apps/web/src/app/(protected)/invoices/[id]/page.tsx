@@ -231,18 +231,6 @@ export default function InvoiceDetailPage() {
 
             <div className="mt-6 pt-6 border-t flex justify-end">
               <div className="w-full md:w-1/2 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal:</span>
-                  <span className="font-medium">
-                    {formatCurrency(invoice.totalAmount / 1.075)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">VAT (7.5%):</span>
-                  <span className="font-medium">
-                    {formatCurrency(invoice.totalAmount - invoice.totalAmount / 1.075)}
-                  </span>
-                </div>
                 <div className="flex justify-between pt-2 border-t">
                   <span className="font-semibold text-lg">Total:</span>
                   <span className="font-bold text-lg">
