@@ -56,6 +56,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/packages/database/prisma ./packages/database/prisma
 COPY --from=builder /app/packages/database/package.json ./packages/database/
 COPY --from=builder /app/packages/database/node_modules ./packages/database/node_modules
+COPY --from=builder /app/packages/database/*.ts ./packages/database/
 COPY --from=builder /app/apps/web/package.json ./apps/web/
 COPY --from=builder /app/apps/web/next.config.ts ./apps/web/
 COPY --from=builder /app/apps/web/public ./apps/web/public
@@ -77,7 +78,7 @@ ENV HOSTNAME="0.0.0.0"
 
 # Start command: Push schema, seed database, then start server
 CMD cd packages/database && \
-    npx prisma db push --accept-data-loss --skip-generate || true && \
-    npx tsx prisma/seed.ts || true && \
+    pnpm prisma db push --accept-data-loss --skip-generate || true && \
+    pnpm seed || true && \
     cd ../.. && \
     node apps/web/server.js
