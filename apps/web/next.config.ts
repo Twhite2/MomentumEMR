@@ -2,7 +2,6 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
   transpilePackages: ['@momentum/ui', '@momentum/database'],
   eslint: {
     // Don't fail production builds on ESLint errors

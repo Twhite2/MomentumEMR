@@ -64,9 +64,9 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-workspace.yaml ./
 COPY --from=builder /app/node_modules ./node_modules
 
-# Copy built application
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+# Copy built Next.js application
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next ./apps/web/.next
+COPY --from=builder /app/apps/web/node_modules ./apps/web/node_modules
 
 # Switch to non-root user
 USER nextjs
@@ -81,4 +81,4 @@ CMD cd packages/database && \
     pnpm prisma db push --accept-data-loss --skip-generate || true && \
     pnpm seed || true && \
     cd ../.. && \
-    node apps/web/server.js
+    pnpm --filter @momentum/web start
