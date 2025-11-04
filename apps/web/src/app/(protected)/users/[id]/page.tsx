@@ -157,6 +157,7 @@ export default function UserDetailPage() {
       pharmacist: 'bg-amaranth text-white',
       lab_tech: 'bg-danube text-white',
       cashier: 'bg-saffron text-black',
+      receptionist: 'bg-purple-500 text-white',
       patient: 'bg-muted text-muted-foreground',
     };
     return colors[role] || 'bg-muted text-muted-foreground';
@@ -250,6 +251,7 @@ export default function UserDetailPage() {
                   <option value="pharmacist">Pharmacist</option>
                   <option value="lab_tech">Lab Technician</option>
                   <option value="cashier">Cashier</option>
+                  <option value="receptionist">Receptionist</option>
                   <option value="patient">Patient</option>
                 </Select>
 
@@ -364,6 +366,14 @@ export default function UserDetailPage() {
                   <li>Payment recording</li>
                   <li>Financial tracking</li>
                   <li>Receipt generation</li>
+                </ul>
+              )}
+              {user.role === 'receptionist' && (
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Patient registration and check-in</li>
+                  <li>Appointment scheduling and management</li>
+                  <li>Front desk operations</li>
+                  <li>Basic patient information access</li>
                 </ul>
               )}
               {user.role === 'patient' && (

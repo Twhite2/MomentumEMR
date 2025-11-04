@@ -119,6 +119,7 @@ export default function NewUserPage() {
                 <option value="pharmacist">Pharmacist</option>
                 <option value="lab_tech">Lab Technician</option>
                 <option value="cashier">Cashier</option>
+                <option value="receptionist">Receptionist</option>
                 <option value="patient">Patient</option>
               </Select>
             </div>
@@ -174,6 +175,9 @@ export default function NewUserPage() {
               )}
               {formData.role === 'cashier' && (
                 <p>Access to billing, invoicing, payment recording, and financial reports.</p>
+              )}
+              {formData.role === 'receptionist' && (
+                <p>Access to patient registration, appointment scheduling, and front desk operations.</p>
               )}
               {formData.role === 'patient' && (
                 <p>Access to personal medical records, appointments, and prescriptions.</p>
