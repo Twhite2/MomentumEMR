@@ -77,7 +77,7 @@ export default function NewAppointmentPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Combine date and time
@@ -87,10 +87,35 @@ export default function NewAppointmentPage() {
     const endDateTime = new Date(startDateTime);
     endDateTime.setMinutes(endDateTime.getMinutes() + parseInt(formData.duration));
 
-    // For patient users, use their patientId from session
-    const patientIdToUse = session?.user?.role === 'patient' 
-      ? (session.user as any).patientId 
-      : formData.patientId;
+    // For patient users, find their patient record
+    let patientIdToUse = formData.patientId;
+    
+    if (session?.user?.role === 'patient') {
+      try {
+        // Patient API now returns only the user's own record
+        const response = await axios.get('/api/patients?limit=1');
+        if (response.data.patients && response.data.patients.length > 0) {
+          patientIdToUse = response.data.patients[0].id;
+        } else {
+          toast.error('Patient record not found. Please contact support.');
+          return;
+        }
+      } catch (error) {
+        toast.error('Failed to find patient record');
+        return;
+      }
+    }
+
+    // Validation
+    if (!patientIdToUse) {
+      toast.error('Please select a patient');
+      return;
+    }
+
+    if (!formData.doctorId) {
+      toast.error('Please select a doctor');
+      return;
+    }
 
     const payload = {
       patientId: patientIdToUse,

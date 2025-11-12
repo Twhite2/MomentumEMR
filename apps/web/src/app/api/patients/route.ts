@@ -8,13 +8,14 @@ import crypto from 'crypto';
 // GET /api/patients - List patients for hospital
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'cashier', 'lab_tech']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'cashier', 'lab_tech', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(session.user.id);
     const userRole = session.user.role;
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
+    const email = searchParams.get('email') || '';
     const patientType = searchParams.get('patientType') || undefined;
     const showAll = searchParams.get('showAll') === 'true'; // Admin can override filter
     const page = parseInt(searchParams.get('page') || '1');
@@ -24,9 +25,25 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const where: any = { hospitalId };
 
+    // Patients can only see their own record
+    if (userRole === 'patient') {
+      where.contactInfo = {
+        path: ['email'],
+        equals: session.user.email
+      };
+    }
+
     // Doctors see only their assigned patients unless showAll is true
     if (userRole === 'doctor' && !showAll) {
       where.primaryDoctorId = userId;
+    }
+
+    // Specific email filter (for finding patient by email)
+    if (email && userRole !== 'patient') {
+      where.contactInfo = {
+        path: ['email'],
+        equals: email
+      };
     }
 
     if (search) {
