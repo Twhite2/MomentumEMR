@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Edit, Calendar, User, FileText, Stethoscope } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, User, FileText, Stethoscope, Download, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
@@ -45,7 +45,18 @@ export default function MedicalRecordDetailPage() {
     queryKey: ['medical-record', recordId],
     queryFn: async () => {
       const response = await axios.get(`/api/medical-records/${recordId}`);
-      return response.data;
+      const data = response.data;
+      
+      // Parse attachments if they're stored as JSON string
+      if (data.attachments && typeof data.attachments === 'string') {
+        try {
+          data.attachments = JSON.parse(data.attachments);
+        } catch (e) {
+          data.attachments = null;
+        }
+      }
+      
+      return data;
     },
   });
 
@@ -182,10 +193,62 @@ export default function MedicalRecordDetailPage() {
               <FileText className="w-5 h-5 text-tory-blue" />
               Attachments
             </h2>
-            {record.attachments && Object.keys(record.attachments).length > 0 ? (
+            {record.attachments && Array.isArray(record.attachments) && record.attachments.length > 0 ? (
               <div className="space-y-2">
-                {/* TODO: Display attachments when file upload is implemented */}
-                <p className="text-sm text-muted-foreground">Attachments will be displayed here</p>
+                {record.attachments.map((file: any, index: number) => {
+                  // Extract file key from URL for authenticated download
+                  const getFileKey = (url: string) => {
+                    try {
+                      const urlObj = new URL(url);
+                      const pathParts = urlObj.pathname.split('/');
+                      const bucketIndex = pathParts.findIndex(part => part === 'emr-uploads');
+                      if (bucketIndex !== -1 && bucketIndex < pathParts.length - 1) {
+                        return pathParts.slice(bucketIndex + 1).join('/');
+                      }
+                      return url;
+                    } catch {
+                      return url;
+                    }
+                  };
+
+                  const fileKey = getFileKey(file.url);
+                  const downloadUrl = `/api/files/download?key=${encodeURIComponent(fileKey)}&filename=${encodeURIComponent(file.name)}`;
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-muted/50 border border-border rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <FileText className="w-5 h-5 text-tory-blue flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {file.size ? `${(file.size / 1024).toFixed(2)} KB` : 'Unknown size'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={downloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 hover:bg-primary/10 rounded text-primary transition-colors"
+                          title="Open in new tab"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                        <a
+                          href={downloadUrl}
+                          className="p-2 hover:bg-green-haze/10 rounded text-green-haze transition-colors"
+                          title="Download file"
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-8">
