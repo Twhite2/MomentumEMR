@@ -25,8 +25,20 @@ export default function BrandingSettings({ hospitalId, initialData }: BrandingSe
   const queryClient = useQueryClient();
   const { updateTheme } = useHospitalTheme();
 
+  // Convert B2 URL to proxy URL for initial preview
+  const getProxiedLogoUrl = (url: string | null | undefined) => {
+    if (!url) return null;
+    if (url.includes('backblazeb2.com')) {
+      const urlParts = url.split('/file/emr-uploads/');
+      if (urlParts.length > 1) {
+        return `/api/images/${urlParts[1]}`;
+      }
+    }
+    return url;
+  };
+
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logoUrl || null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(getProxiedLogoUrl(initialData?.logoUrl));
   const [primaryColor, setPrimaryColor] = useState(initialData?.primaryColor || '#0F4C81');
   const [secondaryColor, setSecondaryColor] = useState(initialData?.secondaryColor || '#4A90E2');
   const [tagline, setTagline] = useState(initialData?.tagline || '');
@@ -46,8 +58,11 @@ export default function BrandingSettings({ hospitalId, initialData }: BrandingSe
       toast.success('Branding updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['hospital', hospitalId] });
       
-      // Update logo preview with the new uploaded URL (with cache busting)
-      const cacheBustedUrl = data.hospital?.logoUrl ? data.hospital.logoUrl + '?t=' + Date.now() : null;
+      // Convert logo URL to proxy URL and add cache busting
+      const logoUrl = data.hospital?.logoUrl;
+      const proxiedLogoUrl = getProxiedLogoUrl(logoUrl);
+      const cacheBustedUrl = proxiedLogoUrl ? proxiedLogoUrl + '?t=' + Date.now() : null;
+      
       if (cacheBustedUrl) {
         setLogoPreview(cacheBustedUrl);
       }

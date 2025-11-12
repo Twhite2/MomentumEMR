@@ -76,20 +76,28 @@ export async function PUT(
     }
     const data = await request.json();
 
+    // Prepare update data
+    const updateData: any = {
+      name: data.name,
+      address: data.address,
+      phoneNumber: data.phoneNumber,
+      contactEmail: data.contactEmail,
+      subscriptionPlan: data.subscriptionPlan,
+      active: data.active,
+      primaryColor: data.primaryColor,
+      secondaryColor: data.secondaryColor,
+      tagline: data.tagline,
+    };
+
+    // Only update logoUrl if it's a valid B2 URL (not a proxy URL)
+    // Logo uploads should go through /api/hospitals/[id]/branding endpoint
+    if (data.logoUrl && data.logoUrl.includes('backblazeb2.com')) {
+      updateData.logoUrl = data.logoUrl;
+    }
+
     const hospital = await prisma.hospital.update({
       where: { id: hospitalId },
-      data: {
-        name: data.name,
-        address: data.address,
-        phoneNumber: data.phoneNumber,
-        contactEmail: data.contactEmail,
-        subscriptionPlan: data.subscriptionPlan,
-        active: data.active,
-        logoUrl: data.logoUrl,
-        primaryColor: data.primaryColor,
-        secondaryColor: data.secondaryColor,
-        tagline: data.tagline,
-      },
+      data: updateData,
     }) as any;
 
     return NextResponse.json(hospital);

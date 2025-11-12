@@ -50,7 +50,7 @@ export default function SettingsPage() {
 
   // Save branding mutation
   const saveBrandingMutation = useMutation({
-    mutationFn: async (data: typeof brandingData) => {
+    mutationFn: async (data: Partial<typeof brandingData>) => {
       const response = await axios.put(`/api/hospitals/${session?.user?.hospitalId}`, data);
       return response.data;
     },
@@ -69,7 +69,9 @@ export default function SettingsPage() {
 
   const handleSave = () => {
     if (activeTab === 'branding') {
-      saveBrandingMutation.mutate(brandingData);
+      // Don't send logoUrl - it should only be updated via the branding upload endpoint
+      const { logoUrl, ...dataWithoutLogo } = brandingData;
+      saveBrandingMutation.mutate(dataWithoutLogo);
     } else {
       toast.success('Settings saved successfully');
     }

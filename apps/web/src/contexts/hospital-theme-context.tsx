@@ -44,10 +44,21 @@ export function HospitalThemeProvider({ children }: { children: ReactNode }) {
           const response = await fetch(`/api/hospitals/${session.user.hospitalId}/theme`);
           if (response.ok) {
             const hospitalTheme = await response.json();
+            
+            // Convert B2 direct URL to proxied URL for private buckets
+            let logoUrl = hospitalTheme.logoUrl;
+            if (logoUrl && logoUrl.includes('backblazeb2.com')) {
+              // Extract the key from the B2 URL
+              const urlParts = logoUrl.split('/file/emr-uploads/');
+              if (urlParts.length > 1) {
+                logoUrl = `/api/images/${urlParts[1]}`;
+              }
+            }
+            
             setTheme({
               primaryColor: hospitalTheme.primaryColor || defaultTheme.primaryColor,
               secondaryColor: hospitalTheme.secondaryColor || defaultTheme.secondaryColor,
-              logoUrl: hospitalTheme.logoUrl,
+              logoUrl: logoUrl,
               tagline: hospitalTheme.tagline,
             });
           }
