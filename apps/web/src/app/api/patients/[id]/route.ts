@@ -88,7 +88,7 @@ export async function PUT(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'nurse', 'receptionist']);
+    const session = await requireRole(['admin', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
     const patientId = parseInt(params.id);
 

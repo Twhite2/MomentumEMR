@@ -52,6 +52,7 @@ export default function PatientDetailPage() {
   const canOrderLabs = isDoctor; // Only doctors can order lab tests
   const canCreateMedicalRecords = !isNurse && !isReceptionist; // Nurses and receptionists cannot create medical records
   const canCreateInvoices = ['admin', 'receptionist'].includes(userRole || ''); // Only admins/receptionists handle billing
+  const canEditPatient = ['admin', 'receptionist'].includes(userRole || ''); // Only admin/receptionist can edit patient info
 
   const { data: patient, isLoading, error } = useQuery<Patient>({
     queryKey: ['patient', patientId],
@@ -127,12 +128,14 @@ export default function PatientDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href={`/patients/${patient.id}/edit`}>
-            <Button variant="outline">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          </Link>
+          {canEditPatient && (
+            <Link href={`/patients/${patient.id}/edit`}>
+              <Button variant="outline">
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            </Link>
+          )}
           <Link href={`/appointments/new?patientId=${patient.id}`}>
             <Button variant="primary">
               <Calendar className="w-4 h-4 mr-2" />

@@ -292,14 +292,14 @@ export default function MedicalRecordDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
             <div className="space-y-2">
-              <Link href={`/prescriptions/new?patientId=${record.patient.id}`}>
-                <Button variant="outline" className="w-full">
-                  Create Prescription
-                </Button>
-              </Link>
               <Link href={`/lab-orders/new?patientId=${record.patient.id}`}>
                 <Button variant="outline" className="w-full">
                   Order Lab Test
+                </Button>
+              </Link>
+              <Link href={`/prescriptions/new?patientId=${record.patient.id}`}>
+                <Button variant="outline" className="w-full">
+                  Create Prescription
                 </Button>
               </Link>
               <Link href={`/appointments/new?patientId=${record.patient.id}`}>

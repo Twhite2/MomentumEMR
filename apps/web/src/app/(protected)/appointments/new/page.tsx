@@ -189,13 +189,28 @@ export default function NewAppointmentPage() {
                 <option value="follow_up">Follow-up</option>
               </Select>
 
-              <Input
-                label="Department"
+              <Select
+                label="Department (Optional)"
                 name="department"
                 value={formData.department}
                 onChange={handleInputChange}
-                placeholder="e.g., Cardiology, General"
-              />
+              >
+                <option value="">Select Department</option>
+                <option value="General Medicine">General Medicine</option>
+                <option value="Pediatrics">Pediatrics</option>
+                <option value="Surgery">Surgery</option>
+                <option value="Obstetrics & Gynecology">Obstetrics & Gynecology</option>
+                <option value="Cardiology">Cardiology</option>
+                <option value="Orthopedics">Orthopedics</option>
+                <option value="Emergency">Emergency</option>
+                <option value="Dentistry">Dentistry</option>
+                <option value="Ophthalmology">Ophthalmology</option>
+                <option value="ENT">ENT (Ear, Nose, Throat)</option>
+                <option value="Dermatology">Dermatology</option>
+                <option value="Psychiatry">Psychiatry</option>
+                <option value="Neurology">Neurology</option>
+                <option value="Radiology">Radiology</option>
+              </Select>
             </div>
           </div>
 
