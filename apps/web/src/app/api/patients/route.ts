@@ -160,6 +160,7 @@ export async function POST(request: NextRequest) {
       corporateClientId,
       primaryDoctorId,
       userId, // Optional: If provided, link to existing user account
+      password, // Optional: Custom password for patient account
     } = body;
 
     // Validation
@@ -225,8 +226,14 @@ export async function POST(request: NextRequest) {
     
     // Only generate password if creating a new user (not linking to existing)
     if (!userId) {
-      temporaryPassword = generatePassword();
-      hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+      // Use provided password or auto-generate one
+      if (password && password.trim().length > 0) {
+        temporaryPassword = password.trim();
+        hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+      } else {
+        temporaryPassword = generatePassword();
+        hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+      }
     }
 
     // Create user and patient in a transaction

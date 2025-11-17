@@ -25,6 +25,7 @@ import {
   Stethoscope,
   BedDouble,
   UserCheck,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -152,6 +153,12 @@ const navItems: NavItem[] = [
     roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'patient'],
   },
   {
+    label: 'Allergies',
+    href: '/allergies',
+    icon: AlertTriangle,
+    roles: ['admin', 'doctor', 'nurse'],
+  },
+  {
     label: 'Pharmacy',
     href: '/pharmacy',
     icon: Pill,
@@ -168,6 +175,12 @@ const navItems: NavItem[] = [
     href: '/billing',
     icon: DollarSign,
     roles: ['admin', 'receptionist', 'cashier', 'pharmacist', 'lab_tech', 'patient'],
+  },
+  {
+    label: 'HMO & Claims',
+    href: '/hmo',
+    icon: Building2,
+    roles: ['admin', 'cashier'],
   },
   {
     label: 'Notifications',

@@ -22,6 +22,7 @@ interface MedicalRecord {
   visitDate: string;
   diagnosis: string | null;
   notes: string | null;
+  allergies: any;
   attachments: any;
   patient: {
     id: number;
@@ -42,6 +43,7 @@ export default function EditMedicalRecordPage() {
     visitDate: '',
     diagnosis: '',
     notes: '',
+    allergies: '',
   });
 
   const [attachments, setAttachments] = useState<Array<{ name: string; url: string; size: number }>>([]);
@@ -59,11 +61,25 @@ export default function EditMedicalRecordPage() {
   // Populate form when record loads
   useEffect(() => {
     if (record) {
+      // Parse allergies from JSON
+      let allergiesString = '';
+      if (record.allergies) {
+        try {
+          const parsed = typeof record.allergies === 'string' 
+            ? JSON.parse(record.allergies) 
+            : record.allergies;
+          allergiesString = Array.isArray(parsed) ? parsed.join(', ') : '';
+        } catch (e) {
+          allergiesString = '';
+        }
+      }
+
       setFormData({
         patientId: record.patientId.toString(),
         visitDate: new Date(record.visitDate).toISOString().split('T')[0],
         diagnosis: record.diagnosis || '',
         notes: record.notes || '',
+        allergies: allergiesString,
       });
 
       // Parse attachments if they exist
@@ -114,11 +130,17 @@ export default function EditMedicalRecordPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Parse allergies into array
+    const allergiesArray = formData.allergies
+      ? formData.allergies.split(',').map((a) => a.trim()).filter((a) => a.length > 0)
+      : [];
+
     const payload = {
       patientId: formData.patientId,
       visitDate: formData.visitDate,
       diagnosis: formData.diagnosis || null,
       notes: formData.notes || null,
+      allergies: allergiesArray.length > 0 ? JSON.stringify(allergiesArray) : null,
       attachments: attachments.length > 0 ? JSON.stringify(attachments) : null,
     };
 
@@ -220,6 +242,19 @@ export default function EditMedicalRecordPage() {
                 rows={8}
                 placeholder="Document patient symptoms, examination findings, treatment plan, and any other relevant clinical information..."
               />
+
+              <div className="space-y-2">
+                <Input
+                  label="Allergies (Optional)"
+                  name="allergies"
+                  value={formData.allergies}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Penicillin, Latex, Peanuts (comma-separated)"
+                />
+                <p className="text-xs text-muted-foreground">
+                  ⚠️ List any known allergies discovered during this visit. Separate multiple allergies with commas.
+                </p>
+              </div>
             </div>
           </div>
 

@@ -29,6 +29,7 @@ export default function NewMedicalRecordPage() {
     visitDate: new Date().toISOString().split('T')[0],
     diagnosis: '',
     notes: '',
+    allergies: '', // Comma-separated list of allergies
   });
 
   const [attachments, setAttachments] = useState<Array<{ name: string; url: string; size: number }>>([]);
@@ -72,11 +73,17 @@ export default function NewMedicalRecordPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Parse allergies into array
+    const allergiesArray = formData.allergies
+      ? formData.allergies.split(',').map((a) => a.trim()).filter((a) => a.length > 0)
+      : [];
+
     const payload = {
       patientId: formData.patientId,
       visitDate: formData.visitDate,
       diagnosis: formData.diagnosis || null,
       notes: formData.notes || null,
+      allergies: allergiesArray.length > 0 ? JSON.stringify(allergiesArray) : null,
       attachments: attachments.length > 0 ? JSON.stringify(attachments) : null,
     };
 
@@ -157,6 +164,19 @@ export default function NewMedicalRecordPage() {
                 rows={8}
                 placeholder="Document patient symptoms, examination findings, treatment plan, and any other relevant clinical information..."
               />
+
+              <div className="space-y-2">
+                <Input
+                  label="Allergies (Optional)"
+                  name="allergies"
+                  value={formData.allergies}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Penicillin, Latex, Peanuts (comma-separated)"
+                />
+                <p className="text-xs text-muted-foreground">
+                  ⚠️ List any known allergies discovered during this visit. Separate multiple allergies with commas.
+                </p>
+              </div>
             </div>
           </div>
 

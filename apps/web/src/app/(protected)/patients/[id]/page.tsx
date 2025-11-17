@@ -271,7 +271,7 @@ export default function PatientDetailPage() {
             
             {/* Only admins/receptionists can create invoices */}
             {canCreateInvoices && (
-              <Link href={`/billing/new?patientId=${patient.id}`}>
+              <Link href={`/invoices/new?patientId=${patient.id}`}>
                 <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
                   <DollarSign className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
                   <p className="text-sm font-medium">Create Invoice</p>

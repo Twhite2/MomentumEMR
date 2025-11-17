@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, Info } from 'lucide-react';
+import { ArrowLeft, Save, Info, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -34,6 +34,8 @@ export default function NewPatientPage() {
   const userId = searchParams.get('userId');
   const { data: session } = useSession();
   const [patientType, setPatientType] = useState('self_pay');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   // Nurses cannot assign doctors or manage insurance/billing
   const isNurse = session?.user?.role === 'nurse';
@@ -59,6 +61,8 @@ export default function NewPatientPage() {
     patientType: 'self_pay',
     phone: '',
     email: '',
+    password: '',
+    confirmPassword: '',
     address: '',
     emergencyContact: '',
     insuranceId: '',
@@ -119,11 +123,19 @@ export default function NewPatientPage() {
     onSuccess: (data) => {
       toast.success('Patient registered successfully!');
       
-      // Show temporary password in development
+      // Show password confirmation
       if (data.temporaryPassword) {
-        toast.success(`Account created! Temporary password: ${data.temporaryPassword}`, {
-          duration: 10000,
-        });
+        if (formData.password) {
+          // Custom password was used
+          toast.success(`Account created with your custom password`, {
+            duration: 5000,
+          });
+        } else {
+          // Auto-generated password
+          toast.success(`Account created! Auto-generated password: ${data.temporaryPassword}`, {
+            duration: 10000,
+          });
+        }
       }
       
       router.push(`/patients/${data.patient.id}`);
@@ -147,6 +159,12 @@ export default function NewPatientPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate passwords match if password is provided
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
     // Build contact info
     const contactInfo: any = {};
     if (formData.phone) contactInfo.phone = formData.phone;
@@ -159,6 +177,7 @@ export default function NewPatientPage() {
       gender: formData.gender,
       patientType: formData.patientType,
       contactInfo,
+      password: formData.password || undefined, // Include password if provided
       address: formData.address || null,
       emergencyContact: formData.emergencyContact || null,
       insuranceId: formData.patientType === 'hmo' && formData.insuranceId ? formData.insuranceId : null,
@@ -352,7 +371,47 @@ export default function NewPatientPage() {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="patient@email.com"
+                required
               />
+              <div className="relative">
+                <Input
+                  label="New Password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Enter password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-9 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <div className="relative">
+                <Input
+                  label="Confirm New Password"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  placeholder="Confirm password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-9 text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <div className="md:col-span-2">
+                <p className="text-xs text-muted-foreground">
+                  💡 Leave password fields blank to auto-generate a secure random password
+                </p>
+              </div>
               <div className="md:col-span-2">
                 <Textarea
                   label="Home Address"

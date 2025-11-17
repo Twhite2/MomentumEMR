@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     const doctorId = parseInt(session.user.id);
 
     const body = await request.json();
-    const { patientId, visitDate, diagnosis, notes, attachments } = body;
+    const { patientId, visitDate, diagnosis, notes, allergies, attachments } = body;
 
     // Validation
     if (!patientId || !visitDate) {
@@ -105,6 +105,7 @@ export async function POST(request: NextRequest) {
         visitDate: new Date(visitDate),
         diagnosis: diagnosis || null,
         notes: notes || null,
+        allergies: allergies || null,
         attachments: attachments || null,
       },
       include: {

@@ -52,7 +52,7 @@ export async function PUT(
     const recordId = parseInt(params.id);
 
     const body = await request.json();
-    const { visitDate, diagnosis, notes, attachments } = body;
+    const { visitDate, diagnosis, notes, allergies, attachments } = body;
 
     // Verify record exists
     const existing = await prisma.medicalRecord.findFirst({
@@ -70,6 +70,7 @@ export async function PUT(
         visitDate: visitDate ? new Date(visitDate) : undefined,
         diagnosis,
         notes,
+        allergies,
         attachments,
       },
       include: {

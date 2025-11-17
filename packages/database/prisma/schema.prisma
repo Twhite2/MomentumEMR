@@ -99,6 +99,32 @@ enum LabOrderStatus {
   cancelled
 }
 
+enum ClaimStatus {
+  draft
+  ready_for_claims
+  batching
+  submitted
+  processing
+  paid
+  partially_paid
+  queried
+  denied
+  resubmitted
+}
+
+enum ClaimSubmissionMethod {
+  email_pdf
+  portal_excel
+  portal_csv
+  api
+}
+
+enum HMOCodingStandard {
+  icd10
+  cpt
+  local
+}
+
 enum DashboardType {
   patient_volume
   revenue
@@ -160,6 +186,8 @@ model Hospital {
   analyticsDashboards  AnalyticsDashboard[]
   analyticsReports     AnalyticsReport[]
   analyticsMetrics     AnalyticsMetric[]
+  encounters           Encounter[] // HMO encounters
+  claimBatches         ClaimBatch[] // HMO claim batches
 
   @@map("hospitals")
 }
@@ -205,6 +233,12 @@ model User {
   chatAttachmentsUploaded ChatAttachment[]      @relation("ChatAttachments")
   chatReadReceipts        ChatReadReceipt[]     @relation("ChatReadReceipts")
   chatAuditLogs           ChatAuditLog[]        @relation("ChatAuditLogs")
+  // HMO Relations
+  encountersAsDoctor      Encounter[]           @relation("EncounterDoctor")
+  proceduresPerformed     EncounterProcedure[]  @relation("ProcedurePerformer")
+  attachmentsUploaded     EncounterAttachment[] @relation("AttachmentUploader")
+  claimBatchesCreated     ClaimBatch[]          @relation("BatchCreator")
+  claimSubmissions        ClaimSubmission[]     @relation("SubmissionCreator")
 
   @@index([hospitalId])
   @@index([email])
@@ -248,6 +282,7 @@ model Patient {
   vitals            Vital[]
   admissions        Admission[]
   nursingNotes      NursingNote[]
+  encounters        Encounter[] // HMO encounters
 
   @@index([hospitalId])
   @@index([userId])
@@ -258,20 +293,35 @@ model Patient {
 }
 
 model Hmo {
-  id               Int      @id @default(autoincrement())
-  hospitalId       Int      @map("hospital_id")
-  policyName       String   @map("policy_name")
-  provider         String?
-  coverageDetails  Json?    @map("coverage_details")
-  active           Boolean  @default(true)
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id                    Int                      @id @default(autoincrement())
+  hospitalId            Int                      @map("hospital_id")
+  name                  String                   // e.g., "Reliance HMO", "AXA Mansard"
+  policyName            String?                  @map("policy_name")
+  provider              String?
+  providerCode          String?                  @map("provider_code") // Hospital's provider code with this HMO
+  submissionMethod      ClaimSubmissionMethod    @default(email_pdf) @map("submission_method")
+  requiredFormat        String?                  @map("required_format") // "PDF", "Excel", "CSV"
+  submissionEmail       String?                  @map("submission_email")
+  submissionPortalUrl   String?                  @map("submission_portal_url")
+  codingStandard        HMOCodingStandard        @default(icd10) @map("coding_standard")
+  requiresAuthorization Boolean                  @default(true) @map("requires_authorization")
+  coverageDetails       Json?                    @map("coverage_details") // JSON with covered services, percentages
+  copaymentRules        Json?                    @map("copayment_rules") // JSON with copayment rules
+  active                Boolean                  @default(true)
+  createdAt             DateTime                 @default(now()) @map("created_at")
+  updatedAt             DateTime                 @updatedAt @map("updated_at")
 
   // Relations
-  hospital Hospital  @relation(fields: [hospitalId], references: [id])
-  patients Patient[]
+  hospital           Hospital             @relation(fields: [hospitalId], references: [id])
+  patients           Patient[]
+  hmoplans           HmoPlan[]
+  fieldMappings      HmoFieldMapping[]
+  encounters         Encounter[]
+  claimBatches       ClaimBatch[]
+  claimSubmissions   ClaimSubmission[]
 
   @@index([hospitalId])
+  @@index([name])
   @@map("hmo")
 }
 
@@ -333,6 +383,7 @@ model MedicalRecord {
   visitDate   DateTime @map("visit_date") @db.Date
   diagnosis   String?  @db.Text
   notes       String?  @db.Text
+  allergies   Json?    // Allergies noted during this visit: ["Penicillin", "Latex", etc.]
   attachments Json?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -976,4 +1027,230 @@ model ChatAuditLog {
   @@index([action])
   @@index([createdAt])
   @@map("chat_audit_logs")
+}
+
+// ===================================
+// HMO CLAIMS MANAGEMENT MODELS
+// ===================================
+
+model HmoPlan {
+  id                Int      @id @default(autoincrement())
+  hmoId             Int      @map("hmo_id")
+  planName          String   @map("plan_name") // e.g., "Gold Plan", "Family Plan"
+  planCode          String?  @map("plan_code")
+  coverageLimit     Decimal? @map("coverage_limit") @db.Decimal(15, 2)
+  copayPercentage   Decimal? @map("copay_percentage") @db.Decimal(5, 2)
+  coveredServices   Json?    @map("covered_services") // Array of service types/codes
+  excludedServices  Json?    @map("excluded_services")
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  hmo Hmo @relation(fields: [hmoId], references: [id], onDelete: Cascade)
+
+  @@index([hmoId])
+  @@map("hmo_plans")
+}
+
+model HmoFieldMapping {
+  id            Int      @id @default(autoincrement())
+  hmoId         Int      @map("hmo_id")
+  emrField      String   @map("emr_field") // Our internal field name
+  hmoField      String   @map("hmo_field") // HMO's required field name
+  fieldType     String   @map("field_type") // "text", "number", "date", "code"
+  isMandatory   Boolean  @default(false) @map("is_mandatory")
+  defaultValue  String?  @map("default_value")
+  transformation String? // JSON string with transformation rules if needed
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  hmo Hmo @relation(fields: [hmoId], references: [id], onDelete: Cascade)
+
+  @@index([hmoId])
+  @@index([emrField])
+  @@map("hmo_field_mappings")
+}
+
+model Encounter {
+  id                    Int          @id @default(autoincrement())
+  hospitalId            Int          @map("hospital_id")
+  patientId             Int          @map("patient_id")
+  hmoId                 Int?         @map("hmo_id")
+  doctorId              Int          @map("doctor_id")
+  visitDate             DateTime     @map("visit_date")
+  encounterType         String       @map("encounter_type") // "OPD", "IPD", "Emergency"
+  admissionDate         DateTime?    @map("admission_date")
+  dischargeDate         DateTime?    @map("discharge_date")
+  authorizationCode     String?      @map("authorization_code")
+  chiefComplaint        String?      @map("chief_complaint") @db.Text
+  notes                 String?      @db.Text
+  claimStatus           ClaimStatus  @default(draft) @map("claim_status")
+  totalAmount           Decimal      @default(0) @map("total_amount") @db.Decimal(15, 2)
+  hmoCoveredAmount      Decimal      @default(0) @map("hmo_covered_amount") @db.Decimal(15, 2)
+  patientCopayAmount    Decimal      @default(0) @map("patient_copay_amount") @db.Decimal(15, 2)
+  patientPaidAmount     Decimal      @default(0) @map("patient_paid_amount") @db.Decimal(15, 2)
+  paystackAuthCode      String?      @map("paystack_auth_code") // For recurring charges
+  claimBatchId          Int?         @map("claim_batch_id")
+  readyForClaimsAt      DateTime?    @map("ready_for_claims_at")
+  submittedAt           DateTime?    @map("submitted_at")
+  createdAt             DateTime     @default(now()) @map("created_at")
+  updatedAt             DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  hospital      Hospital           @relation(fields: [hospitalId], references: [id])
+  patient       Patient            @relation(fields: [patientId], references: [id])
+  hmo           Hmo?               @relation(fields: [hmoId], references: [id])
+  doctor        User               @relation("EncounterDoctor", fields: [doctorId], references: [id])
+  claimBatch    ClaimBatch?        @relation(fields: [claimBatchId], references: [id])
+  diagnoses     EncounterDiagnosis[]
+  procedures    EncounterProcedure[]
+  billingItems  EncounterBillingItem[]
+  attachments   EncounterAttachment[]
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([hmoId])
+  @@index([doctorId])
+  @@index([claimStatus])
+  @@index([visitDate])
+  @@index([claimBatchId])
+  @@map("encounters")
+}
+
+model EncounterDiagnosis {
+  id           Int      @id @default(autoincrement())
+  encounterId  Int      @map("encounter_id")
+  diagnosisCode String  @map("diagnosis_code") // ICD-10 code
+  description   String
+  isPrimary    Boolean  @default(false) @map("is_primary")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  encounter Encounter @relation(fields: [encounterId], references: [id], onDelete: Cascade)
+
+  @@index([encounterId])
+  @@map("encounter_diagnoses")
+}
+
+model EncounterProcedure {
+  id             Int      @id @default(autoincrement())
+  encounterId    Int      @map("encounter_id")
+  procedureCode  String   @map("procedure_code") // CPT or local code
+  description    String
+  quantity       Int      @default(1)
+  unitCost       Decimal  @map("unit_cost") @db.Decimal(15, 2)
+  totalCost      Decimal  @map("total_cost") @db.Decimal(15, 2)
+  performedAt    DateTime @map("performed_at")
+  performedById  Int?     @map("performed_by_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  encounter    Encounter @relation(fields: [encounterId], references: [id], onDelete: Cascade)
+  performedBy  User?     @relation("ProcedurePerformer", fields: [performedById], references: [id])
+
+  @@index([encounterId])
+  @@map("encounter_procedures")
+}
+
+model EncounterBillingItem {
+  id              Int      @id @default(autoincrement())
+  encounterId     Int      @map("encounter_id")
+  serviceId       String?  @map("service_id") // Internal service code
+  description     String
+  quantity        Int      @default(1)
+  unitCost        Decimal  @map("unit_cost") @db.Decimal(15, 2)
+  totalCost       Decimal  @map("total_cost") @db.Decimal(15, 2)
+  isCoveredByHmo  Boolean  @default(true) @map("is_covered_by_hmo")
+  hmoCoverage     Decimal? @map("hmo_coverage") @db.Decimal(5, 2) // Percentage
+  hmoAmount       Decimal  @default(0) @map("hmo_amount") @db.Decimal(15, 2)
+  patientAmount   Decimal  @default(0) @map("patient_amount") @db.Decimal(15, 2)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  encounter Encounter @relation(fields: [encounterId], references: [id], onDelete: Cascade)
+
+  @@index([encounterId])
+  @@map("encounter_billing_items")
+}
+
+model EncounterAttachment {
+  id           Int      @id @default(autoincrement())
+  encounterId  Int      @map("encounter_id")
+  fileName     String   @map("file_name")
+  fileUrl      String   @map("file_url")
+  fileType     String   @map("file_type") // "lab_result", "imaging", "prescription", "other"
+  description  String?
+  uploadedById Int      @map("uploaded_by_id")
+  uploadedAt   DateTime @default(now()) @map("uploaded_at")
+
+  // Relations
+  encounter  Encounter @relation(fields: [encounterId], references: [id], onDelete: Cascade)
+  uploadedBy User      @relation("AttachmentUploader", fields: [uploadedById], references: [id])
+
+  @@index([encounterId])
+  @@map("encounter_attachments")
+}
+
+model ClaimBatch {
+  id                Int      @id @default(autoincrement())
+  hospitalId        Int      @map("hospital_id")
+  hmoId             Int      @map("hmo_id")
+  batchNumber       String   @unique @map("batch_number") // e.g., "RLH-2024-001"
+  batchDate         DateTime @map("batch_date")
+  encounterCount    Int      @default(0) @map("encounter_count")
+  totalAmount       Decimal  @map("total_amount") @db.Decimal(15, 2)
+  status            ClaimStatus @default(batching)
+  generatedFileUrl  String?  @map("generated_file_url") // URL to exported claim file in B2
+  submissionNotes   String?  @map("submission_notes") @db.Text
+  createdById       Int      @map("created_by_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  hospital    Hospital          @relation(fields: [hospitalId], references: [id])
+  hmo         Hmo               @relation(fields: [hmoId], references: [id])
+  createdBy   User              @relation("BatchCreator", fields: [createdById], references: [id])
+  encounters  Encounter[]
+  submissions ClaimSubmission[]
+
+  @@index([hospitalId])
+  @@index([hmoId])
+  @@index([status])
+  @@index([batchDate])
+  @@map("claim_batches")
+}
+
+model ClaimSubmission {
+  id                  Int          @id @default(autoincrement())
+  claimBatchId        Int          @map("claim_batch_id")
+  hmoId               Int          @map("hmo_id")
+  submissionDate      DateTime     @map("submission_date")
+  submissionMethod    ClaimSubmissionMethod @map("submission_method")
+  submittedAmount     Decimal      @map("submitted_amount") @db.Decimal(15, 2)
+  approvedAmount      Decimal?     @map("approved_amount") @db.Decimal(15, 2)
+  paidAmount          Decimal?     @map("paid_amount") @db.Decimal(15, 2)
+  status              ClaimStatus  @default(submitted)
+  responseDate        DateTime?    @map("response_date")
+  paymentDate         DateTime?    @map("payment_date")
+  queryReason         String?      @map("query_reason") @db.Text
+  queryResponse       String?      @map("query_response") @db.Text
+  denialReason        String?      @map("denial_reason") @db.Text
+  submissionReference String?      @map("submission_reference") // HMO's reference number
+  notes               String?      @db.Text
+  submittedById       Int          @map("submitted_by_id")
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  claimBatch  ClaimBatch @relation(fields: [claimBatchId], references: [id])
+  hmo         Hmo        @relation(fields: [hmoId], references: [id])
+  submittedBy User       @relation("SubmissionCreator", fields: [submittedById], references: [id])
+
+  @@index([claimBatchId])
+  @@index([hmoId])
+  @@index([status])
+  @@index([submissionDate])
+  @@map("claim_submissions")
 }
