@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
 
     for (const row of validRows) {
       try {
-        const inventoryItem = await prisma.inventoryItem.create({
+        const inventoryItem = await prisma.inventory.create({
           data: {
             hospitalId,
             itemName: row.itemName,
