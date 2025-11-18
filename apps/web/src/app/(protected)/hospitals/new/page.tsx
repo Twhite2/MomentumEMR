@@ -18,6 +18,7 @@ export default function NewHospitalPage() {
     address: '',
     phoneNumber: '',
     contactEmail: '',
+    password: '',
     subscriptionPlan: 'Basic',
     active: true,
     logoUrl: '',
@@ -27,6 +28,7 @@ export default function NewHospitalPage() {
   });
 
   const [creationResult, setCreationResult] = useState<any>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -46,6 +48,44 @@ export default function NewHospitalPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate(formData);
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    setUploadingLogo(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setFormData((prev) => ({ ...prev, logoUrl: response.data.url }));
+      toast.success('Logo uploaded successfully');
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      toast.error('Failed to upload logo');
+    } finally {
+      setUploadingLogo(false);
+    }
   };
 
   // Show success message with setup link
@@ -81,31 +121,14 @@ export default function NewHospitalPage() {
             </div>
           </div>
 
-          <div className="bg-saffron/10 border border-saffron/20 rounded-lg p-6 mb-6">
-            <h3 className="font-semibold text-saffron mb-2 flex items-center gap-2">
+          <div className="bg-green-haze/10 border border-green-haze/20 rounded-lg p-6 mb-6">
+            <h3 className="font-semibold text-green-haze mb-2 flex items-center gap-2">
               <Mail className="w-5 h-5" />
-              Password Setup Required
+              Account Ready to Use
             </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              A password setup link has been generated. Share this with the hospital admin to activate their account.
+            <p className="text-sm text-muted-foreground">
+              The hospital admin account has been created and activated. The admin can now login using the email address and password you provided.
             </p>
-            <div className="bg-white rounded border border-border p-3">
-              <p className="text-xs text-muted-foreground mb-2">Setup Link (Valid for 24 hours):</p>
-              <code className="text-xs break-all bg-muted px-2 py-1 rounded block">
-                {creationResult.setupLink}
-              </code>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-4"
-              onClick={() => {
-                navigator.clipboard.writeText(creationResult.setupLink);
-                toast.success('Setup link copied to clipboard!');
-              }}
-            >
-              Copy Link
-            </Button>
           </div>
 
           <div className="flex gap-3">
@@ -173,6 +196,20 @@ export default function NewHospitalPage() {
                     required
                   />
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Admin Password *</label>
+                <Input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="Enter password for admin account"
+                  required
+                  minLength={8}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Password for the hospital admin account (min. 8 characters)
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Phone Number *</label>
@@ -254,9 +291,22 @@ export default function NewHospitalPage() {
                   )}
                 </div>
                 <div>
-                  <Button type="button" variant="outline" size="sm">
+                  <input
+                    type="file"
+                    id="logo-upload"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => document.getElementById('logo-upload')?.click()}
+                    disabled={uploadingLogo}
+                  >
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload Logo
+                    {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2">
                     Recommended: 200x200px, PNG or SVG

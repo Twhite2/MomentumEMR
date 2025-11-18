@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@momentum/database';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,25 +48,35 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
-    // Generate a secure token for password setup
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    // Validate required fields
+    if (!data.name || !data.contactEmail || !data.password) {
+      return NextResponse.json(
+        { error: 'Name, contact email, and password are required' },
+        { status: 400 }
+      );
+    }
+
+    // Hash the admin password
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    // Remove id field if present to avoid unique constraint error
+    const { id, password, ...hospitalData } = data;
 
     // Create hospital and admin user in a transaction
     const result = await prisma.$transaction(async (tx) => {
       // Create the hospital
       const hospital = await tx.hospital.create({
         data: {
-          name: data.name,
-          address: data.address,
-          phoneNumber: data.phoneNumber,
-          contactEmail: data.contactEmail,
-          subscriptionPlan: data.subscriptionPlan || 'Basic',
-          active: data.active ?? true,
-          logoUrl: data.logoUrl || null,
-          primaryColor: data.primaryColor || '#1253b2', // Momentum tory-blue
-          secondaryColor: data.secondaryColor || '#729ad2', // Momentum danube
-          tagline: data.tagline || null,
+          name: hospitalData.name,
+          address: hospitalData.address,
+          phoneNumber: hospitalData.phoneNumber,
+          contactEmail: hospitalData.contactEmail,
+          subscriptionPlan: hospitalData.subscriptionPlan || 'Basic',
+          active: hospitalData.active ?? true,
+          logoUrl: hospitalData.logoUrl || null,
+          primaryColor: hospitalData.primaryColor || '#1253b2', // Momentum tory-blue
+          secondaryColor: hospitalData.secondaryColor || '#729ad2', // Momentum danube
+          tagline: hospitalData.tagline || null,
         },
       });
 
@@ -74,31 +85,22 @@ export async function POST(request: NextRequest) {
         data: {
           hospitalId: hospital.id,
           name: `${hospital.name} Admin`,
-          email: data.contactEmail,
-          hashedPassword: crypto.randomBytes(32).toString('hex'), // Temporary random password
+          email: hospitalData.contactEmail,
+          hashedPassword,
           role: 'admin',
-          active: false, // Will be activated when password is set
-          passwordResetToken: resetToken,
-          passwordResetExpiry: resetExpiry,
+          active: true, // Activated immediately with password
         },
       });
 
-      return { hospital, adminUser, resetToken };
+      return { hospital, adminUser };
     });
 
-    // Generate password setup link
-    const setupLink = `${process.env.NEXTAUTH_URL}/auth/setup-password?token=${result.resetToken}`;
-
-    // TODO: Send email to hospital contact with setup link
     console.log('=================================');
     console.log('HOSPITAL CREATED SUCCESSFULLY');
     console.log('=================================');
     console.log(`Hospital: ${result.hospital.name}`);
     console.log(`Admin Email: ${result.adminUser.email}`);
-    console.log(`Password Setup Link: ${setupLink}`);
-    console.log('=================================');
-    console.log('📧 Email should be sent to:', data.contactEmail);
-    console.log('Subject: Welcome to Momentum EMR - Set Up Your Account');
+    console.log(`Admin can now login with the provided password`);
     console.log('=================================');
 
     return NextResponse.json({
@@ -109,8 +111,7 @@ export async function POST(request: NextRequest) {
         email: result.adminUser.email,
         role: result.adminUser.role,
       },
-      setupLink, // Include in response for development/testing
-      message: 'Hospital created. Password setup email sent to contact email.',
+      message: 'Hospital created successfully. Admin account is ready to use.',
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating hospital:', error);
