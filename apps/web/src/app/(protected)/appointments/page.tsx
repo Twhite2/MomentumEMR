@@ -7,6 +7,7 @@ import { Button, Select } from '@momentum/ui';
 import { Plus, Calendar, Clock, User } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
+import ExcelImportExport from '@/components/shared/ExcelImportExport';
 
 interface Appointment {
   id: number;
@@ -128,6 +129,18 @@ export default function AppointmentsPage() {
           </Link>
         )}
       </div>
+
+      {/* Excel Import/Export */}
+      {canCreateAppointments && (
+        <ExcelImportExport
+          title="Bulk Appointments Import"
+          description="Download Excel template, fill offline, and upload for batch appointment scheduling"
+          templateEndpoint="/api/appointments/excel/template"
+          importEndpoint="/api/appointments/excel/import"
+          templateFilename="Appointments_Template"
+          queryKey={['appointments']}
+        />
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-lg border border-border p-4">

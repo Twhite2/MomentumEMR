@@ -6,6 +6,7 @@ import { Button, Input, Select } from '@momentum/ui';
 import { Plus, Users, Search, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
+import ExcelImportExport from '@/components/shared/ExcelImportExport';
 
 interface User {
   id: number;
@@ -102,6 +103,16 @@ export default function UsersPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Excel Import/Export */}
+      <ExcelImportExport
+        title="Bulk Staff Registration"
+        description="Download Excel template, fill offline, and upload for batch staff account creation"
+        templateEndpoint="/api/users/excel/template"
+        importEndpoint="/api/users/excel/import"
+        templateFilename="Staff_Registration_Template"
+        queryKey={['users']}
+      />
 
       {/* Stats Cards */}
       {stats && (

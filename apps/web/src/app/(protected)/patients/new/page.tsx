@@ -12,8 +12,9 @@ import { toast } from 'sonner';
 
 interface HMO {
   id: number;
-  policyName: string;
-  provider: string;
+  name: string;
+  policyName?: string;
+  provider?: string;
 }
 
 interface CorporateClient {
@@ -327,7 +328,7 @@ export default function NewPatientPage() {
                   <option value="">Select HMO policy</option>
                   {hmoList?.map((hmo) => (
                     <option key={hmo.id} value={hmo.id}>
-                      {hmo.policyName} - {hmo.provider}
+                      {hmo.name}{hmo.policyName ? ` - ${hmo.policyName}` : ''}{hmo.provider ? ` (${hmo.provider})` : ''}
                     </option>
                   ))}
                 </Select>

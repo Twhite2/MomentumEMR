@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Button, Input } from '@momentum/ui';
@@ -14,7 +14,10 @@ import {
   TestTube,
   Settings,
   Download,
+  FileSpreadsheet,
+  ChevronDown,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function DiseaseAnalyticsPage() {
   const queryClient = useQueryClient();
@@ -23,6 +26,26 @@ export default function DiseaseAnalyticsPage() {
     endDate: '',
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [exportingComprehensive, setExportingComprehensive] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportMenu]);
 
   // Fetch disease analytics
   const { data: diseaseData, isLoading } = useQuery({
@@ -78,8 +101,40 @@ export default function DiseaseAnalyticsPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `disease-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `disease-analytics-summary-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+    setShowExportMenu(false);
+  };
+
+  const handleComprehensiveExport = async () => {
+    try {
+      setExportingComprehensive(true);
+      toast.info('Generating comprehensive export... This may take a moment.');
+      
+      const params = new URLSearchParams();
+      if (dateRange.startDate) params.append('startDate', dateRange.startDate);
+      if (dateRange.endDate) params.append('endDate', dateRange.endDate);
+      
+      const response = await axios.get(`/api/analytics/diseases/export?${params}`, {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `disease_analytics_comprehensive_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Comprehensive export downloaded successfully!');
+      setShowExportMenu(false);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to export data');
+    } finally {
+      setExportingComprehensive(false);
+    }
   };
 
   return (
@@ -104,14 +159,69 @@ export default function DiseaseAnalyticsPage() {
             <Settings className="w-4 h-4" />
             Privacy Settings
           </Button>
-          <Button
-            onClick={handleExportData}
-            disabled={!diseaseData}
-            className="gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Export Data
-          </Button>
+          
+          {/* Export Menu */}
+          <div className="relative" ref={exportMenuRef}>
+            <Button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={!diseaseData}
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+            
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg border border-border shadow-lg z-10">
+                <div className="p-2">
+                  <button
+                    onClick={handleExportData}
+                    className="w-full text-left px-4 py-3 hover:bg-muted rounded-lg transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <Download className="w-5 h-5 mt-0.5 text-tory-blue" />
+                      <div>
+                        <div className="font-medium">Quick Summary (CSV)</div>
+                        <div className="text-sm text-muted-foreground">
+                          Basic disease statistics and trends
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                  
+                  <button
+                    onClick={handleComprehensiveExport}
+                    disabled={exportingComprehensive}
+                    className="w-full text-left px-4 py-3 hover:bg-muted rounded-lg transition-colors mt-1"
+                  >
+                    <div className="flex items-start gap-3">
+                      <FileSpreadsheet className="w-5 h-5 mt-0.5 text-green-haze" />
+                      <div>
+                        <div className="font-medium flex items-center gap-2">
+                          Comprehensive Research Export (Excel)
+                          <span className="text-xs bg-green-haze/10 text-green-haze px-2 py-0.5 rounded">Recommended</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Anonymized dataset with diagnoses, prescriptions, lab results, vitals, and allergies.
+                          Includes 5 sheets with data dictionary.
+                        </div>
+                        <div className="text-xs text-amber-600 mt-1">
+                          ⚠️ Patient names & contacts excluded for research privacy
+                        </div>
+                      </div>
+                    </div>
+                    {exportingComprehensive && (
+                      <div className="mt-2 text-sm text-muted-foreground flex items-center gap-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-tory-blue border-t-transparent rounded-full"></div>
+                        Generating export...
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

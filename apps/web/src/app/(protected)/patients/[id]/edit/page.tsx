@@ -12,13 +12,20 @@ import { toast } from 'sonner';
 
 interface HMO {
   id: number;
-  policyName: string;
-  provider: string;
+  name: string;
+  policyName?: string;
+  provider?: string;
 }
 
 interface CorporateClient {
   id: number;
   companyName: string;
+}
+
+interface Doctor {
+  id: number;
+  name: string;
+  email: string;
 }
 
 interface Patient {
@@ -36,6 +43,8 @@ interface Patient {
   emergencyContact: string;
   insuranceId: number | null;
   corporateClientId: number | null;
+  primaryDoctorId: number | null;
+  primaryDoctor?: Doctor;
 }
 
 export default function EditPatientPage() {
@@ -61,6 +70,7 @@ export default function EditPatientPage() {
     emergencyContact: '',
     insuranceId: '',
     corporateClientId: '',
+    primaryDoctorId: '',
   });
 
   // Fetch patient data
@@ -90,6 +100,15 @@ export default function EditPatientPage() {
     },
   });
 
+  // Fetch Doctors
+  const { data: doctors } = useQuery<Doctor[]>({
+    queryKey: ['doctors'],
+    queryFn: async () => {
+      const response = await axios.get('/api/users?role=doctor&limit=1000');
+      return response.data.users;
+    },
+  });
+
   // Populate form when patient data loads
   useEffect(() => {
     if (patient) {
@@ -105,6 +124,7 @@ export default function EditPatientPage() {
         emergencyContact: patient.emergencyContact || '',
         insuranceId: patient.insuranceId?.toString() || '',
         corporateClientId: patient.corporateClientId?.toString() || '',
+        primaryDoctorId: patient.primaryDoctorId?.toString() || '',
       });
       setPatientType(patient.patientType);
     }
@@ -157,6 +177,7 @@ export default function EditPatientPage() {
         formData.patientType === 'corporate' && formData.corporateClientId
           ? formData.corporateClientId
           : null,
+      primaryDoctorId: formData.primaryDoctorId || null,
     };
 
     updatePatient.mutate(payload);
@@ -232,6 +253,29 @@ export default function EditPatientPage() {
             </div>
           </div>
 
+          {/* Assigned Doctor */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Assigned Doctor</h2>
+            <div className="grid grid-cols-1 gap-4">
+              <Select
+                label="Primary Doctor"
+                name="primaryDoctorId"
+                value={formData.primaryDoctorId}
+                onChange={handleInputChange}
+              >
+                <option value="">No primary doctor assigned</option>
+                {doctors?.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.name} - {doctor.email}
+                  </option>
+                ))}
+              </Select>
+              <p className="text-sm text-muted-foreground">
+                Assign a primary doctor to manage this patient's ongoing care and treatment plans.
+              </p>
+            </div>
+          </div>
+
           {/* Patient Type & Billing - Hidden for nurses */}
           {canManageBilling && (
             <div>
@@ -260,7 +304,7 @@ export default function EditPatientPage() {
                     <option value="">Select HMO policy</option>
                     {hmoList?.map((hmo) => (
                       <option key={hmo.id} value={hmo.id}>
-                        {hmo.policyName} - {hmo.provider}
+                        {hmo.name}{hmo.policyName ? ` - ${hmo.policyName}` : ''}{hmo.provider ? ` (${hmo.provider})` : ''}
                       </option>
                     ))}
                   </Select>

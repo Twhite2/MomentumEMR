@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/hmo - List HMO providers for hospital
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'cashier', 'nurse']);
+    const session = await requireRole(['admin', 'cashier', 'nurse', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const { searchParams } = new URL(request.url);

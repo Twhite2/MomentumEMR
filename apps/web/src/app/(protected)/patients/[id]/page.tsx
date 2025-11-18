@@ -21,10 +21,16 @@ interface Patient {
   };
   address: string;
   emergencyContact: string;
+  primaryDoctor?: {
+    id: number;
+    name: string;
+    email: string;
+  };
   hmo?: {
     id: number;
-    policyName: string;
-    provider: string;
+    name: string;
+    policyName?: string;
+    provider?: string;
   };
   corporateClient?: {
     id: number;
@@ -194,11 +200,24 @@ export default function PatientDetailPage() {
                 </span>
               </div>
 
+              {patient.primaryDoctor && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Primary Doctor</p>
+                  <p className="font-medium">{patient.primaryDoctor.name}</p>
+                  <p className="text-sm text-muted-foreground">{patient.primaryDoctor.email}</p>
+                </div>
+              )}
+
               {patient.hmo && (
                 <div>
                   <p className="text-xs text-muted-foreground">HMO Coverage</p>
-                  <p className="font-medium">{patient.hmo.policyName}</p>
-                  <p className="text-sm text-muted-foreground">{patient.hmo.provider}</p>
+                  <p className="font-medium">{patient.hmo.name}</p>
+                  {patient.hmo.policyName && (
+                    <p className="text-sm text-muted-foreground">{patient.hmo.policyName}</p>
+                  )}
+                  {patient.hmo.provider && (
+                    <p className="text-sm text-muted-foreground">{patient.hmo.provider}</p>
+                  )}
                 </div>
               )}
 

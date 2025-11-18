@@ -6,6 +6,7 @@ import { Button, Input } from '@momentum/ui';
 import { Plus, Pill, AlertTriangle, Search } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
+import ExcelImportExport from '@/components/shared/ExcelImportExport';
 
 interface InventoryItem {
   id: number;
@@ -127,6 +128,16 @@ export default function InventoryPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Excel Import/Export */}
+      <ExcelImportExport
+        title="Bulk Inventory Import"
+        description="Download Excel template, fill offline, and upload for batch inventory creation"
+        templateEndpoint="/api/inventory/excel/template"
+        importEndpoint="/api/inventory/excel/import"
+        templateFilename="Inventory_Template"
+        queryKey={['inventory']}
+      />
 
       {/* Stats Cards */}
       {stats && (

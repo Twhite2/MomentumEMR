@@ -7,6 +7,7 @@ import { Button } from '@momentum/ui';
 import { Plus, FileText, Calendar, User } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
+import ExcelImportExport from '@/components/shared/ExcelImportExport';
 
 interface MedicalRecord {
   id: number;
@@ -81,6 +82,18 @@ export default function MedicalRecordsPage() {
           </Link>
         )}
       </div>
+
+      {/* Excel Import/Export */}
+      {canEditRecords && (
+        <ExcelImportExport
+          title="Bulk Medical Records Import"
+          description="Download Excel template, fill offline, and upload for batch record creation"
+          templateEndpoint="/api/medical-records/excel/template"
+          importEndpoint="/api/medical-records/excel/import"
+          templateFilename="Medical_Records_Template"
+          queryKey={['medical-records']}
+        />
+      )}
 
       {/* Records List */}
       <div className="bg-white rounded-lg border border-border overflow-hidden">

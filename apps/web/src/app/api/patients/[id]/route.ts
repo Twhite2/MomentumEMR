@@ -24,6 +24,9 @@ export async function GET(
         hospitalId, // Ensure patient belongs to user's hospital
       },
       include: {
+        primaryDoctor: {
+          select: { id: true, name: true, email: true },
+        },
         hmo: true,
         corporateClient: true,
         appointments: {
@@ -106,6 +109,7 @@ export async function PUT(
       corporateClientId,
       allergies,
       bloodGroup,
+      primaryDoctorId,
     } = body;
 
     // Verify patient belongs to hospital
@@ -133,8 +137,12 @@ export async function PUT(
         corporateClientId: corporateClientId ? parseInt(corporateClientId) : null,
         allergies: allergies !== undefined ? (typeof allergies === 'string' ? JSON.parse(allergies) : allergies) : undefined,
         bloodGroup: bloodGroup || undefined,
+        primaryDoctorId: primaryDoctorId ? parseInt(primaryDoctorId) : null,
       },
       include: {
+        primaryDoctor: {
+          select: { id: true, name: true, email: true },
+        },
         hmo: true,
         corporateClient: true,
       },
