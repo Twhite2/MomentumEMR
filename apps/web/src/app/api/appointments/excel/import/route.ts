@@ -10,7 +10,7 @@ interface AppointmentRow {
   appointmentTime: string;
   duration: number;
   type: 'consultation' | 'follow_up' | 'procedure' | 'lab';
-  status: 'scheduled' | 'confirmed' | 'cancelled';
+  status: 'scheduled' | 'checked_in' | 'completed' | 'cancelled';
   reason?: string;
   notes?: string;
   rowNumber: number;
@@ -25,7 +25,7 @@ function validateAppointmentRow(row: any, rowIndex: number): AppointmentRow {
   const dateStr = row['Appointment Date* (YYYY-MM-DD)']?.toString().trim();
   const timeStr = row['Appointment Time* (HH:MM 24hr)']?.toString().trim();
   const typeStr = row['Type* (consultation/follow_up/procedure/lab)']?.toString().trim().toLowerCase();
-  const statusStr = row['Status (scheduled/confirmed/cancelled)']?.toString().trim().toLowerCase() || 'scheduled';
+  const statusStr = row['Status (scheduled/checked_in/completed/cancelled)']?.toString().trim().toLowerCase() || 'scheduled';
 
   let patientId = 0;
   if (!patientIdStr) {
@@ -78,9 +78,9 @@ function validateAppointmentRow(row: any, rowIndex: number): AppointmentRow {
     errors.push('Type must be: consultation, follow_up, procedure, or lab');
   }
 
-  const validStatuses = ['scheduled', 'confirmed', 'cancelled'];
+  const validStatuses = ['scheduled', 'checked_in', 'completed', 'cancelled'];
   if (!validStatuses.includes(statusStr)) {
-    errors.push('Status must be: scheduled, confirmed, or cancelled');
+    errors.push('Status must be: scheduled, checked_in, completed, or cancelled');
   }
 
   return {
@@ -177,19 +177,18 @@ export async function POST(request: NextRequest) {
         }
 
         // Combine date and time
-        const appointmentDateTime = new Date(`${row.appointmentDate}T${row.appointmentTime}:00`);
+        const startTime = new Date(`${row.appointmentDate}T${row.appointmentTime}:00`);
+        const endTime = new Date(startTime.getTime() + row.duration * 60000); // Add duration in milliseconds
 
         const appointment = await prisma.appointment.create({
           data: {
             hospitalId,
             patientId: row.patientId,
-            userId: row.doctorId,
-            appointmentDate: appointmentDateTime,
-            duration: row.duration,
-            type: row.type,
+            doctorId: row.doctorId,
+            appointmentType: row.type,
             status: row.status,
-            reason: row.reason || undefined,
-            notes: row.notes || undefined,
+            startTime,
+            endTime,
           },
         });
 
