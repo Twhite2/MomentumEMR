@@ -6,18 +6,14 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 interface MedicalRecordRow {
   patientId: number;
   visitDate: string;
-  chiefComplaint: string;
   diagnosis: string;
-  treatmentPlan?: string;
-  bp?: string;
-  temperature?: number;
-  pulse?: number;
-  respiratoryRate?: number;
-  weight?: number;
-  height?: number;
-  allergies?: string[];
   notes?: string;
-  followUpDate?: string;
+  allergies?: string[];
+  temperature?: string;
+  heartRate?: string;
+  respiratoryRate?: string;
+  weight?: string;
+  height?: string;
   rowNumber: number;
   errors: string[];
 }
@@ -27,7 +23,6 @@ function validateMedicalRecordRow(row: any, rowIndex: number): MedicalRecordRow 
 
   const patientIdStr = row['Patient ID*']?.toString().trim();
   const visitDateStr = row['Visit Date* (YYYY-MM-DD)']?.toString().trim();
-  const chiefComplaint = row['Chief Complaint*']?.toString().trim();
   const diagnosis = row['Diagnosis*']?.toString().trim();
 
   let patientId = 0;
@@ -52,55 +47,25 @@ function validateMedicalRecordRow(row: any, rowIndex: number): MedicalRecordRow 
     }
   }
 
-  if (!chiefComplaint) errors.push('Chief Complaint is required');
+  // Chief Complaint removed - not in schema
   if (!diagnosis) errors.push('Diagnosis is required');
-
-  let followUpDate: string | undefined;
-  const followUpDateStr = row['Follow-up Date (YYYY-MM-DD)']?.toString().trim();
-  if (followUpDateStr) {
-    const date = new Date(followUpDateStr);
-    if (isNaN(date.getTime())) {
-      errors.push('Invalid Follow-up Date format');
-    } else {
-      followUpDate = date.toISOString().split('T')[0];
-    }
-  }
 
   const allergiesStr = row['Allergies (comma-separated)']?.toString().trim();
   const allergies = allergiesStr
     ? allergiesStr.split(',').map((a: string) => a.trim()).filter((a: string) => a.length > 0)
     : [];
 
-  const temperatureStr = row['Vital Signs (Temperature)']?.toString().trim();
-  const temperature = temperatureStr ? parseFloat(temperatureStr) : undefined;
-
-  const pulseStr = row['Vital Signs (Pulse)']?.toString().trim();
-  const pulse = pulseStr ? parseInt(pulseStr) : undefined;
-
-  const rrStr = row['Vital Signs (Respiratory Rate)']?.toString().trim();
-  const respiratoryRate = rrStr ? parseInt(rrStr) : undefined;
-
-  const weightStr = row['Vital Signs (Weight kg)']?.toString().trim();
-  const weight = weightStr ? parseFloat(weightStr) : undefined;
-
-  const heightStr = row['Vital Signs (Height cm)']?.toString().trim();
-  const height = heightStr ? parseFloat(heightStr) : undefined;
-
   return {
     patientId,
     visitDate,
-    chiefComplaint: chiefComplaint || '',
     diagnosis: diagnosis || '',
-    treatmentPlan: row['Treatment Plan']?.toString().trim() || undefined,
-    bp: row['Vital Signs (BP)']?.toString().trim() || undefined,
-    temperature,
-    pulse,
-    respiratoryRate,
-    weight,
-    height,
-    allergies: allergies.length > 0 ? allergies : undefined,
     notes: row['Notes']?.toString().trim() || undefined,
-    followUpDate,
+    allergies: allergies.length > 0 ? allergies : undefined,
+    temperature: row['Vital Signs (Temperature)']?.toString().trim() || undefined,
+    heartRate: row['Vital Signs (Heart Rate)']?.toString().trim() || undefined,
+    respiratoryRate: row['Vital Signs (Respiratory Rate)']?.toString().trim() || undefined,
+    weight: row['Vital Signs (Weight kg)']?.toString().trim() || undefined,
+    height: row['Vital Signs (Height cm)']?.toString().trim() || undefined,
     rowNumber: rowIndex + 2,
     errors,
   };
@@ -110,7 +75,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await requireRole(['admin', 'doctor', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
-    const userId = session.user.id;
+    const userId = parseInt(session.user.id);
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -179,30 +144,26 @@ export async function POST(request: NextRequest) {
           data: {
             hospitalId,
             patientId: row.patientId,
-            userId,
+            doctorId: userId,
             visitDate: new Date(row.visitDate),
-            chiefComplaint: row.chiefComplaint,
             diagnosis: row.diagnosis,
-            treatmentPlan: row.treatmentPlan || undefined,
-            allergies: row.allergies ? (JSON.stringify(row.allergies) as any) : undefined,
             notes: row.notes || undefined,
-            followUpDate: row.followUpDate ? new Date(row.followUpDate) : undefined,
+            allergies: row.allergies ? (JSON.stringify(row.allergies) as any) : undefined,
           },
         });
 
         // Create vital signs if provided
-        if (row.bp || row.temperature || row.pulse || row.respiratoryRate || row.weight || row.height) {
+        if (row.temperature || row.heartRate || row.respiratoryRate || row.weight || row.height) {
           await prisma.vital.create({
             data: {
               hospitalId,
               patientId: row.patientId,
               recordedBy: userId,
-              bloodPressure: row.bp || undefined,
-              temperature: row.temperature || undefined,
-              pulse: row.pulse || undefined,
-              respiratoryRate: row.respiratoryRate || undefined,
-              weight: row.weight || undefined,
-              height: row.height || undefined,
+              temperature: row.temperature ? parseFloat(row.temperature) : undefined,
+              heartRate: row.heartRate ? parseInt(row.heartRate) : undefined,
+              respiratoryRate: row.respiratoryRate ? parseInt(row.respiratoryRate) : undefined,
+              weight: row.weight ? parseFloat(row.weight) : undefined,
+              height: row.height ? parseFloat(row.height) : undefined,
             },
           });
         }
