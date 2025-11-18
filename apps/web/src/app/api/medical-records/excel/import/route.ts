@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
           errors: row.errors,
           data: {
             patientId: row.patientId,
-            chiefComplaint: row.chiefComplaint,
+            diagnosis: row.diagnosis,
           },
         })),
       }, 400);
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
           errors: [error.message || 'Database error'],
           data: {
             patientId: row.patientId,
-            chiefComplaint: row.chiefComplaint,
+            diagnosis: row.diagnosis,
           },
         });
       }
