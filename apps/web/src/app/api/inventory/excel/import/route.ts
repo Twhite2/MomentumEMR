@@ -5,16 +5,11 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 
 interface InventoryRow {
   itemName: string;
-  category: 'medication' | 'supply' | 'equipment';
-  description?: string;
-  sku?: string;
-  quantity: number;
-  unit: string;
+  itemCode?: string;
+  stockQuantity: number;
   unitPrice: number;
   reorderLevel?: number;
   expiryDate?: string;
-  manufacturer?: string;
-  storageLocation?: string;
   rowNumber: number;
   errors: string[];
 }
@@ -23,31 +18,21 @@ function validateInventoryRow(row: any, rowIndex: number): InventoryRow {
   const errors: string[] = [];
 
   const itemName = row['Item Name*']?.toString().trim();
-  const categoryStr = row['Category* (medication/supply/equipment)']?.toString().trim().toLowerCase();
-  const quantityStr = row['Quantity*']?.toString().trim();
-  const unit = row['Unit* (tablets/bottles/boxes/pieces)']?.toString().trim();
+  const itemCode = row['Item Code']?.toString().trim();
+  const quantityStr = row['Stock Quantity*']?.toString().trim();
   const unitPriceStr = row['Unit Price*']?.toString().trim();
 
   if (!itemName) errors.push('Item Name is required');
 
-  const validCategories = ['medication', 'supply', 'equipment'];
-  if (!categoryStr) {
-    errors.push('Category is required');
-  } else if (!validCategories.includes(categoryStr)) {
-    errors.push('Category must be: medication, supply, or equipment');
-  }
-
-  let quantity = 0;
+  let stockQuantity = 0;
   if (!quantityStr) {
     errors.push('Quantity is required');
   } else {
-    quantity = parseFloat(quantityStr);
-    if (isNaN(quantity) || quantity < 0) {
-      errors.push('Quantity must be a positive number');
+    stockQuantity = parseInt(quantityStr);
+    if (isNaN(stockQuantity) || stockQuantity < 0) {
+      errors.push('Stock Quantity must be a positive number');
     }
   }
-
-  if (!unit) errors.push('Unit is required');
 
   let unitPrice = 0;
   if (!unitPriceStr) {
@@ -60,7 +45,7 @@ function validateInventoryRow(row: any, rowIndex: number): InventoryRow {
   }
 
   const reorderLevelStr = row['Reorder Level']?.toString().trim();
-  const reorderLevel = reorderLevelStr ? parseFloat(reorderLevelStr) : undefined;
+  const reorderLevel = reorderLevelStr ? parseInt(reorderLevelStr) : 10; // Default 10
 
   let expiryDate: string | undefined;
   const expiryDateStr = row['Expiry Date (YYYY-MM-DD)']?.toString().trim();
@@ -75,16 +60,11 @@ function validateInventoryRow(row: any, rowIndex: number): InventoryRow {
 
   return {
     itemName: itemName || '',
-    category: categoryStr as any || 'supply',
-    description: row['Description']?.toString().trim() || undefined,
-    sku: row['SKU/Item Code']?.toString().trim() || undefined,
-    quantity,
-    unit: unit || '',
+    itemCode: itemCode || undefined,
+    stockQuantity,
     unitPrice,
     reorderLevel,
     expiryDate,
-    manufacturer: row['Manufacturer']?.toString().trim() || undefined,
-    storageLocation: row['Storage Location']?.toString().trim() || undefined,
     rowNumber: rowIndex + 2,
     errors,
   };
@@ -144,16 +124,11 @@ export async function POST(request: NextRequest) {
           data: {
             hospitalId,
             itemName: row.itemName,
-            category: row.category,
-            description: row.description || undefined,
-            sku: row.sku || undefined,
-            quantity: row.quantity,
-            unit: row.unit,
+            itemCode: row.itemCode || undefined,
+            stockQuantity: row.stockQuantity,
             unitPrice: row.unitPrice,
-            reorderLevel: row.reorderLevel || undefined,
+            reorderLevel: row.reorderLevel || 10,
             expiryDate: row.expiryDate ? new Date(row.expiryDate) : undefined,
-            manufacturer: row.manufacturer || undefined,
-            storageLocation: row.storageLocation || undefined,
           },
         });
 
@@ -161,7 +136,7 @@ export async function POST(request: NextRequest) {
           row: row.rowNumber,
           itemId: inventoryItem.id,
           itemName: row.itemName,
-          quantity: row.quantity,
+          stockQuantity: row.stockQuantity,
           success: true,
         });
       } catch (error: any) {
