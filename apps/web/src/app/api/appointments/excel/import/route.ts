@@ -9,7 +9,7 @@ interface AppointmentRow {
   appointmentDate: string;
   appointmentTime: string;
   duration: number;
-  type: 'consultation' | 'follow_up' | 'procedure' | 'lab';
+  type: 'OPD' | 'IPD' | 'surgery' | 'lab' | 'follow_up';
   status: 'scheduled' | 'checked_in' | 'completed' | 'cancelled';
   reason?: string;
   notes?: string;
@@ -24,7 +24,7 @@ function validateAppointmentRow(row: any, rowIndex: number): AppointmentRow {
   const doctorIdStr = row['Doctor ID*']?.toString().trim();
   const dateStr = row['Appointment Date* (YYYY-MM-DD)']?.toString().trim();
   const timeStr = row['Appointment Time* (HH:MM 24hr)']?.toString().trim();
-  const typeStr = row['Type* (consultation/follow_up/procedure/lab)']?.toString().trim().toLowerCase();
+  const typeStr = row['Type* (OPD/IPD/surgery/lab/follow_up)']?.toString().trim();
   const statusStr = row['Status (scheduled/checked_in/completed/cancelled)']?.toString().trim().toLowerCase() || 'scheduled';
 
   let patientId = 0;
@@ -71,11 +71,11 @@ function validateAppointmentRow(row: any, rowIndex: number): AppointmentRow {
   const durationStr = row['Duration (minutes)']?.toString().trim();
   const duration = durationStr ? parseInt(durationStr) : 30;
 
-  const validTypes = ['consultation', 'follow_up', 'procedure', 'lab'];
+  const validTypes = ['OPD', 'IPD', 'surgery', 'lab', 'follow_up'];
   if (!typeStr) {
     errors.push('Type is required');
   } else if (!validTypes.includes(typeStr)) {
-    errors.push('Type must be: consultation, follow_up, procedure, or lab');
+    errors.push('Type must be: OPD, IPD, surgery, lab, or follow_up');
   }
 
   const validStatuses = ['scheduled', 'checked_in', 'completed', 'cancelled'];
@@ -89,7 +89,7 @@ function validateAppointmentRow(row: any, rowIndex: number): AppointmentRow {
     appointmentDate,
     appointmentTime,
     duration,
-    type: typeStr as any || 'consultation',
+    type: typeStr as any || 'OPD',
     status: statusStr as any || 'scheduled',
     reason: row['Reason for Visit']?.toString().trim() || undefined,
     notes: row['Notes']?.toString().trim() || undefined,
