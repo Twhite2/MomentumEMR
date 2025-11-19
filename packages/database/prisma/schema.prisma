@@ -196,7 +196,7 @@ model User {
   id                   Int       @id @default(autoincrement())
   hospitalId           Int       @map("hospital_id")
   name                 String
-  email                String    @unique
+  email                String
   hashedPassword       String    @map("hashed_password")
   role                 UserRole
   active               Boolean   @default(true)
@@ -240,6 +240,7 @@ model User {
   claimBatchesCreated     ClaimBatch[]          @relation("BatchCreator")
   claimSubmissions        ClaimSubmission[]     @relation("SubmissionCreator")
 
+  @@unique([hospitalId, email], name: "hospitalId_email")
   @@index([hospitalId])
   @@index([email])
   @@index([passwordResetToken])
@@ -319,7 +320,9 @@ model Hmo {
   encounters         Encounter[]
   claimBatches       ClaimBatch[]
   claimSubmissions   ClaimSubmission[]
+  tariffs            HmoTariff[]          @relation("HmoTariffs")
 
+  @@unique([hospitalId, name], name: "hospitalId_name")
   @@index([hospitalId])
   @@index([name])
   @@map("hmo")
@@ -1253,4 +1256,40 @@ model ClaimSubmission {
   @@index([status])
   @@index([submissionDate])
   @@map("claim_submissions")
+}
+
+// ===================================
+// HMO TARIFF MANAGEMENT MODELS
+// ===================================
+
+model HmoTariff {
+  id               Int       @id @default(autoincrement())
+  hmoId            Int       @map("hmo_id")
+  code             String    // Service/procedure/drug code
+  name             String    // Item/service name
+  category         String?   // Category (e.g., "Medication", "Procedure", "Package")
+  unit             String?   // Unit of measure (e.g., "Tab", "Vial", "Session")
+  basePrice        Decimal   @map("base_price") @db.Decimal(15, 2)
+  tier0Price       Decimal?  @map("tier_0_price") @db.Decimal(15, 2) // For tiered pricing
+  tier1Price       Decimal?  @map("tier_1_price") @db.Decimal(15, 2)
+  tier2Price       Decimal?  @map("tier_2_price") @db.Decimal(15, 2)
+  tier3Price       Decimal?  @map("tier_3_price") @db.Decimal(15, 2)
+  tier4Price       Decimal?  @map("tier_4_price") @db.Decimal(15, 2)
+  isPARequired     Boolean   @default(false) @map("is_pa_required") // Pre-authorization required
+  effectiveDate    DateTime? @map("effective_date")
+  expiryDate       DateTime? @map("expiry_date")
+  active           Boolean   @default(true)
+  metadata         Json?     // Store additional HMO-specific fields
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  hmo Hmo @relation("HmoTariffs", fields: [hmoId], references: [id], onDelete: Cascade)
+
+  @@unique([hmoId, code])
+  @@index([hmoId])
+  @@index([code])
+  @@index([category])
+  @@index([name])
+  @@map("hmo_tariffs")
 }

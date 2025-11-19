@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'cashier']);
+    const session = await requireRole(['super_admin', 'admin', 'cashier', 'doctor', 'nurse', 'pharmacist']);
     const hospitalId = parseInt(session.user.hospitalId);
     const hmoId = parseInt(params.id);
 

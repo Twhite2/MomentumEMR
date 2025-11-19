@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button, Input, Select } from '@momentum/ui';
-import { Plus, Building2, FileText, Settings } from 'lucide-react';
+import { Plus, Building2, FileText, Settings, DollarSign, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -169,10 +169,9 @@ export default function HMOManagementPage() {
           ) : (
             <div className="space-y-3">
               {hmos.map((hmo: HMO) => (
-                <Link
+                <div
                   key={hmo.id}
-                  href={`/hmo/${hmo.id}`}
-                  className="block p-4 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-colors"
+                  className="p-4 rounded-lg border border-border hover:border-primary transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -194,15 +193,29 @@ export default function HMOManagementPage() {
                         <span>{hmo._count?.encounters || 0} encounters</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       {hmo.requiresAuthorization && (
                         <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700">
                           Requires Auth
                         </span>
                       )}
+                      
+                      <Link href={`/hmo/${hmo.id}/tariffs`}>
+                        <Button variant="outline" size="sm">
+                          <DollarSign className="w-4 h-4 mr-2" />
+                          Tariffs
+                        </Button>
+                      </Link>
+
+                      <Link href={`/hmo/${hmo.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Settings className="w-4 h-4 mr-2" />
+                          Settings
+                        </Button>
+                      </Link>
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}
