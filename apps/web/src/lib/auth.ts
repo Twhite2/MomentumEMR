@@ -27,7 +27,7 @@ export const authOptions = {
           const password = credentials.password as string;
 
           console.log('🔍 [AUTH] Querying database for user...');
-          const user = await prisma.user.findUnique({
+          const user = await prisma.user.findFirst({
             where: { email },
             include: {
               hospital: true,
