@@ -130,7 +130,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center text-xs text-muted-foreground">
             <p>© 2025 Momentum Healthcare Solutions. All rights reserved.</p>
             <p className="mt-1">
-              Need help? <a href="/support" className="text-primary hover:underline">Contact Support</a>
+              Need help? <a href="https://www.momentumhealthcare.org/contact-us" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Contact Support</a>
             </p>
           </div>
         </div>
