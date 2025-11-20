@@ -442,6 +442,27 @@ async function main() {
 
   console.log('✅ Momentum Hospital created:', momentumHospital.name);
 
+  // Momentum Hospital Admin
+  const momentumAdmin = await prisma.user.upsert({
+    where: {
+      hospitalId_email: {
+        hospitalId: momentumHospital.id,
+        email: 'info@momentummultispecialist.com'
+      }
+    },
+    update: {},
+    create: {
+      name: 'Momentum Admin',
+      email: 'info@momentummultispecialist.com',
+      hashedPassword,
+      role: 'admin',
+      hospitalId: momentumHospital.id,
+      active: true,
+    },
+  });
+
+  console.log('✅ Momentum Admin created:', momentumAdmin.email);
+
   // Momentum Hospital Staff & Patients
   console.log('👥 Creating Momentum Hospital users...');
 
@@ -596,7 +617,9 @@ async function main() {
   console.log('   - nurse@citygeneralhospital.com (Nurse)');
   console.log('   - lisa.anderson@citygeneralhospital.com (Cashier)');
   console.log('\n🏥 Momentum Multispecialist Hospital Users:');
-  console.log('   👩‍⚕️ Staff:');
+  console.log('   � Admin:');
+  console.log('      - info@momentummultispecialist.com');
+  console.log('   �👩‍⚕️ Staff:');
   console.log('      - rashidat@momentum.com (Nurse)');
   console.log('      - samuel@momentum.com (Cashier)');
   console.log('      - jumoke@momentum.com (Receptionist)');
