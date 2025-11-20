@@ -107,15 +107,18 @@ export async function POST(request: NextRequest) {
 
     for (const row of validRows) {
       try {
-        // Check if email already exists
-        const existingUser = await prisma.user.findUnique({
-          where: { email: row.email },
+        // Check if email already exists in this hospital
+        const existingUser = await prisma.user.findFirst({
+          where: { 
+            email: row.email,
+            hospitalId,
+          },
         });
 
         if (existingUser) {
           importErrors.push({
             row: row.rowNumber,
-            errors: [`Email ${row.email} already exists`],
+            errors: [`Email ${row.email} already exists in this hospital`],
             data: { name: row.name, email: row.email },
           });
           continue;
