@@ -28,7 +28,12 @@ async function main() {
 
   // Create super admin user (platform-level admin)
   const superAdmin = await prisma.user.upsert({
-    where: { email: 'superadmin@momentum.com' },
+    where: {
+      hospitalId_email: {
+        hospitalId: hospital.id,
+        email: 'superadmin@momentum.com'
+      }
+    },
     update: {},
     create: {
       name: 'Momentum Super Admin',
@@ -44,7 +49,12 @@ async function main() {
 
   // Create admin user
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@citygeneralhospital.com' },
+    where: {
+      hospitalId_email: {
+        hospitalId: hospital.id,
+        email: 'admin@citygeneralhospital.com'
+      }
+    },
     update: {},
     create: {
       name: 'Admin User',
@@ -60,7 +70,12 @@ async function main() {
 
   // Create doctor user
   const doctor = await prisma.user.upsert({
-    where: { email: 'sarah.johnson@citygeneralhospital.com' },
+    where: {
+      hospitalId_email: {
+        hospitalId: hospital.id,
+        email: 'sarah.johnson@citygeneralhospital.com'
+      }
+    },
     update: {},
     create: {
       name: 'Dr. Sarah Johnson',
@@ -76,7 +91,12 @@ async function main() {
 
   // Create nurse user
   const nurse = await prisma.user.upsert({
-    where: { email: 'nurse@citygeneralhospital.com' },
+    where: {
+      hospitalId_email: {
+        hospitalId: hospital.id,
+        email: 'nurse@citygeneralhospital.com'
+      }
+    },
     update: {},
     create: {
       name: 'Nurse Mary',
@@ -93,7 +113,12 @@ async function main() {
   // Create receptionist user
   const receptionistPassword = await bcrypt.hash('receptionist123', 10);
   const receptionist = await prisma.user.upsert({
-    where: { email: 'receptionist@citygeneralhospital.com' },
+    where: {
+      hospitalId_email: {
+        hospitalId: hospital.id,
+        email: 'receptionist@citygeneralhospital.com'
+      }
+    },
     update: {
       name: 'Sarah Martinez',
       hashedPassword: receptionistPassword,
