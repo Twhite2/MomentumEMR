@@ -199,13 +199,16 @@ export async function POST(request: NextRequest) {
         return apiResponse({ error: 'This user already has a patient record' }, 400);
       }
     } else {
-      // Check if email already exists (only when NOT linking to existing user)
-      existingUser = await prisma.user.findUnique({
-        where: { email: patientEmail },
+      // Check if email already exists in this hospital (only when NOT linking to existing user)
+      existingUser = await prisma.user.findFirst({
+        where: { 
+          email: patientEmail,
+          hospitalId: parseInt(session.user.hospitalId),
+        },
       });
 
       if (existingUser) {
-        return apiResponse({ error: 'Email already exists in the system' }, 400);
+        return apiResponse({ error: 'Email already exists in this hospital' }, 400);
       }
     }
 
