@@ -134,16 +134,6 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-
-        {/* Demo Credentials */}
-        <div className="mt-4 p-4 bg-white rounded-lg shadow">
-          <p className="text-xs font-semibold mb-2">Demo Credentials:</p>
-          <div className="text-xs space-y-1 text-muted-foreground">
-            <p>Admin: admin@citygeneralhospital.com</p>
-            <p>Doctor: sarah.johnson@citygeneralhospital.com</p>
-            <p>Password: password123</p>
-          </div>
-        </div>
       </div>
     </div>
   );
