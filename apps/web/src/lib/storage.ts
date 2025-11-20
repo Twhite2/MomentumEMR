@@ -24,6 +24,7 @@ export interface UploadOptions {
 
 /**
  * Upload file to Backblaze B2
+ * Returns the S3 key (path) instead of full URL for private buckets
  */
 export async function uploadFile(options: UploadOptions): Promise<string> {
   const { file, fileName, contentType, folder } = options;
@@ -46,13 +47,10 @@ export async function uploadFile(options: UploadOptions): Promise<string> {
       })
     );
 
-    // Return public URL - B2 format
-    const publicUrl = process.env.S3_PUBLIC_URL 
-      ? `${process.env.S3_PUBLIC_URL}/${key}`
-      : `https://f005.backblazeb2.com/file/${BUCKET_NAME}/${key}`;
-    
-    console.log('File uploaded successfully:', publicUrl);
-    return publicUrl;
+    // For private buckets, return the key instead of URL
+    // The frontend will request signed URLs via API
+    console.log('File uploaded successfully. Key:', key);
+    return key;
   } catch (error) {
     console.error('Error uploading file to B2:', error);
     throw new Error('Failed to upload file');
@@ -61,15 +59,20 @@ export async function uploadFile(options: UploadOptions): Promise<string> {
 
 /**
  * Delete file from Backblaze B2
+ * @param fileKeyOrUrl - S3 key (e.g., 'logos/abc.png') or full URL
  */
-export async function deleteFile(fileUrl: string): Promise<void> {
+export async function deleteFile(fileKeyOrUrl: string): Promise<void> {
   try {
-    // Extract key from URL
-    const url = new URL(fileUrl);
-    const key = url.pathname.split(`/${BUCKET_NAME}/`)[1];
+    let key = fileKeyOrUrl;
+    
+    // If it's a full URL, extract the key
+    if (fileKeyOrUrl.startsWith('http')) {
+      const url = new URL(fileKeyOrUrl);
+      key = url.pathname.split(`/${BUCKET_NAME}/`)[1] || fileKeyOrUrl;
+    }
 
     if (!key) {
-      throw new Error('Invalid file URL');
+      throw new Error('Invalid file key or URL');
     }
 
     await s3Client.send(
@@ -86,6 +89,8 @@ export async function deleteFile(fileUrl: string): Promise<void> {
 
 /**
  * Generate a signed URL for temporary access to private files
+ * @param key - S3 key (e.g., 'logos/abc.png')
+ * @param expiresIn - Expiration time in seconds (default: 1 hour)
  */
 export async function getSignedFileUrl(key: string, expiresIn: number = 3600): Promise<string> {
   try {
@@ -100,6 +105,13 @@ export async function getSignedFileUrl(key: string, expiresIn: number = 3600): P
     console.error('Error generating signed URL:', error);
     throw new Error('Failed to generate signed URL');
   }
+}
+
+/**
+ * Check if a string is an S3 key (not a full URL)
+ */
+export function isS3Key(value: string): boolean {
+  return !value.startsWith('http') && !value.startsWith('//');
 }
 
 /**

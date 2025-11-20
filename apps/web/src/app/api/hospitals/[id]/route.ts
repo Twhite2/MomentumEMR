@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@momentum/database';
+import { getSignedFileUrl, isS3Key } from '@/lib/storage';
 
 export async function GET(
   request: NextRequest,
@@ -37,7 +38,20 @@ export async function GET(
       return NextResponse.json({ error: 'Hospital not found' }, { status: 404 });
     }
 
-    return NextResponse.json(hospital);
+    // Generate signed URL for logo if it's an S3 key
+    let logoUrl = hospital.logoUrl;
+    if (logoUrl && isS3Key(logoUrl)) {
+      try {
+        logoUrl = await getSignedFileUrl(logoUrl, 86400); // 24 hours
+      } catch (error) {
+        console.error('Error generating signed URL:', error);
+      }
+    }
+
+    return NextResponse.json({
+      ...hospital,
+      logoUrl,
+    });
   } catch (error) {
     console.error('Error fetching hospital:', error);
     return NextResponse.json(
@@ -89,9 +103,9 @@ export async function PUT(
       tagline: data.tagline,
     };
 
-    // Only update logoUrl if it's a valid B2 URL (not a proxy URL)
+    // Only update logoUrl if provided
     // Logo uploads should go through /api/hospitals/[id]/branding endpoint
-    if (data.logoUrl && data.logoUrl.includes('backblazeb2.com')) {
+    if (data.logoUrl) {
       updateData.logoUrl = data.logoUrl;
     }
 
