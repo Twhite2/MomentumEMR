@@ -6,9 +6,10 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // POST /api/hmo/[id]/tariffs/import - Import HMO tariff data
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['super_admin', 'admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const hmoId = parseInt(params.id);

@@ -5,9 +5,10 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/hmo/[id]/tariffs - Search HMO tariffs
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['super_admin', 'admin', 'doctor', 'nurse', 'pharmacist', 'cashier']);
     const hospitalId = parseInt(session.user.hospitalId);
     const hmoId = parseInt(params.id);
@@ -70,9 +71,10 @@ export async function GET(
 // DELETE /api/hmo/[id]/tariffs - Clear all tariffs for HMO
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const session = await requireRole(['super_admin', 'admin']);
     const hospitalId = parseInt(session.user.hospitalId);
     const hmoId = parseInt(params.id);
