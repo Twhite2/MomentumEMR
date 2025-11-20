@@ -106,8 +106,8 @@ export async function POST(
     } else if (hmoType === 'leadway') {
       // Leadway: Procedure codes with single pricing
       for (const row of data) {
+        const rowData = row as any;
         try {
-          const rowData = row as any;
           const code = rowData['Proceedure Code']?.toString().trim();
           const name = rowData['Proceedure Name']?.toString().trim();
           const amount = rowData['Amount']?.toString().trim();
@@ -151,8 +151,8 @@ export async function POST(
     } else if (hmoType === 'axa') {
       // AXA: Service packages with categories and PA requirements
       for (const row of data) {
+        const rowData = row as any;
         try {
-          const rowData = row as any;
           const code = rowData['Code']?.toString().trim();
           const name = rowData['Name']?.toString().trim();
           const category = rowData['Category']?.toString().trim();
