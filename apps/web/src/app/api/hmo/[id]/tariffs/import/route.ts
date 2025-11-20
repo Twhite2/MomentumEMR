@@ -49,8 +49,8 @@ export async function POST(
     if (hmoType === 'reliance') {
       // Reliance: Drug tariff with tiered pricing
       for (const row of data) {
+        const rowData = row as any;
         try {
-          const rowData = row as any;
           const code = `REL-${rowData['S/N']}`.trim();
           const name = rowData['LINE ITEM']?.toString().trim();
           const unit = rowData['Unit']?.toString().trim();
