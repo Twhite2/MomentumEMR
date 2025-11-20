@@ -44,8 +44,10 @@ export default function AppointmentsPage() {
   const [date, setDate] = useState('');
   const [page, setPage] = useState(1);
   
-  // Check if user can create appointments (admin, nurse, or receptionist)
-  const canCreateAppointments = ['admin', 'nurse', 'receptionist'].includes(session?.user?.role || '');
+  // Check if user can create appointments
+  const canCreateAppointments = ['admin', 'nurse', 'receptionist', 'patient'].includes(session?.user?.role || '');
+  const isPatient = session?.user?.role === 'patient';
+  const canBulkImport = ['admin', 'nurse', 'receptionist'].includes(session?.user?.role || '');
 
   const { data, isLoading, error } = useQuery<AppointmentsResponse>({
     queryKey: ['appointments', status, date, page],
@@ -117,21 +119,23 @@ export default function AppointmentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Appointments</h1>
-          <p className="text-muted-foreground mt-1">Manage patient appointments and schedules</p>
+          <h1 className="text-3xl font-bold">{isPatient ? 'My Appointments' : 'Appointments'}</h1>
+          <p className="text-muted-foreground mt-1">
+            {isPatient ? 'View and manage your appointments' : 'Manage patient appointments and schedules'}
+          </p>
         </div>
         {canCreateAppointments && (
           <Link href="/appointments/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4 mr-2" />
-              Book Appointment
+              {isPatient ? 'Book Appointment' : 'Book Appointment'}
             </Button>
           </Link>
         )}
       </div>
 
-      {/* Excel Import/Export */}
-      {canCreateAppointments && (
+      {/* Excel Import/Export - Staff only */}
+      {canBulkImport && (
         <ExcelImportExport
           title="Bulk Appointments Import"
           description="Download Excel template, fill offline, and upload for batch appointment scheduling"

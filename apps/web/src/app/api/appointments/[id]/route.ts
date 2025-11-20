@@ -11,6 +11,8 @@ export async function GET(
     const params = await context.params;
     const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
+    const userId = parseInt(session.user.id);
+    const userRole = session.user.role;
     const appointmentId = parseInt(params.id);
 
     const appointment = await prisma.appointment.findFirst({
@@ -32,6 +34,22 @@ export async function GET(
 
     if (!appointment) {
       return apiResponse({ error: 'Appointment not found' }, 404);
+    }
+
+    // Patient access control: can only view own appointments
+    if (userRole === 'patient') {
+      const patientRecord = await prisma.patient.findFirst({
+        where: { hospitalId, userId },
+      });
+      
+      if (!patientRecord || appointment.patientId !== patientRecord.id) {
+        return apiResponse({ error: 'Access denied' }, 403);
+      }
+    }
+
+    // Doctor access control: can only view assigned appointments
+    if (userRole === 'doctor' && appointment.doctorId !== userId) {
+      return apiResponse({ error: 'Access denied' }, 403);
     }
 
     return apiResponse(appointment);
@@ -141,8 +159,10 @@ export async function DELETE(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
+    const userId = parseInt(session.user.id);
+    const userRole = session.user.role;
     const appointmentId = parseInt(params.id);
 
     // Verify appointment exists
@@ -154,13 +174,24 @@ export async function DELETE(
       return apiResponse({ error: 'Appointment not found' }, 404);
     }
 
+    // Patient access control: can only cancel own appointments
+    if (userRole === 'patient') {
+      const patientRecord = await prisma.patient.findFirst({
+        where: { hospitalId, userId },
+      });
+      
+      if (!patientRecord || existing.patientId !== patientRecord.id) {
+        return apiResponse({ error: 'Access denied' }, 403);
+      }
+    }
+
     // Update status to cancelled
     await prisma.appointment.update({
       where: { id: appointmentId },
       data: { status: 'cancelled' },
     });
 
-    return apiResponse({ message: 'Appointment cancelled successfully' });
+    return apiResponse({ message: 'Appointment cancelled successfully' })
   } catch (error) {
     return handleApiError(error);
   }

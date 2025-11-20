@@ -26,12 +26,18 @@ export async function GET(request: NextRequest) {
     if (userRole === 'doctor') {
       where.doctorId = userId;
     } else if (userRole === 'patient') {
-      // Find patient record for this user
+      // Find patient record for this user using userId
       const patientRecord = await prisma.patient.findFirst({
-        where: { hospitalId, contactInfo: { path: ['email'], equals: session.user.email } },
+        where: { hospitalId, userId },
       });
       if (patientRecord) {
         where.patientId = patientRecord.id;
+      } else {
+        // If no patient record found, return empty results
+        return apiResponse({
+          appointments: [],
+          pagination: { page, limit, total: 0, totalPages: 0 },
+        });
       }
     }
 

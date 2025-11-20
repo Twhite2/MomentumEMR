@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
 import { ArrowLeft, Edit, Calendar, Clock, User, MapPin, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -36,10 +37,15 @@ interface Appointment {
 }
 
 export default function AppointmentDetailPage() {
+  const { data: session } = useSession();
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
   const appointmentId = params.id as string;
+  
+  // Check if user is patient
+  const isPatient = session?.user?.role === 'patient';
+  const canManageAppointments = ['admin', 'doctor', 'nurse', 'receptionist'].includes(session?.user?.role || '');
 
   const { data: appointment, isLoading, error } = useQuery<Appointment>({
     queryKey: ['appointment', appointmentId],
@@ -266,7 +272,7 @@ export default function AppointmentDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
             <div className="space-y-2">
-              {appointment.status === 'scheduled' && (
+              {!isPatient && appointment.status === 'scheduled' && (
                 <>
                   <Button
                     variant="primary"
@@ -277,22 +283,26 @@ export default function AppointmentDetailPage() {
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Check In Patient
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      if (confirm('Are you sure you want to cancel this appointment?')) {
-                        cancelAppointment.mutate();
-                      }
-                    }}
-                  >
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Cancel Appointment
-                  </Button>
                 </>
               )}
 
-              {appointment.status === 'checked_in' && (
+              {/* Patients can cancel their own appointments */}
+              {appointment.status === 'scheduled' && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    if (confirm('Are you sure you want to cancel this appointment?')) {
+                      cancelAppointment.mutate();
+                    }
+                  }}
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Cancel Appointment
+                </Button>
+              )}
+
+              {!isPatient && appointment.status === 'checked_in' && (
                 <Button
                   variant="primary"
                   className="w-full"
@@ -304,12 +314,19 @@ export default function AppointmentDetailPage() {
                 </Button>
               )}
 
-              {appointment.status !== 'cancelled' && (
+              {!isPatient && appointment.status !== 'cancelled' && (
                 <Link href={`/medical-records/new?patientId=${appointment.patient.id}&appointmentId=${appointment.id}`}>
                   <Button variant="outline" className="w-full">
                     Add Medical Record
                   </Button>
                 </Link>
+              )}
+              
+              {/* Show helpful message if no actions available */}
+              {isPatient && appointment.status !== 'scheduled' && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No actions available for this appointment
+                </p>
               )}
             </div>
           </div>
