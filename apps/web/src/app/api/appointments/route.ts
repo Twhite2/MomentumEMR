@@ -10,6 +10,11 @@ export async function GET(request: NextRequest) {
     const userId = parseInt(session.user.id);
     const userRole = session.user.role;
 
+    // Validate session IDs
+    if (isNaN(hospitalId) || isNaN(userId)) {
+      return apiResponse({ error: 'Invalid session data' }, 400);
+    }
+
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');
     const doctorId = searchParams.get('doctorId');
@@ -126,10 +131,18 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Missing required fields' }, 400);
     }
 
+    // Validate IDs are valid numbers
+    const parsedPatientId = parseInt(patientId);
+    const parsedDoctorId = parseInt(doctorId);
+    
+    if (isNaN(parsedPatientId) || isNaN(parsedDoctorId) || isNaN(hospitalId)) {
+      return apiResponse({ error: 'Invalid patient or doctor ID' }, 400);
+    }
+
     // Verify patient and doctor belong to hospital
     const [patient, doctor] = await Promise.all([
-      prisma.patient.findFirst({ where: { id: parseInt(patientId), hospitalId } }),
-      prisma.user.findFirst({ where: { id: parseInt(doctorId), hospitalId, role: 'doctor' } }),
+      prisma.patient.findFirst({ where: { id: parsedPatientId, hospitalId } }),
+      prisma.user.findFirst({ where: { id: parsedDoctorId, hospitalId, role: 'doctor' } }),
     ]);
 
     if (!patient) {
@@ -143,7 +156,7 @@ export async function POST(request: NextRequest) {
     // Check for scheduling conflicts
     const conflict = await prisma.appointment.findFirst({
       where: {
-        doctorId: parseInt(doctorId),
+        doctorId: parsedDoctorId,
         startTime: new Date(startTime),
         status: { in: ['scheduled', 'checked_in'] },
       },
@@ -157,8 +170,8 @@ export async function POST(request: NextRequest) {
     const appointment = await prisma.appointment.create({
       data: {
         hospitalId,
-        patientId: parseInt(patientId),
-        doctorId: parseInt(doctorId),
+        patientId: parsedPatientId,
+        doctorId: parsedDoctorId,
         department: department || null,
         appointmentType,
         status: status || 'scheduled',
