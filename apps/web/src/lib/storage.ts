@@ -10,9 +10,10 @@ const s3Client = new S3Client({
     accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
   },
+  forcePathStyle: true, // Required for Backblaze B2
 });
 
-const BUCKET_NAME = process.env.S3_BUCKET || 'emr-uploads';
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || process.env.S3_BUCKET || 'emr-upload';
 
 export interface UploadOptions {
   file: Buffer;
