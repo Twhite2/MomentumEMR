@@ -39,9 +39,8 @@ export async function POST(
     const data = XLSX.utils.sheet_to_json(worksheet);
 
     let importResults = {
-      success: 0,
+      imported: 0,
       failed: 0,
-      updated: 0,
       errors: [] as any[],
     };
 
@@ -94,7 +93,7 @@ export async function POST(
             },
           });
 
-          if (tariff) importResults.success++;
+          if (tariff) importResults.imported++;
         } catch (error: any) {
           importResults.failed++;
           importResults.errors.push({
@@ -139,7 +138,7 @@ export async function POST(
             },
           });
 
-          if (tariff) importResults.success++;
+          if (tariff) importResults.imported++;
         } catch (error: any) {
           importResults.failed++;
           importResults.errors.push({
@@ -192,7 +191,7 @@ export async function POST(
             },
           });
 
-          if (tariffData) importResults.success++;
+          if (tariffData) importResults.imported++;
         } catch (error: any) {
           importResults.failed++;
           importResults.errors.push({
@@ -207,7 +206,7 @@ export async function POST(
 
     return apiResponse({
       success: true,
-      message: `Imported ${importResults.success} tariffs successfully`,
+      message: `Imported ${importResults.imported} tariffs successfully`,
       ...importResults,
     });
   } catch (error) {
