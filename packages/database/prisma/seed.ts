@@ -421,6 +421,140 @@ async function main() {
     },
   });
 
+  // ============================================
+  // MOMENTUM MULTISPECIALIST HOSPITAL
+  // ============================================
+  console.log('\n🏥 Creating Momentum Multispecialist Hospital...');
+  
+  const momentumHospital = await prisma.hospital.upsert({
+    where: { id: 2 },
+    update: {},
+    create: {
+      id: 2,
+      name: 'Momentum Multispecialist Hospital',
+      address: 'Momentum Medical Plaza, Healthcare District',
+      contactEmail: 'info@momentummultispecialist.com',
+      phoneNumber: '+234-XXX-XXX-XXXX',
+      subscriptionPlan: 'Premium',
+      active: true,
+    },
+  });
+
+  console.log('✅ Momentum Hospital created:', momentumHospital.name);
+
+  // Momentum Hospital Staff & Patients
+  console.log('👥 Creating Momentum Hospital users...');
+
+  // Blessing - Patient
+  await prisma.user.create({
+    data: {
+      hospitalId: momentumHospital.id,
+      name: 'Blessing',
+      email: 'blessing@momentum.com',
+      hashedPassword,
+      role: 'patient',
+      active: true,
+    },
+  });
+
+  // Rashidat - Nurse
+  await prisma.user.create({
+    data: {
+      hospitalId: momentumHospital.id,
+      name: 'Rashidat',
+      email: 'rashidat@momentum.com',
+      hashedPassword,
+      role: 'nurse',
+      active: true,
+    },
+  });
+
+  // Samuel - Cashier
+  await prisma.user.create({
+    data: {
+      hospitalId: momentumHospital.id,
+      name: 'Samuel',
+      email: 'samuel@momentum.com',
+      hashedPassword,
+      role: 'cashier',
+      active: true,
+    },
+  });
+
+  // Jumoke - Receptionist
+  await prisma.user.create({
+    data: {
+      hospitalId: momentumHospital.id,
+      name: 'Jumoke',
+      email: 'jumoke@momentum.com',
+      hashedPassword,
+      role: 'receptionist',
+      active: true,
+    },
+  });
+
+  // Femi - Pharmacist
+  await prisma.user.create({
+    data: {
+      hospitalId: momentumHospital.id,
+      name: 'Femi',
+      email: 'femi@momentum.com',
+      hashedPassword,
+      role: 'pharmacist',
+      active: true,
+    },
+  });
+
+  // Iheoma - Lab Technician
+  await prisma.user.create({
+    data: {
+      hospitalId: momentumHospital.id,
+      name: 'Iheoma',
+      email: 'iheoma@momentum.com',
+      hashedPassword,
+      role: 'lab_tech',
+      active: true,
+    },
+  });
+
+  // Kola - Patient
+  await prisma.user.create({
+    data: {
+      hospitalId: momentumHospital.id,
+      name: 'Kola',
+      email: 'kola@momentum.com',
+      hashedPassword,
+      role: 'patient',
+      active: true,
+    },
+  });
+
+  // Naomi - Patient
+  await prisma.user.create({
+    data: {
+      hospitalId: momentumHospital.id,
+      name: 'Naomi',
+      email: 'naomi@momentum.com',
+      hashedPassword,
+      role: 'patient',
+      active: true,
+    },
+  });
+
+  // Chinedu - Patient
+  await prisma.user.create({
+    data: {
+      hospitalId: momentumHospital.id,
+      name: 'Chinedu',
+      email: 'chinedu@momentum.com',
+      hashedPassword,
+      role: 'patient',
+      active: true,
+    },
+  });
+
+  console.log('✅ Momentum Hospital staff & patients created successfully!');
+
   console.log('');
   console.log('🎉 Seeding completed successfully!');
   console.log('');
@@ -461,6 +595,18 @@ async function main() {
   console.log('\n👩‍⚕️ Nurses & Cashiers:');
   console.log('   - nurse@citygeneralhospital.com (Nurse)');
   console.log('   - lisa.anderson@citygeneralhospital.com (Cashier)');
+  console.log('\n🏥 Momentum Multispecialist Hospital Users:');
+  console.log('   👩‍⚕️ Staff:');
+  console.log('      - rashidat@momentum.com (Nurse)');
+  console.log('      - samuel@momentum.com (Cashier)');
+  console.log('      - jumoke@momentum.com (Receptionist)');
+  console.log('      - femi@momentum.com (Pharmacist)');
+  console.log('      - iheoma@momentum.com (Lab Technician)');
+  console.log('   🧑‍🤝‍🧑 Patients:');
+  console.log('      - blessing@momentum.com');
+  console.log('      - kola@momentum.com');
+  console.log('      - naomi@momentum.com');
+  console.log('      - chinedu@momentum.com');
 }
 
 main()
