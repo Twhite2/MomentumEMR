@@ -920,11 +920,13 @@ export default function LabOrderDetailPage() {
                       Schedule Follow-up
                     </Button>
                   </Link>
-                  <Link href={`/medical-records/new?patientId=${order.patient.id}`}>
-                    <Button variant="outline" className="w-full">
-                      Add Medical Record
-                    </Button>
-                  </Link>
+                  {['admin', 'doctor', 'nurse'].includes(session?.user?.role || '') && (
+                    <Link href={`/medical-records/new?patientId=${order.patient.id}`}>
+                      <Button variant="outline" className="w-full">
+                        Add Medical Record
+                      </Button>
+                    </Link>
+                  )}
                 </>
               )}
             </div>

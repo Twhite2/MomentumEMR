@@ -380,7 +380,7 @@ curl http://localhost:3000
 # Should return Next.js response
 
 # Test external access
-curl http://yourdomain.com
+curl https://momentumhealthcare.io
 ```
 
 ---

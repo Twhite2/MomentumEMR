@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@momentum/database';
-import { uploadFile, deleteFile, getSignedFileUrl, isS3Key } from '@/lib/storage';
+import { uploadFile, deleteFile } from '@/lib/storage';
 
 // PUT /api/hospitals/[id]/branding - Update hospital branding
 export async function PUT(
@@ -169,22 +169,7 @@ export async function GET(
       return NextResponse.json({ error: 'Hospital not found' }, { status: 404 });
     }
 
-    // Generate signed URL for logo if it's an S3 key
-    let logoUrl = hospital.logoUrl;
-    if (logoUrl && isS3Key(logoUrl)) {
-      try {
-        // Generate signed URL valid for 24 hours
-        logoUrl = await getSignedFileUrl(logoUrl, 86400);
-      } catch (error) {
-        console.error('Error generating signed URL for logo:', error);
-        // Keep the original key if signing fails
-      }
-    }
-
-    return NextResponse.json({
-      ...hospital,
-      logoUrl,
-    });
+    return NextResponse.json(hospital);
   } catch (error) {
     console.error('Error fetching hospital branding:', error);
     return NextResponse.json(

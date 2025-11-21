@@ -145,12 +145,6 @@ export async function GET(request: NextRequest) {
         ...(isPatient && patientId ? { patientId } : {}),
         OR: [
           {
-            appointmentType: {
-              contains: searchTerm,
-              mode: 'insensitive',
-            },
-          },
-          {
             department: {
               contains: searchTerm,
               mode: 'insensitive',
@@ -265,34 +259,24 @@ export async function GET(request: NextRequest) {
       where: {
         ...hospitalFilter,
         ...(isPatient && patientId ? { patientId } : {}),
-        OR: [
-          {
-            status: {
-              contains: searchTerm,
-              mode: 'insensitive',
-            },
-          },
-          ...(isPatient ? [] : [
-            {
-              patient: {
-                OR: [
-                  {
-                    firstName: {
-                      contains: searchTerm,
-                      mode: 'insensitive',
-                    },
-                  },
-                  {
-                    lastName: {
-                      contains: searchTerm,
-                      mode: 'insensitive',
-                    },
-                  },
-                ],
+        ...(isPatient ? {} : {
+          patient: {
+            OR: [
+              {
+                firstName: {
+                  contains: searchTerm,
+                  mode: 'insensitive',
+                },
               },
-            },
-          ]),
-        ],
+              {
+                lastName: {
+                  contains: searchTerm,
+                  mode: 'insensitive',
+                },
+              },
+            ],
+          },
+        }),
       },
       select: {
         id: true,

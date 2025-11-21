@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button, Input, Select } from '@momentum/ui';
-import { Plus, Building2, FileText, Settings, DollarSign, ChevronRight } from 'lucide-react';
+import { Plus, Building2, FileText, Settings, DollarSign, ChevronRight, FileSpreadsheet } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -143,6 +143,50 @@ export default function HMOManagementPage() {
               <p className="text-2xl font-bold">
                 {hmos?.reduce((sum: number, h: HMO) => sum + (h._count?.patients || 0), 0) || 0}
               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tariff Management Card */}
+      <div className="bg-gradient-to-r from-tory-blue/10 to-spindle rounded-lg border-2 border-tory-blue/30 overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-lg bg-tory-blue flex items-center justify-center">
+                  <FileSpreadsheet className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">HMO Tariff Management</h2>
+                  <p className="text-sm text-muted-foreground">
+                    View and manage pricing data for all HMO providers
+                  </p>
+                </div>
+              </div>
+            </div>
+            <Link href="/hmo/tariffs">
+              <Button variant="primary" size="md">
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Manage Tariffs
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white/50 rounded-lg p-4">
+              <p className="text-sm text-muted-foreground mb-1">Total Tariff Items</p>
+              <p className="text-2xl font-bold text-tory-blue">
+                {hmos?.reduce((sum: number, h: HMO) => sum + (h._count?.encounters || 0), 0)?.toLocaleString() || '0'}
+              </p>
+            </div>
+            <div className="bg-white/50 rounded-lg p-4">
+              <p className="text-sm text-muted-foreground mb-1">Search & Export</p>
+              <p className="text-sm font-medium">Browse tariffs by HMO provider</p>
+            </div>
+            <div className="bg-white/50 rounded-lg p-4">
+              <p className="text-sm text-muted-foreground mb-1">Import Data</p>
+              <p className="text-sm font-medium">Upload Excel/CSV files</p>
             </div>
           </div>
         </div>

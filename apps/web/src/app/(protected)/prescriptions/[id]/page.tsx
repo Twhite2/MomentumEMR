@@ -313,11 +313,13 @@ export default function PrescriptionDetailPage() {
                   Schedule Follow-up
                 </Button>
               </Link>
-              <Link href={`/medical-records/new?patientId=${prescription.patient.id}`}>
-                <Button variant="outline" className="w-full">
-                  Add Medical Record
-                </Button>
-              </Link>
+              {['admin', 'doctor', 'nurse'].includes(session?.user?.role || '') && (
+                <Link href={`/medical-records/new?patientId=${prescription.patient.id}`}>
+                  <Button variant="outline" className="w-full">
+                    Add Medical Record
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
 

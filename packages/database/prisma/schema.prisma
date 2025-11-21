@@ -38,6 +38,7 @@ enum AppointmentType {
   surgery
   lab
   follow_up
+  walk_in
 }
 
 enum AppointmentStatus {

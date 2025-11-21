@@ -98,3 +98,114 @@ export async function GET(request: NextRequest) {
     return handleApiError(error);
   }
 }
+
+// POST /api/patient-queue - Add walk-in patient to queue
+export async function POST(request: NextRequest) {
+  try {
+    const session = await requireRole(['admin', 'nurse', 'receptionist']);
+    const hospitalId = parseInt(session.user.hospitalId);
+
+    const body = await request.json();
+    const { patientId, doctorId } = body;
+
+    if (!patientId) {
+      return apiResponse({ error: 'Patient ID is required' }, 400);
+    }
+
+    // Verify patient exists and belongs to hospital
+    const patient = await prisma.patient.findFirst({
+      where: { id: parseInt(patientId), hospitalId },
+    });
+
+    if (!patient) {
+      return apiResponse({ error: 'Patient not found' }, 404);
+    }
+
+    // Check if patient already has a queue entry today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const existingAppointment = await prisma.appointment.findFirst({
+      where: {
+        hospitalId,
+        patientId: parseInt(patientId),
+        startTime: {
+          gte: today,
+          lt: tomorrow,
+        },
+        status: {
+          in: ['scheduled', 'checked_in'],
+        },
+      },
+    });
+
+    if (existingAppointment) {
+      return apiResponse({ 
+        error: 'Patient is already in today\'s queue',
+        appointmentId: existingAppointment.id 
+      }, 400);
+    }
+
+    // Determine doctorId - if not provided, find any available doctor in the hospital
+    let finalDoctorId: number;
+    if (doctorId) {
+      finalDoctorId = parseInt(doctorId);
+    } else if (patient.primaryDoctorId) {
+      finalDoctorId = patient.primaryDoctorId;
+    } else {
+      // Find any doctor in the hospital
+      const anyDoctor = await prisma.user.findFirst({
+        where: {
+          hospitalId,
+          role: 'doctor',
+          active: true,
+        },
+      });
+      
+      if (!anyDoctor) {
+        return apiResponse({ error: 'No available doctors found. Please assign a doctor.' }, 400);
+      }
+      
+      finalDoctorId = anyDoctor.id;
+    }
+
+    // Create walk-in appointment
+    const appointment = await prisma.appointment.create({
+      data: {
+        hospitalId,
+        patientId: parseInt(patientId),
+        doctorId: finalDoctorId,
+        appointmentType: 'walk_in',
+        status: 'checked_in', // Immediately check them in
+        startTime: new Date(),
+      },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            dob: true,
+            gender: true,
+            patientType: true,
+          },
+        },
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    return apiResponse({
+      message: 'Walk-in patient added to queue successfully',
+      appointment,
+    }, 201);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}

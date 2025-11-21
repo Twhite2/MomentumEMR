@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 // GET /api/users - List users
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin']);
+    const session = await requireRole(['admin', 'nurse', 'receptionist', 'doctor']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const { searchParams } = new URL(request.url);

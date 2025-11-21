@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
+    const includeTariffCount = searchParams.get('includeTariffCount') === 'true';
 
     const hmoList = await prisma.hmo.findMany({
       where: {
@@ -30,6 +31,7 @@ export async function GET(request: NextRequest) {
           select: {
             patients: true,
             encounters: true,
+            ...(includeTariffCount ? { tariffs: true } : {}),
           },
         },
       },

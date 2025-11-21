@@ -46,6 +46,7 @@ export default function AppointmentDetailPage() {
   // Check if user is patient
   const isPatient = session?.user?.role === 'patient';
   const canManageAppointments = ['admin', 'doctor', 'nurse', 'receptionist'].includes(session?.user?.role || '');
+  const canCreateMedicalRecords = ['admin', 'doctor', 'nurse'].includes(session?.user?.role || '');
 
   const { data: appointment, isLoading, error } = useQuery<Appointment>({
     queryKey: ['appointment', appointmentId],
@@ -314,7 +315,7 @@ export default function AppointmentDetailPage() {
                 </Button>
               )}
 
-              {!isPatient && appointment.status !== 'cancelled' && (
+              {canCreateMedicalRecords && appointment.status !== 'cancelled' && (
                 <Link href={`/medical-records/new?patientId=${appointment.patient.id}&appointmentId=${appointment.id}`}>
                   <Button variant="outline" className="w-full">
                     Add Medical Record

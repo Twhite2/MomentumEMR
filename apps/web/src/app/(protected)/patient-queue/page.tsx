@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { Clock, UserCheck, UserX, Search, Calendar, Users } from 'lucide-react';
+import { Clock, UserCheck, UserX, Search, Calendar, Users, ChevronDown, ChevronUp, UserPlus, X } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -44,6 +44,13 @@ export default function PatientQueuePage() {
   const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'waiting' | 'in-progress' | 'completed'>('all');
+  const [walkInSearch, setWalkInSearch] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showWalkInSection, setShowWalkInSection] = useState(false);
+  
+  // Check if user can add walk-ins (admin, nurse, or receptionist)
+  const canAddWalkIns = ['admin', 'nurse', 'receptionist'].includes(session?.user?.role || '');
 
   const { data: queueData, isLoading, refetch } = useQuery<QueueResponse>({
     queryKey: ['patient-queue', filterStatus],
@@ -97,6 +104,47 @@ export default function PatientQueuePage() {
   const handleCheckOut = (appointmentId: number) => {
     checkOutMutation.mutate(appointmentId);
   };
+
+  // Search patients for walk-in
+  const handleWalkInSearch = async (search: string) => {
+    if (!search || search.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    
+    setIsSearching(true);
+    try {
+      const response = await axios.get('/api/patients', {
+        params: { search, limit: 10 },
+      });
+      setSearchResults(response.data.patients || []);
+    } catch (error) {
+      toast.error('Failed to search patients');
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Add walk-in patient to queue
+  const addWalkInMutation = useMutation({
+    mutationFn: async (patientId: number) => {
+      const response = await axios.post('/api/patient-queue', {
+        patientId,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Walk-in patient added to queue successfully');
+      setWalkInSearch('');
+      setSearchResults([]);
+      refetch();
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.error || 'Failed to add patient to queue';
+      toast.error(errorMessage);
+    },
+  });
 
   const calculateAge = (dob: string) => {
     const birthDate = new Date(dob);
@@ -186,6 +234,127 @@ export default function PatientQueuePage() {
           </div>
         </div>
       </div>
+
+      {/* Walk-In Patient Search */}
+      {canAddWalkIns && (
+        <div className="bg-gradient-to-r from-tory-blue/5 to-spindle rounded-lg border-2 border-dashed border-tory-blue/30 overflow-hidden">
+          <button
+            onClick={() => setShowWalkInSection(!showWalkInSection)}
+            className="w-full p-6 flex items-center justify-between hover:bg-tory-blue/5 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-tory-blue flex items-center justify-center flex-shrink-0">
+                <UserPlus className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-lg mb-1">Add Walk-In Patient</h3>
+                <p className="text-sm text-muted-foreground">
+                  Search for a patient and add them to today's queue without a prior appointment
+                </p>
+              </div>
+            </div>
+            {showWalkInSection ? (
+              <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            )}
+          </button>
+          
+          {showWalkInSection && (
+            <div className="px-6 pb-6 pt-2 border-t border-tory-blue/20">
+              <div className="flex-1">
+              
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Type at least 2 characters to search..."
+                  value={walkInSearch}
+                  onChange={(e) => {
+                    setWalkInSearch(e.target.value);
+                    handleWalkInSearch(e.target.value);
+                  }}
+                  className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                />
+                {walkInSearch && (
+                  <button
+                    onClick={() => {
+                      setWalkInSearch('');
+                      setSearchResults([]);
+                    }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+                
+                {/* Search Results Dropdown */}
+                {walkInSearch && (
+                  <div className="absolute z-10 w-full mt-2 bg-white border border-border rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                    {walkInSearch.length < 2 ? (
+                      <div className="p-4 text-center text-muted-foreground">
+                        <p className="text-sm">Type at least 2 characters to search</p>
+                      </div>
+                    ) : isSearching ? (
+                      <div className="p-4 text-center">
+                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-tory-blue"></div>
+                        <p className="mt-2 text-sm text-muted-foreground">Searching patients...</p>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      searchResults.map((patient: any) => (
+                        <div
+                          key={patient.id}
+                          className="p-4 hover:bg-spindle border-b border-border last:border-b-0 flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-tory-blue flex items-center justify-center">
+                              <span className="text-white font-medium text-sm">
+                                {patient.firstName?.[0]}{patient.lastName?.[0]}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                {patient.firstName} {patient.lastName}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {patient.contactInfo?.email || patient.contactInfo?.phone || 'No contact info'}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => addWalkInMutation.mutate(typeof patient.id === 'string' ? parseInt(patient.id.replace('user-', '')) : patient.id)}
+                            disabled={addWalkInMutation.isPending}
+                          >
+                            <UserCheck className="w-4 h-4 mr-1" />
+                            Check In
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-6 text-center">
+                        <Users className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-muted-foreground mb-2">No patients found matching "{walkInSearch}"</p>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          The patient may not be registered yet
+                        </p>
+                        <Link href="/patients/new">
+                          <Button variant="outline" size="sm">
+                            <UserPlus className="w-4 h-4 mr-1" />
+                            Register New Patient
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4">
