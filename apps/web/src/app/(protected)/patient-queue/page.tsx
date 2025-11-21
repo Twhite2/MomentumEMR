@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { Clock, UserCheck, UserX, Search, Calendar, Users, ChevronDown, ChevronUp, UserPlus, X } from 'lucide-react';
+import { Clock, UserCheck, UserX, Search, Calendar, Users, UserPlus, X } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -47,7 +47,6 @@ export default function PatientQueuePage() {
   const [walkInSearch, setWalkInSearch] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [showWalkInSection, setShowWalkInSection] = useState(false);
   
   // Check if user can add walk-ins (admin, nurse, or receptionist)
   const canAddWalkIns = ['admin', 'nurse', 'receptionist'].includes(session?.user?.role || '');
@@ -237,12 +236,9 @@ export default function PatientQueuePage() {
 
       {/* Walk-In Patient Search */}
       {canAddWalkIns && (
-        <div className="bg-gradient-to-r from-tory-blue/5 to-spindle rounded-lg border-2 border-dashed border-tory-blue/30 overflow-hidden">
-          <button
-            onClick={() => setShowWalkInSection(!showWalkInSection)}
-            className="w-full p-6 flex items-center justify-between hover:bg-tory-blue/5 transition-colors"
-          >
-            <div className="flex items-center gap-4">
+        <div className="bg-gradient-to-r from-tory-blue/5 to-spindle rounded-lg border-2 border-dashed border-tory-blue/30">
+          <div className="p-6">
+            <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-lg bg-tory-blue flex items-center justify-center flex-shrink-0">
                 <UserPlus className="w-6 h-6 text-white" />
               </div>
@@ -253,18 +249,9 @@ export default function PatientQueuePage() {
                 </p>
               </div>
             </div>
-            {showWalkInSection ? (
-              <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-            )}
-          </button>
           
-          {showWalkInSection && (
-            <div className="px-6 pb-6 pt-2 border-t border-tory-blue/20">
-              <div className="flex-1">
-              
-              <div className="relative">
+            <div>
+              <div className="flex-1 relative z-50">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <input
                   type="text"
@@ -290,7 +277,7 @@ export default function PatientQueuePage() {
                 
                 {/* Search Results Dropdown */}
                 {walkInSearch && (
-                  <div className="absolute z-10 w-full mt-2 bg-white border border-border rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                  <div className="absolute z-50 w-full mt-2 bg-white border border-border rounded-lg shadow-lg max-h-80 overflow-y-auto">
                     {walkInSearch.length < 2 ? (
                       <div className="p-4 text-center text-muted-foreground">
                         <p className="text-sm">Type at least 2 characters to search</p>
@@ -350,9 +337,8 @@ export default function PatientQueuePage() {
                   </div>
                 )}
               </div>
-              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -430,7 +416,7 @@ export default function PatientQueuePage() {
             <tbody className="bg-white divide-y divide-border">
               {filteredQueue && filteredQueue.length > 0 ? (
                 filteredQueue.map((patient) => (
-                  <tr key={patient.id} className="hover:bg-spindle transition-colors">
+                  <tr key={patient.appointment.id} className="hover:bg-spindle transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 bg-tory-blue rounded-full flex items-center justify-center">
