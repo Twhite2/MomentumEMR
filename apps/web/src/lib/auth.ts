@@ -23,12 +23,17 @@ export const authOptions = {
             throw new Error('Invalid credentials');
           }
 
-          const email = credentials.email as string;
+          const email = (credentials.email as string).toLowerCase().trim();
           const password = credentials.password as string;
 
           console.log('🔍 [AUTH] Querying database for user...');
           const user = await prisma.user.findFirst({
-            where: { email },
+            where: { 
+              email: {
+                equals: email,
+                mode: 'insensitive',
+              }
+            },
             include: {
               hospital: true,
             },

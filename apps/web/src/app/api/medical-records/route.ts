@@ -75,12 +75,22 @@ export async function GET(request: NextRequest) {
 // POST /api/medical-records - Create new medical record
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
-    const doctorId = parseInt(session.user.id);
+    const userRole = session.user.role;
 
     const body = await request.json();
-    const { patientId, visitDate, diagnosis, notes, allergies, attachments } = body;
+    const { patientId, visitDate, diagnosis, notes, allergies, attachments, doctorId: providedDoctorId } = body;
+
+    // Determine doctorId: doctors use their own ID, others must provide one
+    let doctorId: number;
+    if (userRole === 'doctor') {
+      doctorId = parseInt(session.user.id);
+    } else if (providedDoctorId) {
+      doctorId = parseInt(providedDoctorId);
+    } else {
+      return apiResponse({ error: 'Doctor ID is required' }, 400);
+    }
 
     // Validation
     if (!patientId || !visitDate) {
