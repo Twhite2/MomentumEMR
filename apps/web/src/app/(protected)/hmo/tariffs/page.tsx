@@ -168,30 +168,6 @@ export default function AllHMOTariffsPage() {
         </div>
       )}
 
-      {/* Quick Upload Section */}
-      <div className="bg-gradient-to-r from-tory-blue/5 to-spindle rounded-lg border-2 border-dashed border-tory-blue/30 p-8">
-        <div className="text-center">
-          <Upload className="w-12 h-12 mx-auto text-tory-blue mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Quick Upload Tariff Data</h3>
-          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Select an HMO provider above and click "Upload New Data" to import Excel/CSV files 
-            with tariff information. Supported formats: AXA Mansard, Leadway, and Reliance HMO templates.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <a
-              href="/templates/hmo-tariff-template.xlsx"
-              download
-              className="inline-block"
-            >
-              <Button variant="outline" size="md">
-                <Download className="w-4 h-4 mr-2" />
-                Download Template
-              </Button>
-            </a>
-          </div>
-        </div>
-      </div>
-
       {/* Instructions */}
       <div className="bg-white rounded-lg border border-border p-6">
         <h3 className="text-lg font-semibold mb-4">How to Import Tariff Data</h3>
