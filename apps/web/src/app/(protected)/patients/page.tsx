@@ -428,11 +428,17 @@ export default function PatientsPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         {patient.isUserOnly ? (
-                          <Link href={`/patients/new?userId=${patient.userId}`}>
-                            <Button variant="outline" size="sm" className="text-amber-600 border-amber-600 hover:bg-amber-50">
-                              Create Record
+                          canCreatePatients ? (
+                            <Link href={`/patients/new?userId=${patient.userId}`}>
+                              <Button variant="outline" size="sm" className="text-amber-600 border-amber-600 hover:bg-amber-50">
+                                Create Record
+                              </Button>
+                            </Link>
+                          ) : (
+                            <Button variant="ghost" size="sm" disabled>
+                              User Account Only
                             </Button>
-                          </Link>
+                          )
                         ) : patient.id ? (
                           <Link href={`/patients/${patient.id}`}>
                             <Button variant="ghost" size="sm">
