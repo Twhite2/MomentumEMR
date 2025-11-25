@@ -259,10 +259,12 @@ model Patient {
   lastName            String       @map("last_name")
   dob                 DateTime     @db.Date
   gender              String?
+  tribe               String?      // Patient's tribe/ethnicity
   contactInfo         Json?        @map("contact_info")
   address             String?      @db.Text
   emergencyContact    String?      @map("emergency_contact") @db.Text
   insuranceId         Int?         @map("insurance_id")
+  hmoEnrolleeNumber   String?      @map("hmo_enrollee_number") // HMO enrollee/member number
   bloodGroup          String?      @map("blood_group")
   allergies           Json?        // Allergy summary: ["Penicillin", "Peanuts", etc.]
   createdAt           DateTime     @default(now()) @map("created_at")
@@ -380,17 +382,18 @@ model Appointment {
 }
 
 model MedicalRecord {
-  id          Int      @id @default(autoincrement())
-  hospitalId  Int      @map("hospital_id")
-  patientId   Int      @map("patient_id")
-  doctorId    Int      @map("doctor_id")
-  visitDate   DateTime @map("visit_date") @db.Date
-  diagnosis   String?  @db.Text
-  notes       String?  @db.Text
-  allergies   Json?    // Allergies noted during this visit: ["Penicillin", "Latex", etc.]
-  attachments Json?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id            Int      @id @default(autoincrement())
+  hospitalId    Int      @map("hospital_id")
+  patientId     Int      @map("patient_id")
+  doctorId      Int      @map("doctor_id")
+  visitDate     DateTime @map("visit_date") @db.Date
+  diagnosis     String?  @db.Text
+  notes         String?  @db.Text
+  treatmentPlan String?  @map("treatment_plan") @db.Text
+  allergies     Json?    // Allergies noted during this visit: ["Penicillin", "Latex", etc.]
+  attachments   Json?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   // Relations
   hospital Hospital @relation(fields: [hospitalId], references: [id])

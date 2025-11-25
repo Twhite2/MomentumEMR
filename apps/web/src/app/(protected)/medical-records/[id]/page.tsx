@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Edit, Calendar, User, FileText, Stethoscope, Download, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, User, FileText, Stethoscope, Download, ExternalLink, Activity, AlertTriangle, Pill, ClipboardList, TestTube, FileSearch, History, Bell } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
@@ -13,6 +13,7 @@ interface MedicalRecord {
   visitDate: string;
   diagnosis: string | null;
   notes: string | null;
+  treatmentPlan: string | null;
   attachments: any;
   patient: {
     id: number;
@@ -20,16 +21,30 @@ interface MedicalRecord {
     lastName: string;
     dob: string;
     gender: string;
+    tribe?: string;
     patientType: string;
     contactInfo: {
       phone?: string;
       email?: string;
+    };
+    allergies?: string;
+    _count?: {
+      medicalRecords: number;
+      prescriptions: number;
+      labOrders: number;
+      vitals: number;
     };
   };
   doctor: {
     id: number;
     name: string;
     email: string;
+  };
+  latestVital?: {
+    bloodPressure: string;
+    temperature: number;
+    pulse: number;
+    weight: number;
   };
   createdAt: string;
   updatedAt: string;
@@ -40,6 +55,8 @@ export default function MedicalRecordDetailPage() {
   const recordId = params.id as string;
   const { data: session } = useSession();
   const isLabTech = session?.user?.role === 'lab_tech';
+  const isDoctor = session?.user?.role === 'doctor' || session?.user?.role === 'admin';
+  const isNurse = session?.user?.role === 'nurse';
 
   const { data: record, isLoading, error } = useQuery<MedicalRecord>({
     queryKey: ['medical-record', recordId],
@@ -113,6 +130,176 @@ export default function MedicalRecordDetailPage() {
     );
   }
 
+  // Enhanced Dashboard View for Doctors
+  if (isDoctor) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/medical-records">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold">Patient Dashboard</h1>
+              <p className="text-muted-foreground mt-1">Comprehensive medical overview</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Info Bar */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {/* Patient Name */}
+          <div className="bg-tory-blue text-white rounded-lg p-4">
+            <h3 className="text-lg font-bold">{record.patient.firstName} {record.patient.lastName}</h3>
+            <p className="text-xs opacity-90 mt-1">
+              {record.patient.id}
+            </p>
+          </div>
+
+          {/* Biodata */}
+          <div className="bg-tory-blue text-white rounded-lg p-4">
+            <h4 className="text-xs font-semibold mb-2">Biodata</h4>
+            <p className="text-sm">{calculateAge(record.patient.dob)} yrs • {record.patient.gender}</p>
+            {record.patient.tribe && <p className="text-xs opacity-90">{record.patient.tribe}</p>}
+          </div>
+
+          {/* Admitted/OPD Status */}
+          <div className="bg-tory-blue text-white rounded-lg p-4 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-xs font-semibold mb-1">Status</p>
+              <p className="text-lg font-bold">{record.patient.patientType === 'inpatient' ? 'ADMITTED' : 'OPD'}</p>
+            </div>
+          </div>
+
+          {/* Vital Signs Summary */}
+          <div className="bg-tory-blue text-white rounded-lg p-4">
+            <h4 className="text-xs font-semibold mb-2">Vital signs</h4>
+            {record.latestVital ? (
+              <div className="space-y-1 text-xs">
+                <p>BP: {record.latestVital.bloodPressure}</p>
+                <p>Temp: {record.latestVital.temperature}°C</p>
+                <p>Pulse: {record.latestVital.pulse} bpm</p>
+              </div>
+            ) : (
+              <p className="text-xs opacity-75">No vitals recorded</p>
+            )}
+          </div>
+
+          {/* Allergies */}
+          <div className="bg-tory-blue text-white rounded-lg p-4">
+            <h4 className="text-xs font-semibold mb-2">Allergies</h4>
+            <p className="text-sm">{record.patient.allergies || 'None recorded'}</p>
+          </div>
+
+          {/* Total Visits */}
+          <div className="bg-tory-blue text-white rounded-lg p-4 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-xs font-semibold mb-1">Total visits</p>
+              <p className="text-2xl font-bold">{record.patient._count?.medicalRecords || 1}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Clinical Notes - Pink */}
+          <Link href={`/medical-records/${record.id}/edit`} className="block lg:col-span-2">
+            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <div className="flex items-start justify-between mb-3">
+                <FileText className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Clinical notes</h3>
+              <p className="text-sm opacity-90 line-clamp-3">{record.notes || 'No clinical notes yet. Click to add.'}</p>
+            </div>
+          </Link>
+
+          {/* Prescribe Drugs - Pink */}
+          <Link href={`/prescriptions/new?patientId=${record.patient.id}`} className="block">
+            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer relative">
+              <Pill className="w-8 h-8 mb-3" />
+              <h3 className="text-lg font-bold">Prescribe drugs</h3>
+              <div className="absolute top-3 right-3">
+                <Bell className="w-5 h-5" />
+              </div>
+              <p className="text-xs mt-2 opacity-75">Notification that it has been prescribed</p>
+            </div>
+          </Link>
+
+          {/* Diagnosis (Differentials) - Pink */}
+          <Link href={`/medical-records/${record.id}/edit`} className="block lg:col-span-2">
+            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <Stethoscope className="w-8 h-8 mb-3" />
+              <h3 className="text-xl font-bold mb-2">Diagnosis (differentials)</h3>
+              <p className="text-sm opacity-90 line-clamp-2">{record.diagnosis || 'No diagnosis recorded yet.'}</p>
+            </div>
+          </Link>
+
+          {/* Previous Prescriptions - Pink */}
+          <Link href={`/prescriptions?patientId=${record.patient.id}`} className="block">
+            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <ClipboardList className="w-8 h-8 mb-3" />
+              <h3 className="text-lg font-bold">Previous prescriptions</h3>
+              <p className="text-xs mt-2 opacity-75">{record.patient._count?.prescriptions || 0} prescription(s)</p>
+            </div>
+          </Link>
+
+          {/* Treatment Plan - Pink */}
+          <Link href={`/medical-records/${record.id}/edit`} className="block lg:col-span-2">
+            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <FileSearch className="w-8 h-8 mb-3" />
+              <h3 className="text-xl font-bold mb-2">Treatment plan. Nurse has access</h3>
+              <p className="text-sm opacity-90 line-clamp-2">{record.treatmentPlan || 'No treatment plan recorded yet.'}</p>
+            </div>
+          </Link>
+
+          {/* Order Test - Green */}
+          <Link href={`/lab-orders/new?patientId=${record.patient.id}`} className="block">
+            <div className="bg-gradient-to-br from-green-haze to-green-haze/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer relative">
+              <TestTube className="w-8 h-8 mb-3" />
+              <h3 className="text-lg font-bold">Order test</h3>
+              <div className="absolute top-3 right-3">
+                <Bell className="w-5 h-5" />
+              </div>
+              <p className="text-xs mt-2 opacity-75">Notification that it has been ordered, see results</p>
+            </div>
+          </Link>
+
+          {/* Previous Orders - Green */}
+          <Link href={`/lab-orders?patientId=${record.patient.id}`} className="block">
+            <div className="bg-gradient-to-br from-green-haze to-green-haze/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <History className="w-8 h-8 mb-3" />
+              <h3 className="text-lg font-bold">Previous orders</h3>
+              <p className="text-xs mt-2 opacity-75">{record.patient._count?.labOrders || 0} lab order(s)</p>
+            </div>
+          </Link>
+
+          {/* Previous Records 1 - Yellow */}
+          <Link href={`/vitals?patientId=${record.patient.id}`} className="block lg:col-span-3">
+            <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 text-white rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer">
+              <Activity className="w-8 h-8 mb-3" />
+              <h3 className="text-xl font-bold">Previous records following hospital visit</h3>
+              <p className="text-sm opacity-90">View all vitals and clinical history</p>
+            </div>
+          </Link>
+
+          {/* Previous Records 2 - Yellow */}
+          <Link href={`/patients/${record.patient.id}`} className="block lg:col-span-3">
+            <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 text-white rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer">
+              <User className="w-8 h-8 mb-3" />
+              <h3 className="text-xl font-bold">Previous records following hospital visit</h3>
+              <p className="text-sm opacity-90">Complete patient medical history</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Standard View for Non-Doctors
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -130,12 +317,14 @@ export default function MedicalRecordDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href={`/medical-records/${record.id}/edit`}>
-            <Button variant="outline">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          </Link>
+          {(isDoctor || isNurse) && (
+            <Link href={`/medical-records/${record.id}/edit`}>
+              <Button variant="outline">
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

@@ -19,7 +19,18 @@ export async function GET(
         hospitalId,
       },
       include: {
-        patient: true,
+        patient: {
+          include: {
+            _count: {
+              select: {
+                medicalRecords: true,
+                prescriptions: true,
+                labOrders: true,
+                vitals: true,
+              },
+            },
+          },
+        },
         doctor: {
           select: {
             id: true,
@@ -34,7 +45,26 @@ export async function GET(
       return apiResponse({ error: 'Medical record not found' }, 404);
     }
 
-    return apiResponse(record);
+    // Get latest vital signs for this patient
+    const latestVital = await prisma.vital.findFirst({
+      where: {
+        patientId: record.patientId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: {
+        bloodPressure: true,
+        temperature: true,
+        pulse: true,
+        weight: true,
+      },
+    });
+
+    return apiResponse({
+      ...record,
+      latestVital,
+    });
   } catch (error) {
     return handleApiError(error);
   }
