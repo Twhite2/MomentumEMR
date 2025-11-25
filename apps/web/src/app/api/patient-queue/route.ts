@@ -51,7 +51,6 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: { startTime: 'asc' },
     });
 
     // Transform data to include queue info
@@ -67,11 +66,43 @@ export async function GET(request: NextRequest) {
         startTime: apt.startTime,
         status: apt.status,
         appointmentType: apt.appointmentType || 'consultation',
+        isEmergency: apt.isEmergency,
         doctor: apt.doctor,
       },
-      checkedInAt: apt.status === 'checked_in' || apt.status === 'completed' ? apt.startTime : undefined,
-      checkedOutAt: apt.status === 'completed' ? apt.endTime : undefined,
+      checkedInAt: apt.checkedInAt,
+      checkedOutAt: apt.checkedOutAt,
     }));
+
+    // Sort queue properly:
+    // 1. Emergency cases first (regardless of status)
+    // 2. Then by status: checked_in -> scheduled -> completed
+    // 3. Within each group, sort by time (checkedInAt for checked_in, startTime for scheduled, checkedOutAt for completed)
+    queue.sort((a, b) => {
+      // Emergency cases always come first
+      if (a.appointment.isEmergency && !b.appointment.isEmergency) return -1;
+      if (!a.appointment.isEmergency && b.appointment.isEmergency) return 1;
+
+      // Group by status
+      const statusOrder = { 'checked_in': 1, 'scheduled': 2, 'completed': 3 };
+      const aOrder = statusOrder[a.appointment.status as keyof typeof statusOrder] || 4;
+      const bOrder = statusOrder[b.appointment.status as keyof typeof statusOrder] || 4;
+      
+      if (aOrder !== bOrder) return aOrder - bOrder;
+
+      // Within same status group, sort by time
+      if (a.appointment.status === 'checked_in') {
+        const aTime = a.checkedInAt ? new Date(a.checkedInAt).getTime() : 0;
+        const bTime = b.checkedInAt ? new Date(b.checkedInAt).getTime() : 0;
+        return aTime - bTime;
+      } else if (a.appointment.status === 'scheduled') {
+        return new Date(a.appointment.startTime).getTime() - new Date(b.appointment.startTime).getTime();
+      } else if (a.appointment.status === 'completed') {
+        const aTime = a.checkedOutAt ? new Date(a.checkedOutAt).getTime() : 0;
+        const bTime = b.checkedOutAt ? new Date(b.checkedOutAt).getTime() : 0;
+        return aTime - bTime;
+      }
+      return 0;
+    });
 
     // Calculate stats
     const stats = {
@@ -172,6 +203,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create walk-in appointment
+    const now = new Date();
     const appointment = await prisma.appointment.create({
       data: {
         hospitalId,
@@ -179,7 +211,8 @@ export async function POST(request: NextRequest) {
         doctorId: finalDoctorId,
         appointmentType: 'walk_in',
         status: 'checked_in', // Immediately check them in
-        startTime: new Date(),
+        startTime: now,
+        checkedInAt: now, // Record actual check-in time
       },
       include: {
         patient: {

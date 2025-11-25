@@ -362,8 +362,11 @@ model Appointment {
   department      String?
   appointmentType AppointmentType   @map("appointment_type")
   status          AppointmentStatus
+  isEmergency     Boolean           @default(false) @map("is_emergency") // Priority flag for emergency cases
   startTime       DateTime          @map("start_time")
   endTime         DateTime?         @map("end_time")
+  checkedInAt     DateTime?         @map("checked_in_at") // Actual check-in time
+  checkedOutAt    DateTime?         @map("checked_out_at") // Actual check-out time
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
 

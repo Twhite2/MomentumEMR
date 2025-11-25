@@ -131,10 +131,25 @@ export async function PATCH(
       return apiResponse({ error: 'Appointment not found' }, 404);
     }
 
+    // Prepare update data with timestamps
+    const updateData: any = { status };
+    
+    // Set checkedInAt when checking in
+    if (status === 'checked_in' && existing.status !== 'checked_in') {
+      updateData.checkedInAt = new Date();
+    }
+    
+    // Set checkedOutAt and endTime when completing
+    if (status === 'completed' && existing.status !== 'completed') {
+      const now = new Date();
+      updateData.checkedOutAt = now;
+      updateData.endTime = now;
+    }
+
     // Update appointment status
     const appointment = await prisma.appointment.update({
       where: { id: appointmentId },
-      data: { status },
+      data: updateData,
       include: {
         patient: true,
         doctor: {

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { Clock, UserCheck, UserX, Search, Calendar, Users, UserPlus, X } from 'lucide-react';
+import { Clock, UserCheck, UserX, Search, Calendar, Users, UserPlus, X, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -22,6 +22,7 @@ interface QueuePatient {
     startTime: string;
     status: string;
     appointmentType: string;
+    isEmergency?: boolean;
     doctor: {
       id: number;
       name: string;
@@ -425,8 +426,16 @@ export default function PatientQueuePage() {
                           </span>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-foreground">
-                            {patient.firstName} {patient.lastName}
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm font-medium text-foreground">
+                              {patient.firstName} {patient.lastName}
+                            </div>
+                            {patient.appointment.isEmergency && (
+                              <div className="flex items-center gap-1 px-2 py-0.5 bg-red-ribbon/10 text-red-ribbon rounded-full text-xs font-medium">
+                                <AlertTriangle className="w-3 h-3" />
+                                EMERGENCY
+                              </div>
+                            )}
                           </div>
                           <div className="text-sm text-muted-foreground">
                             {calculateAge(patient.dob)} yrs • {patient.gender}
