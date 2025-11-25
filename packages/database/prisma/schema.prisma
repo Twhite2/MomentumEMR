@@ -433,38 +433,56 @@ model Prescription {
 }
 
 model PrescriptionItem {
-  id             Int     @id @default(autoincrement())
-  prescriptionId Int     @map("prescription_id")
-  drugName       String  @map("drug_name")
-  dosage         String?
-  frequency      String?
-  duration       String?
-  notes          String? @db.Text
+  id              Int      @id @default(autoincrement())
+  prescriptionId  Int      @map("prescription_id")
+  drugName        String   @map("drug_name")
+  drugCategory    String?  @map("drug_category") // e.g., "Antimalarial", "Antibiotic", "Analgesic"
+  dosage          String?
+  frequency       String?
+  duration        String? // Duration value
+  durationUnit    String?  @default("days") @map("duration_unit") // "days", "weeks", "months"
+  totalTablets    Int?     @map("total_tablets") // Auto-calculated: dosage × frequency × duration
+  inventoryId     Int?     @map("inventory_id") // Link to inventory if available
+  isCustomDrug    Boolean  @default(false) @map("is_custom_drug") // True if not in facility inventory
+  notes           String?  @db.Text
 
   // Relations
   prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  inventory    Inventory?   @relation(fields: [inventoryId], references: [id])
 
   @@index([prescriptionId])
+  @@index([inventoryId])
   @@map("prescription_items")
 }
 
 model Inventory {
-  id             Int       @id @default(autoincrement())
-  hospitalId     Int       @map("hospital_id")
-  itemName       String    @map("item_name")
-  itemCode       String?   @unique @map("item_code")
-  stockQuantity  Int       @default(0) @map("stock_quantity")
-  reorderLevel   Int       @default(10) @map("reorder_level")
-  unitPrice      Decimal?  @map("unit_price") @db.Decimal(10, 2)
-  expiryDate     DateTime? @map("expiry_date") @db.Date
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  id                 Int       @id @default(autoincrement())
+  hospitalId         Int       @map("hospital_id")
+  itemName           String    @map("item_name")
+  itemCode           String?   @unique @map("item_code")
+  category           String?   // "Medication", "Supply", "Equipment", "Lab", "Nursing"
+  drugCategory       String?   @map("drug_category") // "Antimalarial", "Antibiotic", "Analgesic", etc.
+  dosageForm         String?   @map("dosage_form") // "Tablet", "Capsule", "Syrup", "Injection", etc.
+  dosageStrength     String?   @map("dosage_strength") // e.g., "500mg", "250mg/5ml"
+  stockQuantity      Int       @default(0) @map("stock_quantity")
+  packagingUnit      String?   @default("tablet") @map("packaging_unit") // "tablet", "capsule", "bottle", "box", "pack"
+  tabletsPerPackage  Int?      @default(1) @map("tablets_per_package") // For calculating total tablets
+  reorderLevel       Int       @default(10) @map("reorder_level")
+  unitPrice          Decimal?  @map("unit_price") @db.Decimal(10, 2) // Self-pay price per unit
+  hmoPri             Decimal?  @map("hmo_price") @db.Decimal(10, 2) // HMO pricing
+  corporatePrice     Decimal?  @map("corporate_price") @db.Decimal(10, 2) // Corporate pricing
+  expiryDate         DateTime? @map("expiry_date") @db.Date
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  hospital Hospital @relation(fields: [hospitalId], references: [id])
+  hospital          Hospital           @relation(fields: [hospitalId], references: [id])
+  prescriptionItems PrescriptionItem[]
 
   @@index([hospitalId])
   @@index([stockQuantity])
+  @@index([category])
+  @@index([drugCategory])
   @@map("inventory")
 }
 
