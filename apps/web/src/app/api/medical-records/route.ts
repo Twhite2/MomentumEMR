@@ -20,11 +20,7 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const where: any = { hospitalId };
 
-    // Role-based filtering
-    if (userRole === 'doctor') {
-      where.doctorId = userId;
-    }
-
+    // Allow filtering by specific patient or doctor
     if (patientId) {
       where.patientId = parseInt(patientId);
     }
@@ -32,6 +28,9 @@ export async function GET(request: NextRequest) {
     if (doctorId) {
       where.doctorId = parseInt(doctorId);
     }
+
+    // Note: Doctors and nurses can now see all hospital medical records
+    // This enables care continuity and allows nurses to view treatment plans
 
     const [records, total] = await Promise.all([
       prisma.medicalRecord.findMany({

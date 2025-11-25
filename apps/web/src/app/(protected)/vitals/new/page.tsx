@@ -55,6 +55,31 @@ export default function NewVitalsPage() {
     },
   });
 
+  // Handle blood pressure input with auto-slash
+  const handleBloodPressureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    // Remove any non-digit characters except /
+    value = value.replace(/[^0-9/]/g, '');
+    
+    // Auto-add slash after 3 digits
+    if (value.length === 3 && !value.includes('/')) {
+      value = value + '/';
+    }
+    
+    // Prevent multiple slashes
+    const slashCount = (value.match(/\//g) || []).length;
+    if (slashCount > 1) {
+      value = value.slice(0, -1);
+    }
+    
+    // Limit format to XXX/XXX
+    if (value.length > 7) {
+      value = value.slice(0, 7);
+    }
+    
+    setFormData({ ...formData, bloodPressure: value });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -120,107 +145,144 @@ export default function NewVitalsPage() {
           {/* Blood Pressure */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Blood Pressure (e.g., 120/80)
+              Blood Pressure <span className="text-muted-foreground font-normal">(mmHg)</span>
             </label>
-            <input
-              type="text"
-              value={formData.bloodPressure}
-              onChange={(e) => setFormData({ ...formData, bloodPressure: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
-              placeholder="120/80"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={formData.bloodPressure}
+                onChange={handleBloodPressureChange}
+                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                placeholder="120/80"
+                maxLength={7}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                mmHg
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">Format: Systolic/Diastolic (e.g., 120/80)</p>
           </div>
 
           {/* Heart Rate */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Heart Rate (bpm)
+              Heart Rate (Pulse)
             </label>
-            <input
-              type="number"
-              step="1"
-              value={formData.heartRate}
-              onChange={(e) => setFormData({ ...formData, heartRate: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
-              placeholder="72"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                step="1"
+                value={formData.heartRate}
+                onChange={(e) => setFormData({ ...formData, heartRate: e.target.value })}
+                className="w-full px-4 py-2 pr-16 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                placeholder="72"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                bpm
+              </span>
+            </div>
           </div>
 
           {/* Temperature */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Temperature (°C)
+              Temperature
             </label>
-            <input
-              type="number"
-              step="0.1"
-              value={formData.temperature}
-              onChange={(e) => setFormData({ ...formData, temperature: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
-              placeholder="37.0"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                step="0.1"
+                value={formData.temperature}
+                onChange={(e) => setFormData({ ...formData, temperature: e.target.value })}
+                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                placeholder="37.0"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                °C
+              </span>
+            </div>
           </div>
 
           {/* Respiratory Rate */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Respiratory Rate (breaths/min)
+              Respiratory Rate
             </label>
-            <input
-              type="number"
-              step="1"
-              value={formData.respiratoryRate}
-              onChange={(e) => setFormData({ ...formData, respiratoryRate: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
-              placeholder="16"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                step="1"
+                value={formData.respiratoryRate}
+                onChange={(e) => setFormData({ ...formData, respiratoryRate: e.target.value })}
+                className="w-full px-4 py-2 pr-24 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                placeholder="16"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                breaths/min
+              </span>
+            </div>
           </div>
 
           {/* Oxygen Saturation */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Oxygen Saturation (%)
+              Oxygen Saturation (SpO₂)
             </label>
-            <input
-              type="number"
-              step="0.1"
-              min="0"
-              max="100"
-              value={formData.oxygenSaturation}
-              onChange={(e) => setFormData({ ...formData, oxygenSaturation: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
-              placeholder="98.0"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                value={formData.oxygenSaturation}
+                onChange={(e) => setFormData({ ...formData, oxygenSaturation: e.target.value })}
+                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                placeholder="98.0"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                %
+              </span>
+            </div>
           </div>
 
           {/* Weight */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Weight (kg)
+              Weight
             </label>
-            <input
-              type="number"
-              step="0.1"
-              value={formData.weight}
-              onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
-              placeholder="70.0"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                step="0.1"
+                value={formData.weight}
+                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                placeholder="70.0"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                kg
+              </span>
+            </div>
           </div>
 
           {/* Height */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Height (cm)
+              Height
             </label>
-            <input
-              type="number"
-              step="0.1"
-              value={formData.height}
-              onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
-              placeholder="170.0"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                step="0.1"
+                value={formData.height}
+                onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                placeholder="170.0"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                cm
+              </span>
+            </div>
           </div>
         </div>
 

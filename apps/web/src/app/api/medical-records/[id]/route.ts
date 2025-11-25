@@ -77,12 +77,13 @@ export async function PUT(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'doctor']);
+    const session = await requireRole(['admin', 'doctor', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
     const recordId = parseInt(params.id);
+    const userRole = session.user.role;
 
     const body = await request.json();
-    const { visitDate, diagnosis, notes, allergies, attachments } = body;
+    const { visitDate, diagnosis, notes, treatmentPlan, allergies, attachments } = body;
 
     // Verify record exists
     const existing = await prisma.medicalRecord.findFirst({
@@ -93,16 +94,26 @@ export async function PUT(
       return apiResponse({ error: 'Medical record not found' }, 404);
     }
 
+    // Nurses can only update treatment plan
+    const updateData: any = {};
+    if (userRole === 'nurse') {
+      if (treatmentPlan !== undefined) {
+        updateData.treatmentPlan = treatmentPlan;
+      }
+    } else {
+      // Doctors and admins can update all fields
+      if (visitDate) updateData.visitDate = new Date(visitDate);
+      if (diagnosis !== undefined) updateData.diagnosis = diagnosis;
+      if (notes !== undefined) updateData.notes = notes;
+      if (treatmentPlan !== undefined) updateData.treatmentPlan = treatmentPlan;
+      if (allergies !== undefined) updateData.allergies = allergies;
+      if (attachments !== undefined) updateData.attachments = attachments;
+    }
+
     // Update record
     const record = await prisma.medicalRecord.update({
       where: { id: recordId },
-      data: {
-        visitDate: visitDate ? new Date(visitDate) : undefined,
-        diagnosis,
-        notes,
-        allergies,
-        attachments,
-      },
+      data: updateData,
       include: {
         patient: true,
         doctor: {
