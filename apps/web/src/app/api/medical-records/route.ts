@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@momentum/database';
 import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 
-// GET /api/medical-records - List medical records
+// GET /api/medical-records - List medical records (grouped by patient or detailed view)
 export async function GET(request: NextRequest) {
   try {
     const session = await requireRole(['admin', 'doctor', 'nurse', 'pharmacist', 'lab_tech']);
@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');
     const doctorId = searchParams.get('doctorId');
+    const groupByPatient = searchParams.get('groupByPatient') !== 'false'; // Default to true
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
@@ -32,6 +33,91 @@ export async function GET(request: NextRequest) {
     // Note: Doctors and nurses can now see all hospital medical records
     // This enables care continuity and allows nurses to view treatment plans
 
+    // If grouping by patient, return aggregated data
+    if (groupByPatient && !patientId) {
+      // Get all patients with their record counts and latest visit
+      const patientsWithRecords = await prisma.patient.findMany({
+        where: {
+          hospitalId,
+          medicalRecords: {
+            some: where,
+          },
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          dob: true,
+          gender: true,
+          patientType: true,
+          _count: {
+            select: {
+              medicalRecords: true,
+            },
+          },
+          medicalRecords: {
+            where,
+            orderBy: { visitDate: 'desc' },
+            take: 1,
+            select: {
+              id: true,
+              visitDate: true,
+              diagnosis: true,
+              doctor: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: {
+          medicalRecords: {
+            _count: 'desc',
+          },
+        },
+      });
+
+      const total = await prisma.patient.count({
+        where: {
+          hospitalId,
+          medicalRecords: {
+            some: where,
+          },
+        },
+      });
+
+      // Transform to match expected format
+      const records = patientsWithRecords.map(patient => ({
+        patientId: patient.id,
+        patient: {
+          id: patient.id,
+          firstName: patient.firstName,
+          lastName: patient.lastName,
+          dob: patient.dob,
+          gender: patient.gender,
+          patientType: patient.patientType,
+        },
+        totalVisits: patient._count.medicalRecords,
+        latestVisit: patient.medicalRecords[0] || null,
+      }));
+
+      return apiResponse({
+        records,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+        grouped: true,
+      });
+    }
+
+    // Default behavior: return individual records
     const [records, total] = await Promise.all([
       prisma.medicalRecord.findMany({
         where,
@@ -65,6 +151,7 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
+      grouped: false,
     });
   } catch (error) {
     return handleApiError(error);

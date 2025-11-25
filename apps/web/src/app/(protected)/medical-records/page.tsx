@@ -26,14 +26,37 @@ interface MedicalRecord {
   createdAt: string;
 }
 
+interface GroupedPatientRecord {
+  patientId: number;
+  patient: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    dob: string;
+    gender: string;
+    patientType: string;
+  };
+  totalVisits: number;
+  latestVisit: {
+    id: number;
+    visitDate: string;
+    diagnosis: string | null;
+    doctor: {
+      id: number;
+      name: string;
+    };
+  } | null;
+}
+
 interface MedicalRecordsResponse {
-  records: MedicalRecord[];
+  records: (MedicalRecord | GroupedPatientRecord)[];
   pagination: {
     page: number;
     limit: number;
     total: number;
     totalPages: number;
   };
+  grouped?: boolean;
 }
 
 export default function MedicalRecordsPage() {
@@ -63,6 +86,21 @@ export default function MedicalRecordsPage() {
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const isGroupedRecord = (record: any): record is GroupedPatientRecord => {
+    return 'totalVisits' in record && 'latestVisit' in record;
   };
 
   return (
@@ -121,68 +159,131 @@ export default function MedicalRecordsPage() {
         ) : (
           <>
             <div className="divide-y divide-border">
-              {data?.records.map((record) => (
-                <div
-                  key={record.id}
-                  className="p-6 hover:bg-muted/30 transition-colors cursor-pointer"
-                  onClick={() => (window.location.href = `/medical-records/${record.id}`)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-green-haze/10 rounded-full flex items-center justify-center">
-                          <FileText className="w-6 h-6 text-green-haze" />
+              {data?.records.map((record) => {
+                if (isGroupedRecord(record)) {
+                  // Grouped view - one line per patient
+                  return (
+                    <div
+                      key={record.patientId}
+                      className="p-4 hover:bg-muted/30 transition-colors cursor-pointer"
+                      onClick={() => (window.location.href = `/patients/${record.patient.id}`)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="w-12 h-12 bg-tory-blue/10 rounded-full flex items-center justify-center">
+                            <User className="w-6 h-6 text-tory-blue" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3">
+                              <h3 className="font-semibold text-base">
+                                {record.patient.firstName} {record.patient.lastName}
+                              </h3>
+                              <span className="px-2 py-0.5 bg-tory-blue/10 text-tory-blue rounded-full text-xs font-medium">
+                                {record.totalVisits} {record.totalVisits === 1 ? 'Visit' : 'Visits'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                              <span>{calculateAge(record.patient.dob)} yrs • {record.patient.gender}</span>
+                              {record.latestVisit && (
+                                <>
+                                  <span>•</span>
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    Last visit: {formatDate(record.latestVisit.visitDate)}
+                                  </div>
+                                  <span>•</span>
+                                  <span>Dr. {record.latestVisit.doctor.name}</span>
+                                </>
+                              )}
+                            </div>
+                            {record.latestVisit?.diagnosis && (
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                                {record.latestVisit.diagnosis}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">
-                            {record.patient.firstName} {record.patient.lastName}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            Dr. {record.doctor.name}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="ml-15 space-y-2">
-                        {record.diagnosis && (
-                          <div>
-                            <p className="text-sm font-medium text-foreground">
-                              {record.diagnosis}
-                            </p>
-                          </div>
-                        )}
-                        {record.notes && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {record.notes}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-4 mt-3">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="w-4 h-4" />
-                            Visit: {formatDate(record.visitDate)}
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <FileText className="w-4 h-4" />
-                            Created: {formatDate(record.createdAt)}
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/patients/${record.patient.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button variant="outline" size="sm">
+                              <FileText className="w-4 h-4 mr-2" />
+                              View Records
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     </div>
+                  );
+                } else {
+                  // Individual record view
+                  const medicalRecord = record as MedicalRecord;
+                  return (
+                    <div
+                      key={medicalRecord.id}
+                      className="p-6 hover:bg-muted/30 transition-colors cursor-pointer"
+                      onClick={() => (window.location.href = `/medical-records/${medicalRecord.id}`)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-12 h-12 bg-green-haze/10 rounded-full flex items-center justify-center">
+                              <FileText className="w-6 h-6 text-green-haze" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">
+                                {medicalRecord.patient.firstName} {medicalRecord.patient.lastName}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                Dr. {medicalRecord.doctor.name}
+                              </p>
+                            </div>
+                          </div>
 
-                    <div className="flex flex-col items-end gap-2">
-                      <Link
-                        href={`/patients/${record.patient.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button variant="ghost" size="sm">
-                          <User className="w-4 h-4 mr-2" />
-                          View Patient
-                        </Button>
-                      </Link>
+                          <div className="ml-15 space-y-2">
+                            {medicalRecord.diagnosis && (
+                              <div>
+                                <p className="text-sm font-medium text-foreground">
+                                  {medicalRecord.diagnosis}
+                                </p>
+                              </div>
+                            )}
+                            {medicalRecord.notes && (
+                              <p className="text-sm text-muted-foreground line-clamp-2">
+                                {medicalRecord.notes}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-4 mt-3">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Calendar className="w-4 h-4" />
+                                Visit: {formatDate(medicalRecord.visitDate)}
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <FileText className="w-4 h-4" />
+                                Created: {formatDate(medicalRecord.createdAt)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col items-end gap-2">
+                          <Link
+                            href={`/patients/${medicalRecord.patient.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button variant="ghost" size="sm">
+                              <User className="w-4 h-4 mr-2" />
+                              View Patient
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                }
+              })}
             </div>
 
             {/* Pagination */}

@@ -54,16 +54,27 @@ export async function GET(
         createdAt: 'desc',
       },
       select: {
-        bloodPressure: true,
+        bloodPressureSys: true,
+        bloodPressureDia: true,
         temperature: true,
-        pulse: true,
+        heartRate: true,
         weight: true,
       },
     });
 
+    // Format blood pressure for display
+    const formattedVital = latestVital ? {
+      bloodPressure: latestVital.bloodPressureSys && latestVital.bloodPressureDia 
+        ? `${latestVital.bloodPressureSys}/${latestVital.bloodPressureDia}`
+        : null,
+      temperature: latestVital.temperature,
+      pulse: latestVital.heartRate,
+      weight: latestVital.weight,
+    } : null;
+
     return apiResponse({
       ...record,
-      latestVital,
+      latestVital: formattedVital,
     });
   } catch (error) {
     return handleApiError(error);
