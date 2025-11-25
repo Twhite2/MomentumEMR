@@ -90,9 +90,14 @@ export default function NotificationsDropdown() {
         return '📅';
       case 'appointment_cancelled':
         return '❌';
+      case 'patient_added_to_queue':
+      case 'patient_checked_in':
+        return '👤';
       case 'prescription_ready':
+      case 'prescription_created':
         return '💊';
       case 'lab_result_ready':
+      case 'lab_order_created':
         return '🔬';
       case 'invoice_generated':
         return '📄';

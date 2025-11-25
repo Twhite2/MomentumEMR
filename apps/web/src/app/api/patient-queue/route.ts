@@ -234,6 +234,23 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Create notification for the doctor
+    try {
+      await prisma.notification.create({
+        data: {
+          hospitalId,
+          userId: finalDoctorId,
+          type: 'patient_added_to_queue',
+          title: 'New Walk-in Patient',
+          message: `${appointment.patient.firstName} ${appointment.patient.lastName} has been added to your queue`,
+          link: `/patient-queue`,
+        },
+      });
+    } catch (notifError) {
+      // Don't fail the request if notification fails
+      console.error('Failed to create notification:', notifError);
+    }
+
     return apiResponse({
       message: 'Walk-in patient added to queue successfully',
       appointment,
