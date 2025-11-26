@@ -278,7 +278,7 @@ function generatePDFHTML(labResult: any): string {
   ${labResult.resultNotes ? `
     <div class="section">
       <div class="notes-box" style="border-left-color: #6b7280;">
-        <h4 style="color: #6b7280;">Lab Technician Notes</h4>
+        <h4 style="color: #6b7280;">Lab Scientist Notes</h4>
         <p style="white-space: pre-wrap;">${labResult.resultNotes}</p>
       </div>
     </div>

@@ -164,7 +164,7 @@ export default function LabResultsPage() {
         
         ${result.resultNotes ? `
           <div style="background: #f3f4f6; border-left: 4px solid #6b7280; padding: 15px; border-radius: 4px;">
-            <h4 style="margin: 0 0 10px 0; color: #374151;">Lab Technician Notes</h4>
+            <h4 style="margin: 0 0 10px 0; color: #374151;">Lab Scientist Notes</h4>
             <p style="margin: 0; white-space: pre-wrap; color: #4b5563;">${result.resultNotes}</p>
           </div>
         ` : ''}
@@ -374,7 +374,7 @@ export default function LabResultsPage() {
 
                       {result.resultNotes && (
                         <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-                          <p className="text-sm font-medium text-foreground">Lab Technician Notes:</p>
+                          <p className="text-sm font-medium text-foreground">Lab Scientist Notes:</p>
                           <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
                             {result.resultNotes}
                           </p>

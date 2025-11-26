@@ -76,7 +76,7 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Welcome, {session.user.name}</h1>
-        <p className="text-muted-foreground mt-1">Lab Technician Dashboard</p>
+        <p className="text-muted-foreground mt-1">Lab Scientist Dashboard</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

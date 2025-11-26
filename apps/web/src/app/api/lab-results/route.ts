@@ -2,10 +2,10 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@momentum/database';
 import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 
-// GET /api/lab-results - Get all lab results (for lab technicians)
+// GET /api/lab-results - Get all lab results (for Lab Scientists)
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['lab_tech', 'admin', 'doctor', 'pharmacist']);
+    const session = await requireRole(['lab_scientist', 'admin', 'doctor', 'pharmacist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const { searchParams } = new URL(request.url);

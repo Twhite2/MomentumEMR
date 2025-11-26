@@ -153,145 +153,213 @@ export default function MedicalRecordDetailPage() {
         {/* Top Info Bar */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {/* Patient Name */}
-          <div className="bg-tory-blue text-white rounded-lg p-4">
-            <h3 className="text-lg font-bold">{record.patient.firstName} {record.patient.lastName}</h3>
-            <p className="text-xs opacity-90 mt-1">
+          <div className="bg-white border-2 border-tory-blue rounded-lg p-4">
+            <h3 className="text-lg font-bold text-tory-blue">{record.patient.firstName} {record.patient.lastName}</h3>
+            <p className="text-xs text-muted-foreground mt-1">
               {record.patient.id}
             </p>
           </div>
 
           {/* Biodata */}
-          <div className="bg-tory-blue text-white rounded-lg p-4">
-            <h4 className="text-xs font-semibold mb-2">Biodata</h4>
-            <p className="text-sm">{calculateAge(record.patient.dob)} yrs • {record.patient.gender}</p>
-            {record.patient.tribe && <p className="text-xs opacity-90">{record.patient.tribe}</p>}
+          <div className="bg-white border-2 border-tory-blue rounded-lg p-4">
+            <h4 className="text-xs font-semibold mb-2 text-tory-blue">Biodata</h4>
+            <p className="text-sm text-foreground">{calculateAge(record.patient.dob)} yrs • {record.patient.gender}</p>
+            {record.patient.tribe && <p className="text-xs text-muted-foreground">{record.patient.tribe}</p>}
           </div>
 
           {/* Admitted/OPD Status */}
-          <div className="bg-tory-blue text-white rounded-lg p-4 flex items-center justify-center">
+          <div className="bg-white border-2 border-tory-blue rounded-lg p-4 flex items-center justify-center">
             <div className="text-center">
-              <p className="text-xs font-semibold mb-1">Status</p>
-              <p className="text-lg font-bold">{record.patient.patientType === 'inpatient' ? 'ADMITTED' : 'OPD'}</p>
+              <p className="text-xs font-semibold mb-1 text-tory-blue">Status</p>
+              <p className="text-lg font-bold text-foreground">{record.patient.patientType === 'inpatient' ? 'ADMITTED' : 'OPD'}</p>
             </div>
           </div>
 
           {/* Vital Signs Summary */}
-          <div className="bg-tory-blue text-white rounded-lg p-4">
-            <h4 className="text-xs font-semibold mb-2">Vital signs</h4>
+          <div className="bg-white border-2 border-tory-blue rounded-lg p-4">
+            <h4 className="text-xs font-semibold mb-2 text-tory-blue">Vital signs</h4>
             {record.latestVital ? (
-              <div className="space-y-1 text-xs">
+              <div className="space-y-1 text-xs text-foreground">
                 <p>BP: {record.latestVital.bloodPressure}</p>
                 <p>Temp: {record.latestVital.temperature}°C</p>
                 <p>Pulse: {record.latestVital.pulse} bpm</p>
               </div>
             ) : (
-              <p className="text-xs opacity-75">No vitals recorded</p>
+              <p className="text-xs text-muted-foreground">No vitals recorded</p>
             )}
           </div>
 
           {/* Allergies */}
-          <div className="bg-tory-blue text-white rounded-lg p-4">
-            <h4 className="text-xs font-semibold mb-2">Allergies</h4>
-            <p className="text-sm">{record.patient.allergies || 'None recorded'}</p>
+          <div className="bg-white border-2 border-tory-blue rounded-lg p-4">
+            <h4 className="text-xs font-semibold mb-2 text-tory-blue">Allergies</h4>
+            <p className="text-sm text-foreground">{record.patient.allergies || 'None recorded'}</p>
           </div>
 
           {/* Total Visits */}
-          <div className="bg-tory-blue text-white rounded-lg p-4 flex items-center justify-center">
+          <div className="bg-white border-2 border-tory-blue rounded-lg p-4 flex items-center justify-center">
             <div className="text-center">
-              <p className="text-xs font-semibold mb-1">Total visits</p>
-              <p className="text-2xl font-bold">{record.patient._count?.medicalRecords || 1}</p>
+              <p className="text-xs font-semibold mb-1 text-tory-blue">Total visits</p>
+              <p className="text-2xl font-bold text-foreground">{record.patient._count?.medicalRecords || 1}</p>
             </div>
           </div>
         </div>
 
-        {/* Action Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Clinical Notes - Pink */}
-          <Link href={`/medical-records/${record.id}/edit`} className="block lg:col-span-2">
-            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <FileText className="w-8 h-8" />
+        {/* Clinical Documentation & Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Clinical Documentation */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Clinical Notes */}
+            <Link href={`/medical-records/${record.id}/edit`}>
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-tory-blue" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base mb-1">Clinical notes</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {record.notes || 'No clinical notes yet. Click to add.'}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-bold mb-2">Clinical notes</h3>
-              <p className="text-sm opacity-90 line-clamp-3">{record.notes || 'No clinical notes yet. Click to add.'}</p>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Prescribe Drugs - Pink */}
-          <Link href={`/prescriptions/new?patientId=${record.patient.id}`} className="block">
-            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer relative">
-              <Pill className="w-8 h-8 mb-3" />
-              <h3 className="text-lg font-bold">Prescribe drugs</h3>
-              <div className="absolute top-3 right-3">
-                <Bell className="w-5 h-5" />
+            {/* Diagnosis */}
+            <Link href={`/medical-records/${record.id}/edit`}>
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Stethoscope className="w-5 h-5 text-tory-blue" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base mb-1">Diagnosis (differentials)</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {record.diagnosis || 'No diagnosis recorded yet. Click to add.'}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs mt-2 opacity-75">Notification that it has been prescribed</p>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Diagnosis (Differentials) - Pink */}
-          <Link href={`/medical-records/${record.id}/edit`} className="block lg:col-span-2">
-            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
-              <Stethoscope className="w-8 h-8 mb-3" />
-              <h3 className="text-xl font-bold mb-2">Diagnosis (differentials)</h3>
-              <p className="text-sm opacity-90 line-clamp-2">{record.diagnosis || 'No diagnosis recorded yet.'}</p>
-            </div>
-          </Link>
-
-          {/* Previous Prescriptions - Pink */}
-          <Link href={`/prescriptions?patientId=${record.patient.id}`} className="block">
-            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
-              <ClipboardList className="w-8 h-8 mb-3" />
-              <h3 className="text-lg font-bold">Previous prescriptions</h3>
-              <p className="text-xs mt-2 opacity-75">{record.patient._count?.prescriptions || 0} prescription(s)</p>
-            </div>
-          </Link>
-
-          {/* Treatment Plan - Pink */}
-          <Link href={`/medical-records/${record.id}/edit`} className="block lg:col-span-2">
-            <div className="bg-gradient-to-br from-red-ribbon to-red-ribbon/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
-              <FileSearch className="w-8 h-8 mb-3" />
-              <h3 className="text-xl font-bold mb-2">Treatment plan. Nurse has access</h3>
-              <p className="text-sm opacity-90 line-clamp-2">{record.treatmentPlan || 'No treatment plan recorded yet.'}</p>
-            </div>
-          </Link>
-
-          {/* Order Test - Green */}
-          <Link href={`/lab-orders/new?patientId=${record.patient.id}`} className="block">
-            <div className="bg-gradient-to-br from-green-haze to-green-haze/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer relative">
-              <TestTube className="w-8 h-8 mb-3" />
-              <h3 className="text-lg font-bold">Order test</h3>
-              <div className="absolute top-3 right-3">
-                <Bell className="w-5 h-5" />
+            {/* Treatment Plan */}
+            <Link href={`/medical-records/${record.id}/edit`}>
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-green-haze hover:shadow-md transition-all cursor-pointer">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-green-haze/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileSearch className="w-5 h-5 text-green-haze" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base mb-1">Treatment plan</h3>
+                    <p className="text-xs text-muted-foreground mb-1">Nurses have edit access</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {record.treatmentPlan || 'No treatment plan recorded yet.'}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs mt-2 opacity-75">Notification that it has been ordered, see results</p>
+            </Link>
+          </div>
+
+          {/* Right Column - Quick Actions */}
+          <div className="space-y-4">
+            {/* Prescribe Drugs */}
+            <Link href={`/prescriptions/new?patientId=${record.patient.id}`}>
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-red-ribbon hover:shadow-md transition-all cursor-pointer">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-10 h-10 bg-red-ribbon/10 rounded-lg flex items-center justify-center">
+                    <Pill className="w-5 h-5 text-red-ribbon" />
+                  </div>
+                  <Bell className="w-4 h-4 text-red-ribbon" />
+                </div>
+                <h3 className="font-semibold text-base mb-1">Prescribe drugs</h3>
+                <p className="text-xs text-muted-foreground">Create new prescription</p>
+              </div>
+            </Link>
+
+            {/* Order Test */}
+            <Link href={`/lab-orders/new?patientId=${record.patient.id}`}>
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-green-haze hover:shadow-md transition-all cursor-pointer">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-10 h-10 bg-green-haze/10 rounded-lg flex items-center justify-center">
+                    <TestTube className="w-5 h-5 text-green-haze" />
+                  </div>
+                  <Bell className="w-4 h-4 text-green-haze" />
+                </div>
+                <h3 className="font-semibold text-base mb-1">Order lab test</h3>
+                <p className="text-xs text-muted-foreground">Create new lab order</p>
+              </div>
+            </Link>
+
+            {/* Previous Prescriptions */}
+            <Link href={`/prescriptions?patientId=${record.patient.id}`}>
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <ClipboardList className="w-5 h-5 text-tory-blue" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-base mb-1">Previous prescriptions</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {record.patient._count?.prescriptions || 0} prescription(s)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Previous Lab Orders */}
+            <Link href={`/lab-orders?patientId=${record.patient.id}`}>
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <History className="w-5 h-5 text-tory-blue" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-base mb-1">Previous lab orders</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {record.patient._count?.labOrders || 0} lab order(s)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Patient History Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Vitals History */}
+          <Link href={`/vitals?patientId=${record.patient.id}`}>
+            <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Activity className="w-5 h-5 text-tory-blue" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-base mb-1">Vitals & Clinical History</h3>
+                  <p className="text-sm text-muted-foreground">
+                    View all recorded vital signs and measurements
+                  </p>
+                </div>
+              </div>
             </div>
           </Link>
 
-          {/* Previous Orders - Green */}
-          <Link href={`/lab-orders?patientId=${record.patient.id}`} className="block">
-            <div className="bg-gradient-to-br from-green-haze to-green-haze/80 text-white rounded-lg p-6 h-full hover:shadow-lg transition-shadow cursor-pointer">
-              <History className="w-8 h-8 mb-3" />
-              <h3 className="text-lg font-bold">Previous orders</h3>
-              <p className="text-xs mt-2 opacity-75">{record.patient._count?.labOrders || 0} lab order(s)</p>
-            </div>
-          </Link>
-
-          {/* Previous Records 1 - Yellow */}
-          <Link href={`/vitals?patientId=${record.patient.id}`} className="block lg:col-span-3">
-            <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 text-white rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer">
-              <Activity className="w-8 h-8 mb-3" />
-              <h3 className="text-xl font-bold">Previous records following hospital visit</h3>
-              <p className="text-sm opacity-90">View all vitals and clinical history</p>
-            </div>
-          </Link>
-
-          {/* Previous Records 2 - Yellow */}
-          <Link href={`/patients/${record.patient.id}`} className="block lg:col-span-3">
-            <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 text-white rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer">
-              <User className="w-8 h-8 mb-3" />
-              <h3 className="text-xl font-bold">Previous records following hospital visit</h3>
-              <p className="text-sm opacity-90">Complete patient medical history</p>
+          {/* Complete Patient Profile */}
+          <Link href={`/patients/${record.patient.id}`}>
+            <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5 text-tory-blue" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-base mb-1">Complete Patient Profile</h3>
+                  <p className="text-sm text-muted-foreground">
+                    View full medical history and patient information
+                  </p>
+                </div>
+              </div>
             </div>
           </Link>
         </div>

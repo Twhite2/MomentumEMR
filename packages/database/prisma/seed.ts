@@ -526,7 +526,7 @@ async function main() {
     },
   });
 
-  // Iheoma - Lab Technician
+  // Iheoma - Lab Scientist
   await prisma.user.create({
     data: {
       hospitalId: momentumHospital.id,
@@ -624,7 +624,7 @@ async function main() {
   console.log('      - samuel@momentum.com (Cashier)');
   console.log('      - jumoke@momentum.com (Receptionist)');
   console.log('      - femi@momentum.com (Pharmacist)');
-  console.log('      - iheoma@momentum.com (Lab Technician)');
+  console.log('      - iheoma@momentum.com (Lab Scientist)');
   console.log('   🧑‍🤝‍🧑 Patients:');
   console.log('      - blessing@momentum.com');
   console.log('      - kola@momentum.com');

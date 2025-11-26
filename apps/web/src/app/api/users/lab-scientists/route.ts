@@ -8,11 +8,11 @@ export async function GET(request: NextRequest) {
     const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
-    // Fetch all active lab technicians in the hospital
+    // Fetch all active Lab Scientists in the hospital
     const labScientists = await prisma.user.findMany({
       where: {
         hospitalId,
-        role: 'lab_tech',
+        role: 'lab_scientist',
         active: true,
       },
       select: {

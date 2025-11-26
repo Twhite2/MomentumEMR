@@ -166,7 +166,13 @@ export default function MedicalRecordsPage() {
                     <div
                       key={record.patientId}
                       className="p-4 hover:bg-muted/30 transition-colors cursor-pointer"
-                      onClick={() => (window.location.href = `/patients/${record.patient.id}`)}
+                      onClick={() => {
+                        if (record.latestVisit?.id) {
+                          window.location.href = `/medical-records/${record.latestVisit.id}`;
+                        } else {
+                          window.location.href = `/patients/${record.patient.id}`;
+                        }
+                      }}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1">

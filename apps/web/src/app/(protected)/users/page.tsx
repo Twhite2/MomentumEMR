@@ -153,7 +153,7 @@ export default function UsersPage() {
             <option value="doctor">Doctor</option>
             <option value="nurse">Nurse</option>
             <option value="pharmacist">Pharmacist</option>
-            <option value="lab_tech">Lab Technician</option>
+            <option value="lab_tech">Lab Scientist</option>
             <option value="cashier">Cashier</option>
             <option value="receptionist">Receptionist</option>
             <option value="patient">Patient</option>
