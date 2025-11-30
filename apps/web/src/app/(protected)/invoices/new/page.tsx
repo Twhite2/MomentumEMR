@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, Plus, Trash2, Receipt } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, Receipt, Search, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -13,6 +13,29 @@ interface Patient {
   id: number;
   firstName: string;
   lastName: string;
+  patientType: string;
+  hmoId?: number;
+  hmo?: { id: number; name: string };
+}
+
+interface HmoTariff {
+  id: number;
+  code: string;
+  name: string;
+  category: string;
+  unit: string;
+  basePrice: number;
+  isPARequired: boolean;
+}
+
+interface InventoryItem {
+  id: number;
+  itemName: string;
+  category: string;
+  unitPrice: number;
+  hmoPrice?: number;
+  corporatePrice?: number;
+  stockQuantity: number;
 }
 
 interface InvoiceItem {
@@ -20,6 +43,9 @@ interface InvoiceItem {
   quantity: string;
   unitPrice: string;
   amount: number;
+  sourceType?: 'tariff' | 'inventory' | 'manual';
+  sourceId?: number;
+  isManualOverride?: boolean;
 }
 
 export default function NewInvoicePage() {
@@ -30,8 +56,9 @@ export default function NewInvoicePage() {
 
   const [patientId, setPatientId] = useState(preSelectedPatientId || '');
   const [notes, setNotes] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [items, setItems] = useState<InvoiceItem[]>([
-    { description: '', quantity: '1', unitPrice: '', amount: 0 },
+    { description: '', quantity: '1', unitPrice: '', amount: 0, sourceType: 'manual', isManualOverride: false },
   ]);
 
   // Fetch patients
@@ -41,6 +68,31 @@ export default function NewInvoicePage() {
       const response = await axios.get('/api/patients?limit=100');
       return response.data;
     },
+  });
+
+  // Fetch selected patient details
+  const { data: patient } = useQuery({
+    queryKey: ['patient', patientId],
+    queryFn: async () => {
+      const response = await axios.get(`/api/patients/${patientId}`);
+      return response.data;
+    },
+    enabled: !!patientId,
+  });
+
+  // Fetch HMO tariffs or inventory based on patient type
+  const { data: pricingData, isLoading: pricingLoading } = useQuery({
+    queryKey: ['pricing', patient?.patientType, patient?.hmoId, searchTerm],
+    queryFn: async () => {
+      if (patient?.patientType === 'hmo' && patient?.hmoId) {
+        const response = await axios.get(`/api/hmo-tariffs?patientId=${patientId}&search=${searchTerm}`);
+        return { type: 'tariff' as const, items: response.data.tariffs, hmo: response.data.hmo };
+      } else {
+        const response = await axios.get(`/api/inventory/pricing?search=${searchTerm}`);
+        return { type: 'inventory' as const, items: response.data.inventory };
+      }
+    },
+    enabled: !!patient,
   });
 
   // Create invoice mutation
@@ -58,8 +110,49 @@ export default function NewInvoicePage() {
     },
   });
 
+  // Helper function to get price based on patient type
+  const getPrice = (item: any, patientType: string): number => {
+    if (pricingData?.type === 'tariff') {
+      return item.basePrice || 0;
+    } else {
+      // Inventory item
+      if (patientType === 'hmo') return item.hmoPrice || item.unitPrice || 0;
+      if (patientType === 'corporate') return item.corporatePrice || item.unitPrice || 0;
+      return item.unitPrice || 0;
+    }
+  };
+
+  // Handle item selection from dropdown
+  const handleItemSelect = (index: number, selectedId: string) => {
+    if (!selectedId || !pricingData) return;
+
+    const selectedItem = pricingData.items.find((i: any) => i.id === parseInt(selectedId));
+    if (!selectedItem) return;
+
+    const price = getPrice(selectedItem, patient?.patientType || 'self_pay');
+    const description = pricingData.type === 'tariff' 
+      ? `${selectedItem.name} (${selectedItem.code})`
+      : selectedItem.itemName;
+
+    const updated = [...items];
+    updated[index] = {
+      ...updated[index],
+      description,
+      unitPrice: price.toString(),
+      sourceType: pricingData.type === 'tariff' ? 'tariff' : 'inventory',
+      sourceId: selectedItem.id,
+      isManualOverride: false,
+    };
+
+    // Recalculate amount
+    const qty = parseFloat(updated[index].quantity) || 0;
+    updated[index].amount = qty * price;
+
+    setItems(updated);
+  };
+
   const addItem = () => {
-    setItems([...items, { description: '', quantity: '1', unitPrice: '', amount: 0 }]);
+    setItems([...items, { description: '', quantity: '1', unitPrice: '', amount: 0, sourceType: 'manual', isManualOverride: false }]);
   };
 
   const removeItem = (index: number) => {
@@ -68,14 +161,19 @@ export default function NewInvoicePage() {
     }
   };
 
-  const updateItem = (index: number, field: keyof InvoiceItem, value: string) => {
+  const updateItem = (index: number, field: keyof InvoiceItem, value: string | boolean) => {
     const updated = [...items];
     updated[index] = { ...updated[index], [field]: value };
+
+    // Mark as manual override if price is changed manually
+    if (field === 'unitPrice' && (updated[index].sourceType === 'tariff' || updated[index].sourceType === 'inventory')) {
+      updated[index].isManualOverride = true;
+    }
 
     // Calculate amount
     if (field === 'quantity' || field === 'unitPrice') {
       const qty = parseFloat(updated[index].quantity) || 0;
-      const price = parseFloat(updated[index].unitPrice) || 0;
+      const price = parseFloat(updated[index].unitPrice as string) || 0;
       updated[index].amount = qty * price;
     }
 
@@ -156,6 +254,28 @@ export default function NewInvoicePage() {
                 </option>
               ))}
             </Select>
+
+            {/* Patient Type Badge */}
+            {patient && (
+              <div className="mt-4 flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Patient Type:</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  patient.patientType === 'hmo' ? 'bg-tory-blue/10 text-tory-blue' :
+                  patient.patientType === 'corporate' ? 'bg-danube/10 text-danube' :
+                  'bg-green-haze/10 text-green-haze'
+                }`}>
+                  {patient.patientType === 'hmo' && patient.hmo ? `HMO: ${patient.hmo.name}` :
+                   patient.patientType === 'corporate' ? 'Corporate' :
+                   'Self-Pay'}
+                </span>
+                {patient.patientType === 'hmo' && (
+                  <span className="text-xs text-muted-foreground">(Prices from HMO Tariff)</span>
+                )}
+                {patient.patientType !== 'hmo' && (
+                  <span className="text-xs text-muted-foreground">(Prices from Inventory)</span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Invoice Items */}
@@ -191,6 +311,36 @@ export default function NewInvoicePage() {
                     )}
                   </div>
 
+                  {/* Smart Item Selector */}
+                  {patient && pricingData && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Select from {pricingData.type === 'tariff' ? 'HMO Tariff' : 'Inventory'}
+                      </label>
+                      <Select
+                        value=""
+                        onChange={(e) => handleItemSelect(index, e.target.value)}
+                        className="w-full"
+                      >
+                        <option value="">-- Select item to auto-populate --</option>
+                        {pricingData.items.map((pItem: any) => (
+                          <option key={pItem.id} value={pItem.id}>
+                            {pricingData.type === 'tariff' 
+                              ? `${pItem.name} (${pItem.code}) - ${formatCurrency(pItem.basePrice)}`
+                              : `${pItem.itemName} (${pItem.category}) - ${formatCurrency(getPrice(pItem, patient.patientType))}`
+                            }
+                          </option>
+                        ))}
+                      </Select>
+                      {pricingData.items.length === 0 && (
+                        <p className="text-sm text-saffron mt-1">
+                          <AlertCircle className="w-3 h-3 inline mr-1" />
+                          No {pricingData.type === 'tariff' ? 'HMO tariffs' : 'inventory items'} available
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="md:col-span-2">
                       <Input
@@ -199,9 +349,24 @@ export default function NewInvoicePage() {
                         onChange={(e) =>
                           updateItem(index, 'description', e.target.value)
                         }
-                        placeholder="e.g., Consultation fee"
+                        placeholder="Or enter manually..."
                         required
                       />
+                      {/* Price Source Badge */}
+                      {item.sourceType !== 'manual' && (
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className={`text-xs px-2 py-0.5 rounded ${
+                            item.sourceType === 'tariff' ? 'bg-tory-blue/10 text-tory-blue' : 'bg-green-haze/10 text-green-haze'
+                          }`}>
+                            {item.sourceType === 'tariff' ? 'HMO Tariff' : 'Inventory'}
+                          </span>
+                          {item.isManualOverride && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-saffron/10 text-saffron">
+                              Manual Override
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <Input
@@ -214,16 +379,21 @@ export default function NewInvoicePage() {
                       required
                     />
 
-                    <Input
-                      label="Unit Price (₦)"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={item.unitPrice}
-                      onChange={(e) => updateItem(index, 'unitPrice', e.target.value)}
-                      placeholder="0.00"
-                      required
-                    />
+                    <div>
+                      <Input
+                        label="Unit Price (₦)"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.unitPrice}
+                        onChange={(e) => updateItem(index, 'unitPrice', e.target.value)}
+                        placeholder="0.00"
+                        required
+                      />
+                      {item.sourceType !== 'manual' && !item.isManualOverride && (
+                        <p className="text-xs text-muted-foreground mt-1">Auto-populated price</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="mt-3 text-right">

@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@momentum/ui';
-import { Plus, FileText, Calendar, User } from 'lucide-react';
+import { Plus, FileText, Calendar, User, X } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
+import { useSearchParams, useRouter } from 'next/navigation';
 import ExcelImportExport from '@/components/shared/ExcelImportExport';
 
 interface MedicalRecord {
@@ -61,18 +62,31 @@ interface MedicalRecordsResponse {
 
 export default function MedicalRecordsPage() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [page, setPage] = useState(1);
+  
+  // Get URL parameters
+  const patientIdParam = searchParams.get('patientId');
+  const groupByPatientParam = searchParams.get('groupByPatient');
   
   // Check if user can create/edit medical records (admin or doctor only, not nurse)
   const canEditRecords = session?.user?.role === 'admin' || session?.user?.role === 'doctor';
 
   const { data, isLoading, error } = useQuery<MedicalRecordsResponse>({
-    queryKey: ['medical-records', page],
+    queryKey: ['medical-records', page, patientIdParam, groupByPatientParam],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '20',
       });
+
+      if (patientIdParam) {
+        params.append('patientId', patientIdParam);
+      }
+      if (groupByPatientParam) {
+        params.append('groupByPatient', groupByPatientParam);
+      }
 
       const response = await axios.get(`/api/medical-records?${params}`);
       return response.data;
@@ -120,6 +134,26 @@ export default function MedicalRecordsPage() {
           </Link>
         )}
       </div>
+
+      {/* Filter Indicator */}
+      {patientIdParam && data?.records && data.records.length > 0 && (
+        <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-4 py-3">
+          <User className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium">
+            Viewing records for:{' '}
+            {!isGroupedRecord(data.records[0]) && (data.records[0] as MedicalRecord).patient
+              ? `${(data.records[0] as MedicalRecord).patient.firstName} ${(data.records[0] as MedicalRecord).patient.lastName}`
+              : 'Patient'}
+          </span>
+          <button
+            onClick={() => router.push('/medical-records')}
+            className="ml-auto flex items-center gap-1 text-sm text-primary hover:text-primary/80"
+          >
+            <X className="w-4 h-4" />
+            Clear Filter
+          </button>
+        </div>
+      )}
 
       {/* Excel Import/Export */}
       {canEditRecords && (
@@ -211,7 +245,7 @@ export default function MedicalRecordsPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Link
-                            href={`/patients/${record.patient.id}`}
+                            href={`/medical-records?patientId=${record.patient.id}&groupByPatient=false`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Button variant="outline" size="sm">

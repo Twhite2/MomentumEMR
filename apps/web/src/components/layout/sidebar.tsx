@@ -49,6 +49,13 @@ const navItems: NavItem[] = [
     icon: LayoutDashboard,
     roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'receptionist', 'cashier', 'lab_tech', 'patient'],
   },
+  // Patient Queue - Moved up for higher priority (all users)
+  {
+    label: 'Patient Queue',
+    href: '/patient-queue',
+    icon: UserCheck,
+    roles: ['admin', 'doctor', 'nurse', 'receptionist'],
+  },
   // Super Admin specific navigation
   {
     label: 'Super Admin',
@@ -69,7 +76,7 @@ const navItems: NavItem[] = [
     roles: ['super_admin'],
   },
   {
-    label: 'Disease Analytics',
+    label: 'Epidemiology',
     href: '/disease-analytics',
     icon: TestTube,
     roles: ['super_admin'],
@@ -98,12 +105,26 @@ const navItems: NavItem[] = [
     icon: Calendar,
     roles: ['admin', 'doctor', 'nurse', 'receptionist', 'patient'],
   },
+  // Pharmacist priority items - Moved up for higher visibility
   {
-    label: 'Patient Queue',
-    href: '/patient-queue',
-    icon: UserCheck,
-    roles: ['admin', 'doctor', 'nurse', 'receptionist'],
+    label: 'Prescriptions',
+    href: '/prescriptions',
+    icon: ClipboardList,
+    roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'patient'],
   },
+  {
+    label: 'Pharmacy',
+    href: '/pharmacy',
+    icon: Pill,
+    roles: ['admin', 'pharmacist', 'doctor'],
+  },
+  {
+    label: 'Inventory',
+    href: '/inventory',
+    icon: ShoppingCart,
+    roles: ['admin', 'pharmacist'],
+  },
+  // End pharmacist priority items
   {
     label: 'Medical Records',
     href: '/medical-records',
@@ -147,28 +168,10 @@ const navItems: NavItem[] = [
     roles: ['lab_tech', 'patient', 'pharmacist'],
   },
   {
-    label: 'Prescriptions',
-    href: '/prescriptions',
-    icon: ClipboardList,
-    roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'patient'],
-  },
-  {
     label: 'Allergies',
     href: '/allergies',
     icon: AlertTriangle,
     roles: ['admin', 'doctor', 'nurse'],
-  },
-  {
-    label: 'Pharmacy',
-    href: '/pharmacy',
-    icon: Pill,
-    roles: ['admin', 'pharmacist', 'doctor'],
-  },
-  {
-    label: 'Inventory',
-    href: '/inventory',
-    icon: ShoppingCart,
-    roles: ['admin', 'pharmacist'],
   },
   {
     label: 'Billing',
@@ -180,6 +183,12 @@ const navItems: NavItem[] = [
     label: 'HMO & Claims',
     href: '/hmo',
     icon: Building2,
+    roles: ['admin', 'cashier'],
+  },
+  {
+    label: 'Claims Tracking',
+    href: '/claims',
+    icon: DollarSign,
     roles: ['admin', 'cashier'],
   },
   {
@@ -236,7 +245,7 @@ export function Sidebar({ role, hospitalName, isOpen, onClose }: SidebarProps) {
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+              <div className="w-24 h-12 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 relative">
                 <Image 
                   src={logoUrl} 
                   alt={appName}

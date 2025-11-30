@@ -29,6 +29,35 @@ interface Medication {
   notes: string;
 }
 
+interface InventoryItem {
+  id: number;
+  itemName: string;
+  drugCategory: string | null;
+  dosageStrength: string | null;
+  dosageForm: string | null;
+  stockQuantity: number;
+}
+
+// Duration options with day calculations
+const DURATION_OPTIONS = [
+  { value: '', label: 'Select duration', days: 0 },
+  { value: '1 day', label: '1 day (1 day)', days: 1 },
+  { value: '3 days', label: '3 days (3 days)', days: 3 },
+  { value: '5 days', label: '5 days (5 days)', days: 5 },
+  { value: '1 week', label: '1 week (7 days)', days: 7 },
+  { value: '2 weeks', label: '2 weeks (14 days)', days: 14 },
+  { value: '3 weeks', label: '3 weeks (21 days)', days: 21 },
+  { value: '1 month', label: '1 month (30 days)', days: 30 },
+  { value: '2 months', label: '2 months (60 days)', days: 60 },
+  { value: '3 months', label: '3 months (90 days)', days: 90 },
+  { value: 'custom', label: 'Custom duration', days: 0 },
+];
+
+const DRUG_CATEGORIES = [
+  '', 'Antimalarial', 'Antibiotic', 'Analgesic', 'Antihypertensive', 
+  'Antidiabetic', 'Antihistamine', 'Antacid', 'Vitamin', 'Other'
+];
+
 export default function NewPrescriptionPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,6 +72,24 @@ export default function NewPrescriptionPage() {
   const [medications, setMedications] = useState<Medication[]>([
     { drugName: '', dosage: '', frequency: '', duration: '', notes: '' },
   ]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [customDurations, setCustomDurations] = useState<Record<number, string>>({});
+
+  // Fetch inventory items for drug suggestions
+  const { data: inventoryData } = useQuery<{ inventory: InventoryItem[] }>({
+    queryKey: ['inventory-medications', selectedCategory],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        category: 'Medication',
+        limit: '100',
+      });
+      if (selectedCategory) {
+        params.append('drugCategory', selectedCategory);
+      }
+      const response = await axios.get(`/api/inventory?${params}`);
+      return response.data;
+    },
+  });
 
   // Fetch patients
   const { data: patients } = useQuery<{ patients: Patient[] }>({
@@ -95,6 +142,11 @@ export default function NewPrescriptionPage() {
     const updated = [...medications];
     updated[index] = { ...updated[index], [field]: value };
     setMedications(updated);
+  };
+
+  const updateCustomDuration = (index: number, value: string) => {
+    setCustomDurations({ ...customDurations, [index]: value });
+    updateMedication(index, 'duration', value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -201,15 +253,28 @@ export default function NewPrescriptionPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Medications</h2>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addMedication}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Medication
-              </Button>
+              <div className="flex items-center gap-2">
+                <Select
+                  label=""
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-48"
+                >
+                  <option value="">All Categories</option>
+                  {DRUG_CATEGORIES.filter(c => c).map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addMedication}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Medication
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-6">
@@ -237,15 +302,55 @@ export default function NewPrescriptionPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
-                      <Input
-                        label="Drug Name"
-                        value={medication.drugName}
-                        onChange={(e) =>
-                          updateMedication(index, 'drugName', e.target.value)
-                        }
-                        placeholder="e.g., Paracetamol"
-                        required
-                      />
+                      <label className="block text-sm font-medium mb-1">
+                        Drug Name <span className="text-red-ribbon">*</span>
+                      </label>
+                      {inventoryData?.inventory && inventoryData.inventory.length > 0 ? (
+                        <>
+                          <Select
+                            value={medication.drugName}
+                            onChange={(e) => {
+                              const selectedDrug = inventoryData.inventory.find(
+                                (item) => item.itemName === e.target.value
+                              );
+                              updateMedication(index, 'drugName', e.target.value);
+                              if (selectedDrug?.dosageStrength) {
+                                updateMedication(index, 'dosage', selectedDrug.dosageStrength);
+                              }
+                            }}
+                            required
+                          >
+                            <option value="">Select from inventory</option>
+                            {inventoryData.inventory.map((item) => (
+                              <option key={item.id} value={item.itemName}>
+                                {item.itemName} 
+                                {item.dosageStrength && ` - ${item.dosageStrength}`}
+                                {item.dosageForm && ` (${item.dosageForm})`}
+                                {` - Stock: ${item.stockQuantity}`}
+                              </option>
+                            ))}
+                            <option value="__custom__">⊕ Custom/Not in inventory</option>
+                          </Select>
+                          {medication.drugName === '__custom__' && (
+                            <Input
+                              value=""
+                              onChange={(e) => updateMedication(index, 'drugName', e.target.value)}
+                              placeholder="Enter drug name"
+                              className="mt-2"
+                              required
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <Input
+                          value={medication.drugName}
+                          onChange={(e) =>
+                            updateMedication(index, 'drugName', e.target.value)
+                          }
+                          placeholder="e.g., Paracetamol"
+                          required
+                        />
+                      )}
                     </div>
 
                     <Input
@@ -266,14 +371,34 @@ export default function NewPrescriptionPage() {
                       placeholder="e.g., Twice daily"
                     />
 
-                    <Input
-                      label="Duration"
-                      value={medication.duration}
-                      onChange={(e) =>
-                        updateMedication(index, 'duration', e.target.value)
-                      }
-                      placeholder="e.g., 7 days"
-                    />
+                    <div>
+                      <Select
+                        label="Duration"
+                        value={medication.duration === customDurations[index] ? 'custom' : medication.duration}
+                        onChange={(e) => {
+                          if (e.target.value === 'custom') {
+                            updateMedication(index, 'duration', customDurations[index] || '');
+                          } else {
+                            updateMedication(index, 'duration', e.target.value);
+                          }
+                        }}
+                      >
+                        {DURATION_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </Select>
+                      {(medication.duration === customDurations[index] || 
+                        !DURATION_OPTIONS.find(opt => opt.value === medication.duration)) && (
+                        <Input
+                          value={customDurations[index] || medication.duration}
+                          onChange={(e) => updateCustomDuration(index, e.target.value)}
+                          placeholder="e.g., 10 days"
+                          className="mt-2"
+                        />
+                      )}
+                    </div>
 
                     <div className="md:col-span-2">
                       <Textarea

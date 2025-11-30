@@ -240,10 +240,10 @@ export async function POST(request: NextRequest) {
         data: {
           hospitalId,
           userId: finalDoctorId,
-          type: 'patient_added_to_queue',
-          title: 'New Walk-in Patient',
-          message: `${appointment.patient.firstName} ${appointment.patient.lastName} has been added to your queue`,
-          link: `/patient-queue`,
+          notificationType: 'appointment_reminder',
+          deliveryMethod: 'in_app',
+          message: `New Walk-in Patient: ${appointment.patient.firstName} ${appointment.patient.lastName} has been added to your queue`,
+          status: 'pending',
         },
       });
     } catch (notifError) {

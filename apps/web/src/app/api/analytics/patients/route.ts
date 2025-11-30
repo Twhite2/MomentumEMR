@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
-    const monthlyGrowth = await prisma.$queryRaw`
+    const monthlyGrowthRaw: any = await prisma.$queryRaw`
       SELECT 
         TO_CHAR(created_at, 'YYYY-MM') as month,
         COUNT(*) as count
@@ -94,6 +94,12 @@ export async function GET(request: NextRequest) {
       GROUP BY TO_CHAR(created_at, 'YYYY-MM')
       ORDER BY month ASC
     `;
+
+    // Convert BigInt to Number for JSON serialization
+    const monthlyGrowth = monthlyGrowthRaw.map((item: any) => ({
+      month: item.month,
+      count: Number(item.count),
+    }));
 
     return apiResponse({
       summary: {

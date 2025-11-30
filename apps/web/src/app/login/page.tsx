@@ -45,13 +45,12 @@ export default function LoginPage() {
         <div className="bg-white rounded-xl shadow-lg p-8">
           {/* Hospital Branding */}
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden">
+            <div className="flex justify-center mb-3">
+              <div className="w-64 h-32 flex items-center justify-center overflow-hidden">
                 <img src="/logo.png" alt="Momentum EMR" className="w-full h-full object-contain" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-primary">Momentum EMR</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground">
               Electronic Medical Records System
             </p>
           </div>

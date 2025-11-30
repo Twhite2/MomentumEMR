@@ -67,6 +67,7 @@ export default function NewPatientPage() {
     address: '',
     emergencyContact: '',
     insuranceId: '',
+    hmoEnrolleeNumber: '',
     corporateClientId: '',
     primaryDoctorId: '',
   });
@@ -182,6 +183,7 @@ export default function NewPatientPage() {
       address: formData.address || null,
       emergencyContact: formData.emergencyContact || null,
       insuranceId: formData.patientType === 'hmo' && formData.insuranceId ? formData.insuranceId : null,
+      hmoEnrolleeNumber: formData.patientType === 'hmo' && formData.hmoEnrolleeNumber ? formData.hmoEnrolleeNumber : null,
       corporateClientId:
         formData.patientType === 'corporate' && formData.corporateClientId
           ? formData.corporateClientId
@@ -318,20 +320,30 @@ export default function NewPatientPage() {
               </Select>
 
               {patientType === 'hmo' && (
-                <Select
-                  label="HMO Policy"
-                  name="insuranceId"
-                  value={formData.insuranceId}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select HMO policy</option>
-                  {hmoList?.map((hmo) => (
-                    <option key={hmo.id} value={hmo.id}>
-                      {hmo.name}{hmo.policyName ? ` - ${hmo.policyName}` : ''}{hmo.provider ? ` (${hmo.provider})` : ''}
-                    </option>
-                  ))}
-                </Select>
+                <>
+                  <Select
+                    label="HMO Policy"
+                    name="insuranceId"
+                    value={formData.insuranceId}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select HMO policy</option>
+                    {hmoList?.map((hmo) => (
+                      <option key={hmo.id} value={hmo.id}>
+                        {hmo.name}{hmo.policyName ? ` - ${hmo.policyName}` : ''}{hmo.provider ? ` (${hmo.provider})` : ''}
+                      </option>
+                    ))}
+                  </Select>
+                  <Input
+                    label="HMO Enrollee Number"
+                    name="hmoEnrolleeNumber"
+                    value={formData.hmoEnrolleeNumber}
+                    onChange={handleInputChange}
+                    placeholder="Enter member/enrollee number"
+                    required
+                  />
+                </>
               )}
 
               {patientType === 'corporate' && (

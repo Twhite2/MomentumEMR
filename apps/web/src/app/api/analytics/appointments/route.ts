@@ -63,20 +63,42 @@ export async function GET(request: NextRequest) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const dailyAppointments = await prisma.$queryRaw`
-      SELECT 
-        DATE(start_time) as date,
-        COUNT(*) as count,
-        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed,
-        COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled
-      FROM appointments
-      WHERE hospital_id = ${hospitalId}
-        AND start_time >= ${startDate ? new Date(startDate) : thirtyDaysAgo}
-        ${endDate ? prisma.$queryRaw`AND start_time <= ${new Date(endDate)}` : prisma.$queryRaw``}
-      GROUP BY DATE(start_time)
-      ORDER BY date DESC
-      LIMIT 30
-    `;
+    const dailyAppointmentsRaw: any = endDate 
+      ? await prisma.$queryRaw`
+          SELECT 
+            DATE(start_time) as date,
+            COUNT(*) as count,
+            COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed,
+            COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled
+          FROM appointments
+          WHERE hospital_id = ${hospitalId}
+            AND start_time >= ${startDate ? new Date(startDate) : thirtyDaysAgo}
+            AND start_time <= ${new Date(endDate)}
+          GROUP BY DATE(start_time)
+          ORDER BY date DESC
+          LIMIT 30
+        `
+      : await prisma.$queryRaw`
+          SELECT 
+            DATE(start_time) as date,
+            COUNT(*) as count,
+            COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed,
+            COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled
+          FROM appointments
+          WHERE hospital_id = ${hospitalId}
+            AND start_time >= ${startDate ? new Date(startDate) : thirtyDaysAgo}
+          GROUP BY DATE(start_time)
+          ORDER BY date DESC
+          LIMIT 30
+        `;
+
+    // Convert BigInt to Number for JSON serialization
+    const dailyAppointments = dailyAppointmentsRaw.map((item: any) => ({
+      date: item.date,
+      count: Number(item.count),
+      completed: Number(item.completed),
+      cancelled: Number(item.cancelled),
+    }));
 
     // Get top doctors by appointment count
     const topDoctors = await prisma.appointment.groupBy({

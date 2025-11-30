@@ -120,7 +120,7 @@ export async function PATCH(
     const appointmentId = parseInt(params.id);
 
     const body = await request.json();
-    const { status } = body;
+    const { status, skipVitals } = body;
 
     // Verify appointment exists
     const existing = await prisma.appointment.findFirst({
@@ -134,9 +134,12 @@ export async function PATCH(
     // Prepare update data with timestamps
     const updateData: any = { status };
     
-    // Set checkedInAt when checking in
+    // Set checkedInAt and skipVitals when checking in
     if (status === 'checked_in' && existing.status !== 'checked_in') {
       updateData.checkedInAt = new Date();
+      if (skipVitals !== undefined) {
+        updateData.skipVitals = skipVitals;
+      }
     }
     
     // Set checkedOutAt and endTime when completing

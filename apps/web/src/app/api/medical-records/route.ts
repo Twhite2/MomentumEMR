@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');
     const doctorId = searchParams.get('doctorId');
+    // Default to grouped view (one row per patient) for ALL users - only show individual records when explicitly requested
     const groupByPatient = searchParams.get('groupByPatient') !== 'false'; // Default to true
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');

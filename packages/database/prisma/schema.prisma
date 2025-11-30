@@ -110,6 +110,8 @@ enum ClaimStatus {
   partially_paid
   queried
   denied
+  disputed
+  outstanding
   resubmitted
 }
 
@@ -186,9 +188,11 @@ model Hospital {
   surveys              Survey[]
   analyticsDashboards  AnalyticsDashboard[]
   analyticsReports     AnalyticsReport[]
-  analyticsMetrics     AnalyticsMetric[]
-  encounters           Encounter[] // HMO encounters
-  claimBatches         ClaimBatch[] // HMO claim batches
+  analyticsMetrics      AnalyticsMetric[]
+  encounters            Encounter[] // HMO encounters
+  claimBatches          ClaimBatch[] // HMO claim batches
+  nursingInventoryUsage NursingInventoryUsage[]
+  labInventoryUsage     LabInventoryUsage[]
 
   @@map("hospitals")
 }
@@ -215,6 +219,7 @@ model User {
   appointments            Appointment[]
   medicalRecords          MedicalRecord[]
   prescriptions           Prescription[]
+  dispensedPrescriptions  Prescription[]        @relation("DispensedBy")
   labOrdersOrdered        LabOrder[]            @relation("OrderedBy")
   labOrdersAssigned       LabOrder[]            @relation("AssignedLabTech")
   labResultsUploaded      LabResult[]           @relation("UploadedBy")
@@ -234,6 +239,9 @@ model User {
   chatAttachmentsUploaded ChatAttachment[]      @relation("ChatAttachments")
   chatReadReceipts        ChatReadReceipt[]     @relation("ChatReadReceipts")
   chatAuditLogs           ChatAuditLog[]        @relation("ChatAuditLogs")
+  // Inventory Usage Relations
+  nursingInventoryUsage   NursingInventoryUsage[] @relation("NursingInventoryUsage")
+  labInventoryUsage       LabInventoryUsage[]     @relation("LabInventoryUsage")
   // HMO Relations
   encountersAsDoctor      Encounter[]           @relation("EncounterDoctor")
   proceduresPerformed     EncounterProcedure[]  @relation("ProcedurePerformer")
@@ -283,10 +291,12 @@ model Patient {
   patientSurveys    PatientSurvey[]
   labOrders         LabOrder[]
   surveyResponses   SurveyResponse[]
-  vitals            Vital[]
-  admissions        Admission[]
-  nursingNotes      NursingNote[]
-  encounters        Encounter[] // HMO encounters
+  vitals                Vital[]
+  admissions            Admission[]
+  nursingNotes          NursingNote[]
+  encounters            Encounter[] // HMO encounters
+  nursingInventoryUsage NursingInventoryUsage[]
+  labInventoryUsage     LabInventoryUsage[]
 
   @@index([hospitalId])
   @@index([userId])
@@ -363,9 +373,17 @@ model Appointment {
   appointmentType AppointmentType   @map("appointment_type")
   status          AppointmentStatus
   isEmergency     Boolean           @default(false) @map("is_emergency") // Priority flag for emergency cases
+  skipVitals      Boolean           @default(false) @map("skip_vitals") // Skip vitals for this visit
   startTime       DateTime          @map("start_time")
   endTime         DateTime?         @map("end_time")
   checkedInAt     DateTime?         @map("checked_in_at") // Actual check-in time
+  vitalsCompletedAt DateTime?       @map("vitals_completed_at") // When vitals were recorded
+  doctorStartedAt DateTime?         @map("doctor_started_at") // When doctor consultation began
+  doctorCompletedAt DateTime?       @map("doctor_completed_at") // When doctor consultation ended
+  labStartedAt    DateTime?         @map("lab_started_at") // When lab tests began
+  labCompletedAt  DateTime?         @map("lab_completed_at") // When lab tests completed
+  pharmacyStartedAt DateTime?       @map("pharmacy_started_at") // When pharmacy dispensing began
+  pharmacyCompletedAt DateTime?     @map("pharmacy_completed_at") // When pharmacy dispensing completed
   checkedOutAt    DateTime?         @map("checked_out_at") // Actual check-out time
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
@@ -395,6 +413,7 @@ model MedicalRecord {
   treatmentPlan String?  @map("treatment_plan") @db.Text
   allergies     Json?    // Allergies noted during this visit: ["Penicillin", "Latex", etc.]
   attachments   Json?
+  editHistory   Json?    @map("edit_history") // Track edits: [{ doctorId, doctorName, editedAt, changes }]
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -417,6 +436,9 @@ model Prescription {
   treatmentPlan String?              @map("treatment_plan") @db.Text
   status        PrescriptionStatus?
   drugCount     Int                  @default(0) @map("drug_count")
+  dispensedBy   Int?                 @map("dispensed_by") // Pharmacist who dispensed
+  dispensedAt   DateTime?            @map("dispensed_at") // When it was dispensed
+  invoiceId     Int?                 @map("invoice_id") // Auto-generated invoice
   createdAt     DateTime             @default(now()) @map("created_at")
   updatedAt     DateTime             @updatedAt @map("updated_at")
 
@@ -424,11 +446,15 @@ model Prescription {
   hospital          Hospital            @relation(fields: [hospitalId], references: [id])
   patient           Patient             @relation(fields: [patientId], references: [id])
   doctor            User                @relation(fields: [doctorId], references: [id])
+  pharmacist        User?               @relation("DispensedBy", fields: [dispensedBy], references: [id])
+  invoice           Invoice?            @relation(fields: [invoiceId], references: [id])
   prescriptionItems PrescriptionItem[]
 
   @@index([hospitalId])
   @@index([patientId])
   @@index([doctorId])
+  @@index([dispensedBy])
+  @@index([invoiceId])
   @@map("prescriptions")
 }
 
@@ -469,15 +495,17 @@ model Inventory {
   tabletsPerPackage  Int?      @default(1) @map("tablets_per_package") // For calculating total tablets
   reorderLevel       Int       @default(10) @map("reorder_level")
   unitPrice          Decimal?  @map("unit_price") @db.Decimal(10, 2) // Self-pay price per unit
-  hmoPri             Decimal?  @map("hmo_price") @db.Decimal(10, 2) // HMO pricing
+  hmoPrice           Decimal?  @map("hmo_price") @db.Decimal(10, 2) // HMO pricing
   corporatePrice     Decimal?  @map("corporate_price") @db.Decimal(10, 2) // Corporate pricing
   expiryDate         DateTime? @map("expiry_date") @db.Date
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  hospital          Hospital           @relation(fields: [hospitalId], references: [id])
+  hospital          Hospital              @relation(fields: [hospitalId], references: [id])
   prescriptionItems PrescriptionItem[]
+  nursingUsage      NursingInventoryUsage[]
+  labUsage          LabInventoryUsage[]
 
   @@index([hospitalId])
   @@index([stockQuantity])
@@ -501,10 +529,11 @@ model Invoice {
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
   // Relations
-  hospital     Hospital       @relation(fields: [hospitalId], references: [id])
-  patient      Patient        @relation(fields: [patientId], references: [id])
-  payments     Payment[]
-  invoiceItems InvoiceItem[]
+  hospital      Hospital       @relation(fields: [hospitalId], references: [id])
+  patient       Patient        @relation(fields: [patientId], references: [id])
+  payments      Payment[]
+  invoiceItems  InvoiceItem[]
+  prescriptions Prescription[] // Prescriptions linked to this invoice
 
   @@index([hospitalId])
   @@index([patientId])
@@ -604,6 +633,7 @@ model LabOrder {
   doctor         User        @relation("OrderedBy", fields: [orderedBy], references: [id])
   assignedLabTech User?      @relation("AssignedLabTech", fields: [assignedTo], references: [id])
   labResults     LabResult[]
+  inventoryUsage LabInventoryUsage[]
 
   @@index([hospitalId])
   @@index([patientId])
@@ -1317,4 +1347,63 @@ model HmoTariff {
   @@index([category])
   @@index([name])
   @@map("hmo_tariffs")
+}
+
+// ===================================
+// INVENTORY USAGE TRACKING MODELS
+// ===================================
+
+model NursingInventoryUsage {
+  id           Int      @id @default(autoincrement())
+  hospitalId   Int      @map("hospital_id")
+  patientId    Int      @map("patient_id")
+  inventoryId  Int      @map("inventory_id")
+  nurseId      Int      @map("nurse_id")
+  quantity     Int      @default(1)
+  purpose      String?  @db.Text // Reason for usage (e.g., "Wound dressing", "IV setup")
+  notes        String?  @db.Text
+  usedAt       DateTime @default(now()) @map("used_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  hospital  Hospital  @relation(fields: [hospitalId], references: [id])
+  patient   Patient   @relation(fields: [patientId], references: [id])
+  inventory Inventory @relation(fields: [inventoryId], references: [id])
+  nurse     User      @relation("NursingInventoryUsage", fields: [nurseId], references: [id])
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([inventoryId])
+  @@index([nurseId])
+  @@index([usedAt])
+  @@map("nursing_inventory_usage")
+}
+
+model LabInventoryUsage {
+  id           Int      @id @default(autoincrement())
+  hospitalId   Int      @map("hospital_id")
+  patientId    Int      @map("patient_id")
+  labOrderId   Int?     @map("lab_order_id") // Optional link to lab order
+  inventoryId  Int      @map("inventory_id")
+  labTechId    Int      @map("lab_tech_id")
+  quantity     Int      @default(1)
+  testType     String?  @map("test_type") // Type of test (e.g., "Blood Test", "Urinalysis")
+  notes        String?  @db.Text
+  usedAt       DateTime @default(now()) @map("used_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  hospital  Hospital  @relation(fields: [hospitalId], references: [id])
+  patient   Patient   @relation(fields: [patientId], references: [id])
+  labOrder  LabOrder? @relation(fields: [labOrderId], references: [id])
+  inventory Inventory @relation(fields: [inventoryId], references: [id])
+  labTech   User      @relation("LabInventoryUsage", fields: [labTechId], references: [id])
+
+  @@index([hospitalId])
+  @@index([patientId])
+  @@index([labOrderId])
+  @@index([inventoryId])
+  @@index([labTechId])
+  @@index([usedAt])
+  @@map("lab_inventory_usage")
 }

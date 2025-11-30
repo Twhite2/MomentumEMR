@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const labScientists = await prisma.user.findMany({
       where: {
         hospitalId,
-        role: 'lab_scientist',
+        role: 'lab_tech',
         active: true,
       },
       select: {

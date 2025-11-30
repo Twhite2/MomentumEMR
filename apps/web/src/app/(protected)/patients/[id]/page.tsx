@@ -308,30 +308,32 @@ export default function PatientDetailPage() {
             {patient.appointments && patient.appointments.length > 0 ? (
               <div className="space-y-2">
                 {patient.appointments.map((apt: any) => (
-                  <div key={apt.id} className="p-3 border rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-sm">{apt.appointmentType}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Dr. {apt.doctor?.name} • {apt.department}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(apt.startTime).toLocaleDateString()}
-                        </p>
+                  <Link key={apt.id} href={`/appointments/${apt.id}`}>
+                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-sm">{apt.appointmentType}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Dr. {apt.doctor?.name} • {apt.department}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(apt.startTime).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            apt.status === 'completed'
+                              ? 'bg-green-haze/10 text-green-haze'
+                              : apt.status === 'scheduled'
+                              ? 'bg-tory-blue/10 text-tory-blue'
+                              : 'bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {apt.status}
+                        </span>
                       </div>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          apt.status === 'completed'
-                            ? 'bg-green-haze/10 text-green-haze'
-                            : apt.status === 'scheduled'
-                            ? 'bg-tory-blue/10 text-tory-blue'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
-                      >
-                        {apt.status}
-                      </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
@@ -349,19 +351,21 @@ export default function PatientDetailPage() {
               {patient.medicalRecords && patient.medicalRecords.length > 0 ? (
                 <div className="space-y-2">
                   {patient.medicalRecords.map((record: any) => (
-                    <div key={record.id} className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-sm">{record.diagnosis || 'No diagnosis'}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Dr. {record.doctor?.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(record.visitDate).toLocaleDateString()}
-                          </p>
+                    <Link key={record.id} href={`/medical-records/${record.id}`}>
+                      <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-sm">{record.diagnosis || 'No diagnosis'}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Dr. {record.doctor?.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(record.visitDate).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               ) : (
@@ -379,34 +383,120 @@ export default function PatientDetailPage() {
             {patient.prescriptions && patient.prescriptions.length > 0 ? (
               <div className="space-y-2">
                 {patient.prescriptions.map((prescription: any) => (
-                  <div key={prescription.id} className="p-3 border rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-sm">
-                          {prescription.prescriptionItems?.length || 0} medications
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Dr. {prescription.doctor?.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(prescription.createdAt).toLocaleDateString()}
-                        </p>
+                  <Link key={prescription.id} href={`/prescriptions/${prescription.id}`}>
+                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-sm">
+                            {prescription.prescriptionItems?.length || 0} medications
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Dr. {prescription.doctor?.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(prescription.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            prescription.status === 'active'
+                              ? 'bg-green-haze/10 text-green-haze'
+                              : 'bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {prescription.status}
+                        </span>
                       </div>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          prescription.status === 'active'
-                            ? 'bg-green-haze/10 text-green-haze'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
-                      >
-                        {prescription.status}
-                      </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
               <p className="text-muted-foreground text-center py-4">No prescriptions yet</p>
+            )}
+          </div>
+
+          {/* Lab Orders */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <TestTube className="w-5 h-5" />
+              Lab Orders
+            </h3>
+            {patient.labOrders && patient.labOrders.length > 0 ? (
+              <div className="space-y-2">
+                {patient.labOrders.map((labOrder: any) => (
+                  <Link key={labOrder.id} href={`/lab-orders/${labOrder.id}`}>
+                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-sm">{labOrder.orderType}</p>
+                          {labOrder.description && (
+                            <p className="text-xs text-muted-foreground">{labOrder.description}</p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(labOrder.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            labOrder.status === 'completed'
+                              ? 'bg-green-haze/10 text-green-haze'
+                              : labOrder.status === 'pending'
+                              ? 'bg-yellow-500/10 text-yellow-600'
+                              : 'bg-tory-blue/10 text-tory-blue'
+                          }`}
+                        >
+                          {labOrder.status}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No lab orders yet</p>
+            )}
+          </div>
+
+          {/* Invoices */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <DollarSign className="w-5 h-5" />
+              Invoices
+            </h3>
+            {patient.invoices && patient.invoices.length > 0 ? (
+              <div className="space-y-2">
+                {patient.invoices.map((invoice: any) => (
+                  <Link key={invoice.id} href={`/invoices/${invoice.id}`}>
+                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-sm">Invoice #{invoice.id.toString().padStart(6, '0')}</p>
+                          <p className="text-xs text-muted-foreground">
+                            ₦{invoice.totalAmount?.toLocaleString() || '0'}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(invoice.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            invoice.status === 'paid'
+                              ? 'bg-green-haze/10 text-green-haze'
+                              : invoice.status === 'pending'
+                              ? 'bg-yellow-500/10 text-yellow-600'
+                              : 'bg-red-ribbon/10 text-red-ribbon'
+                          }`}
+                        >
+                          {invoice.status}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No invoices yet</p>
             )}
           </div>
         </div>

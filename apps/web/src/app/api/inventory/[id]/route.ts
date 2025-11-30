@@ -38,11 +38,8 @@ export async function GET(
       ...item,
       // Transform database field names to match frontend expectations
       drugName: item.itemName,
-      genericName: null,
-      category: 'Other',
       quantity: item.stockQuantity,
       batchNumber: item.itemCode,
-      manufacturer: null,
       isExpired,
       isLowStock,
       daysToExpiry,
@@ -53,7 +50,7 @@ export async function GET(
   }
 }
 
-// PUT /api/inventory/[id] - Update inventory item
+// PUT /api/inventory/[id] - Update inventory item (full update)
 export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -73,8 +70,13 @@ export async function PUT(
       stockQuantity,
       quantity,
       unitPrice,
+      corporatePrice,
       reorderLevel,
       expiryDate,
+      category,
+      drugCategory,
+      dosageForm,
+      dosageStrength,
     } = body;
     
     // Transform frontend field names to database field names
@@ -91,32 +93,42 @@ export async function PUT(
       return apiResponse({ error: 'Inventory item not found' }, 404);
     }
 
+    // Build update data
+    const updateData: any = {};
+    if (finalItemName !== undefined) updateData.itemName = finalItemName;
+    if (finalItemCode !== undefined) updateData.itemCode = finalItemCode;
+    if (finalStockQuantity !== undefined) updateData.stockQuantity = parseInt(finalStockQuantity);
+    if (unitPrice !== undefined) updateData.unitPrice = parseFloat(unitPrice);
+    if (corporatePrice !== undefined) updateData.corporatePrice = parseFloat(corporatePrice);
+    if (reorderLevel !== undefined) updateData.reorderLevel = parseInt(reorderLevel);
+    if (expiryDate) updateData.expiryDate = new Date(expiryDate);
+    if (category !== undefined) updateData.category = category;
+    if (drugCategory !== undefined) updateData.drugCategory = drugCategory;
+    if (dosageForm !== undefined) updateData.dosageForm = dosageForm;
+    if (dosageStrength !== undefined) updateData.dosageStrength = dosageStrength;
+
     // Update item
     const item = await prisma.inventory.update({
       where: { id: itemId },
-      data: {
-        itemName: finalItemName !== undefined ? finalItemName : undefined,
-        itemCode: finalItemCode !== undefined ? finalItemCode : undefined,
-        stockQuantity: finalStockQuantity !== undefined ? parseInt(finalStockQuantity) : undefined,
-        unitPrice: unitPrice !== undefined ? parseFloat(unitPrice) : undefined,
-        reorderLevel: reorderLevel !== undefined ? parseInt(reorderLevel) : undefined,
-        expiryDate: expiryDate ? new Date(expiryDate) : undefined,
-      },
+      data: updateData,
     });
 
-    // Transform response to match frontend expectations
     return apiResponse({
       ...item,
-      drugName: item.itemName,
-      genericName: null,
-      category: 'Other',
-      quantity: item.stockQuantity,
-      batchNumber: item.itemCode,
-      manufacturer: null,
+      message: 'Inventory item updated successfully',
     });
   } catch (error) {
     return handleApiError(error);
   }
+}
+
+// PATCH /api/inventory/[id] - Partial update inventory item
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  // Use same logic as PUT for partial updates
+  return PUT(request, context);
 }
 
 // DELETE /api/inventory/[id] - Delete inventory item

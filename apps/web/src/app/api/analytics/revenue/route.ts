@@ -43,13 +43,13 @@ export async function GET(request: NextRequest) {
       }),
       // Pending revenue
       prisma.invoice.aggregate({
-        where: { ...where, status: { in: ['pending', 'partial'] } },
+        where: { ...where, status: 'pending' },
         _sum: { totalAmount: true, paidAmount: true },
       }),
       // Invoice counts
       prisma.invoice.count({ where }),
       prisma.invoice.count({ where: { ...where, status: 'paid' } }),
-      prisma.invoice.count({ where: { ...where, status: { in: ['pending', 'partial'] } } }),
+      prisma.invoice.count({ where: { ...where, status: 'pending' } }),
       // Recent invoices
       prisma.invoice.findMany({
         where,
@@ -96,19 +96,39 @@ export async function GET(request: NextRequest) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const dailyRevenue = await prisma.$queryRaw`
-      SELECT 
-        DATE(created_at) as date,
-        SUM(paid_amount) as revenue,
-        COUNT(*) as invoice_count
-      FROM invoices
-      WHERE hospital_id = ${hospitalId}
-        AND created_at >= ${startDate ? new Date(startDate) : thirtyDaysAgo}
-        ${endDate ? prisma.$queryRaw`AND created_at <= ${new Date(endDate)}` : prisma.$queryRaw``}
-      GROUP BY DATE(created_at)
-      ORDER BY date DESC
-      LIMIT 30
-    `;
+    const dailyRevenueRaw: any = endDate
+      ? await prisma.$queryRaw`
+          SELECT 
+            DATE(created_at) as date,
+            SUM(paid_amount) as revenue,
+            COUNT(*) as invoice_count
+          FROM invoices
+          WHERE hospital_id = ${hospitalId}
+            AND created_at >= ${startDate ? new Date(startDate) : thirtyDaysAgo}
+            AND created_at <= ${new Date(endDate)}
+          GROUP BY DATE(created_at)
+          ORDER BY date DESC
+          LIMIT 30
+        `
+      : await prisma.$queryRaw`
+          SELECT 
+            DATE(created_at) as date,
+            SUM(paid_amount) as revenue,
+            COUNT(*) as invoice_count
+          FROM invoices
+          WHERE hospital_id = ${hospitalId}
+            AND created_at >= ${startDate ? new Date(startDate) : thirtyDaysAgo}
+          GROUP BY DATE(created_at)
+          ORDER BY date DESC
+          LIMIT 30
+        `;
+
+    // Convert BigInt to Number for JSON serialization
+    const dailyRevenue = dailyRevenueRaw.map((item: any) => ({
+      date: item.date,
+      revenue: Number(item.revenue),
+      invoice_count: Number(item.invoice_count),
+    }));
 
     return apiResponse({
       summary: {

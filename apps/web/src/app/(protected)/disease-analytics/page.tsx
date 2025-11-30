@@ -144,7 +144,7 @@ export default function DiseaseAnalyticsPage() {
         <div>
           <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
             <Activity className="w-8 h-8" />
-            Disease Analytics
+            Epidemiology
           </h1>
           <p className="text-muted-foreground mt-1">
             Track disease patterns, trends, and sample collection across all hospitals

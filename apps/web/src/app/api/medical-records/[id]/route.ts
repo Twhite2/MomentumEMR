@@ -95,30 +95,75 @@ export async function PUT(
 
     const body = await request.json();
     const { visitDate, diagnosis, notes, treatmentPlan, allergies, attachments } = body;
+    const userId = parseInt(session.user.id);
+    const userName = session.user.name;
 
     // Verify record exists
     const existing = await prisma.medicalRecord.findFirst({
       where: { id: recordId, hospitalId },
+      include: {
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!existing) {
       return apiResponse({ error: 'Medical record not found' }, 404);
     }
 
+    // Build edit history entry
+    const editHistoryEntry = {
+      doctorId: userId,
+      doctorName: userName,
+      editedAt: new Date().toISOString(),
+      changes: [] as string[],
+      originalDoctorId: existing.doctorId,
+      originalDoctorName: existing.doctor.name,
+    };
+
     // Nurses can only update treatment plan
     const updateData: any = {};
     if (userRole === 'nurse') {
-      if (treatmentPlan !== undefined) {
+      if (treatmentPlan !== undefined && treatmentPlan !== existing.treatmentPlan) {
         updateData.treatmentPlan = treatmentPlan;
+        editHistoryEntry.changes.push('treatment plan');
       }
     } else {
       // Doctors and admins can update all fields
-      if (visitDate) updateData.visitDate = new Date(visitDate);
-      if (diagnosis !== undefined) updateData.diagnosis = diagnosis;
-      if (notes !== undefined) updateData.notes = notes;
-      if (treatmentPlan !== undefined) updateData.treatmentPlan = treatmentPlan;
-      if (allergies !== undefined) updateData.allergies = allergies;
-      if (attachments !== undefined) updateData.attachments = attachments;
+      if (visitDate && new Date(visitDate).toISOString() !== new Date(existing.visitDate).toISOString()) {
+        updateData.visitDate = new Date(visitDate);
+        editHistoryEntry.changes.push('visit date');
+      }
+      if (diagnosis !== undefined && diagnosis !== existing.diagnosis) {
+        updateData.diagnosis = diagnosis;
+        editHistoryEntry.changes.push('diagnosis');
+      }
+      if (notes !== undefined && notes !== existing.notes) {
+        updateData.notes = notes;
+        editHistoryEntry.changes.push('clinical notes');
+      }
+      if (treatmentPlan !== undefined && treatmentPlan !== existing.treatmentPlan) {
+        updateData.treatmentPlan = treatmentPlan;
+        editHistoryEntry.changes.push('treatment plan');
+      }
+      if (allergies !== undefined && JSON.stringify(allergies) !== JSON.stringify(existing.allergies)) {
+        updateData.allergies = allergies;
+        editHistoryEntry.changes.push('allergies');
+      }
+      if (attachments !== undefined && JSON.stringify(attachments) !== JSON.stringify(existing.attachments)) {
+        updateData.attachments = attachments;
+        editHistoryEntry.changes.push('attachments');
+      }
+    }
+
+    // Add edit history if changes were made
+    if (editHistoryEntry.changes.length > 0) {
+      const existingHistory = ((existing as any).editHistory as any[]) || [];
+      updateData.editHistory = [...existingHistory, editHistoryEntry];
     }
 
     // Update record

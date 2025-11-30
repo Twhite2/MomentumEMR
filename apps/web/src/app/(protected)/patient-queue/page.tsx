@@ -48,6 +48,9 @@ export default function PatientQueuePage() {
   const [walkInSearch, setWalkInSearch] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<number | null>(null);
+  const [skipVitals, setSkipVitals] = useState(false);
   
   // Check if user can add walk-ins (admin, nurse, or receptionist)
   const canAddWalkIns = ['admin', 'nurse', 'receptionist'].includes(session?.user?.role || '');
@@ -65,14 +68,18 @@ export default function PatientQueuePage() {
 
   // Check-in mutation
   const checkInMutation = useMutation({
-    mutationFn: async (appointmentId: number) => {
+    mutationFn: async ({ appointmentId, skipVitals }: { appointmentId: number; skipVitals: boolean }) => {
       const response = await axios.patch(`/api/appointments/${appointmentId}`, {
         status: 'checked_in',
+        skipVitals,
       });
       return response.data;
     },
     onSuccess: () => {
       toast.success('Patient checked in successfully');
+      setShowCheckInModal(false);
+      setSelectedAppointment(null);
+      setSkipVitals(false);
       refetch();
     },
     onError: () => {
@@ -98,7 +105,14 @@ export default function PatientQueuePage() {
   });
 
   const handleCheckIn = (appointmentId: number) => {
-    checkInMutation.mutate(appointmentId);
+    setSelectedAppointment(appointmentId);
+    setShowCheckInModal(true);
+  };
+
+  const confirmCheckIn = () => {
+    if (selectedAppointment) {
+      checkInMutation.mutate({ appointmentId: selectedAppointment, skipVitals });
+    }
   };
 
   const handleCheckOut = (appointmentId: number) => {
@@ -508,6 +522,55 @@ export default function PatientQueuePage() {
           </table>
         </div>
       </div>
+
+      {/* Check-In Modal */}
+      {showCheckInModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Check-In Patient</h3>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="skipVitals"
+                  checked={skipVitals}
+                  onChange={(e) => setSkipVitals(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-border text-tory-blue focus:ring-tory-blue"
+                />
+                <label htmlFor="skipVitals" className="text-sm text-foreground cursor-pointer">
+                  <div className="font-medium">Skip Vitals</div>
+                  <div className="text-muted-foreground mt-1">
+                    Check this if the patient does not need vitals recorded for this visit
+                  </div>
+                </label>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mt-6">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => {
+                  setShowCheckInModal(false);
+                  setSelectedAppointment(null);
+                  setSkipVitals(false);
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={confirmCheckIn}
+                disabled={checkInMutation.isPending}
+                className="flex-1"
+              >
+                {checkInMutation.isPending ? 'Checking in...' : 'Confirm Check-In'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

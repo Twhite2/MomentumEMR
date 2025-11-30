@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/billing/stats - Get billing statistics
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'cashier', 'doctor', 'patient']);
+    const session = await requireRole(['admin', 'cashier', 'pharmacist', 'doctor', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userRole = session.user.role;
 

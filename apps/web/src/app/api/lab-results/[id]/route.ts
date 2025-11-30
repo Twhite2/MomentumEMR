@@ -200,3 +200,78 @@ export async function DELETE(
     return handleApiError(error);
   }
 }
+
+// PATCH /api/lab-results/[id] - Finalize/Unfinalize lab result
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params;
+    const session = await requireRole(['lab_tech', 'admin']);
+    const resultId = parseInt(params.id);
+    const userId = parseInt(session.user.id);
+
+    const body = await request.json();
+    const { finalized } = body;
+
+    if (typeof finalized !== 'boolean') {
+      return apiResponse({ error: 'finalized field must be a boolean' }, 400);
+    }
+
+    // Fetch the result
+    const existingResult = await prisma.labResult.findUnique({
+      where: { id: resultId },
+      select: { 
+        uploadedBy: true,
+        finalized: true,
+        releasedToPatient: true,
+      },
+    });
+
+    if (!existingResult) {
+      return apiResponse({ error: 'Lab result not found' }, 404);
+    }
+
+    // Authorization: Only the uploader or admin can finalize
+    if (session.user.role === 'lab_tech' && existingResult.uploadedBy !== userId) {
+      return apiResponse({ 
+        error: 'You can only finalize results that you uploaded' 
+      }, 403);
+    }
+
+    // Cannot un-finalize results that have been released
+    if (!finalized && existingResult.releasedToPatient) {
+      return apiResponse({ 
+        error: 'Cannot unfinalize results that have been released to patients' 
+      }, 400);
+    }
+
+    // Update finalized status
+    const updatedResult = await prisma.labResult.update({
+      where: { id: resultId },
+      data: { finalized },
+      include: {
+        labOrder: {
+          include: {
+            patient: true,
+            doctor: true,
+          },
+        },
+        uploader: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    return apiResponse({
+      message: finalized ? 'Lab result finalized successfully' : 'Lab result un-finalized successfully',
+      result: updatedResult,
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}

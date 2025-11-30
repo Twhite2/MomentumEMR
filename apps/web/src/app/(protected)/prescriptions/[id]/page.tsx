@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Pill, User, Calendar, CheckCircle, FileText } from 'lucide-react';
+import { ArrowLeft, Pill, User, Calendar, CheckCircle, FileText, Receipt } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
@@ -283,6 +283,15 @@ export default function PrescriptionDetailPage() {
             <div className="bg-white rounded-lg border border-border p-6">
               <h2 className="text-lg font-semibold mb-4">Pharmacy Actions</h2>
               <div className="space-y-2">
+                <Link href={`/invoices/new?prescriptionId=${prescription.id}&patientId=${prescription.patient.id}`}>
+                  <Button
+                    variant="outline"
+                    className="w-full border-tory-blue text-tory-blue hover:bg-tory-blue hover:text-white"
+                  >
+                    <Receipt className="w-4 h-4 mr-2" />
+                    Generate Invoice
+                  </Button>
+                </Link>
                 <Button
                   variant="primary"
                   className="w-full"
@@ -293,7 +302,7 @@ export default function PrescriptionDetailPage() {
                   Mark as Dispensed
                 </Button>
                 <p className="text-xs text-muted-foreground text-center mt-2">
-                  Click when all medications have been dispensed to the patient
+                  Generate an invoice before dispensing medications to the patient
                 </p>
               </div>
             </div>
@@ -303,11 +312,14 @@ export default function PrescriptionDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
             <div className="space-y-2">
-              <Link href={`/lab-orders/new?patientId=${prescription.patient.id}`}>
-                <Button variant="outline" className="w-full">
-                  Order Lab Test
-                </Button>
-              </Link>
+              {/* Only doctors can order lab tests */}
+              {['admin', 'doctor'].includes(session?.user?.role || '') && (
+                <Link href={`/lab-orders/new?patientId=${prescription.patient.id}`}>
+                  <Button variant="outline" className="w-full">
+                    Order Lab Test
+                  </Button>
+                </Link>
+              )}
               <Link href={`/appointments/new?patientId=${prescription.patient.id}`}>
                 <Button variant="outline" className="w-full">
                   Schedule Follow-up

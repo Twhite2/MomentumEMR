@@ -8,7 +8,7 @@ import crypto from 'crypto';
 // GET /api/patients - List patients for hospital
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'cashier', 'lab_tech', 'patient']);
+    const session = await requireRole(['admin', 'doctor', 'nurse', 'receptionist', 'cashier', 'pharmacist', 'lab_tech', 'patient']);
     const hospitalId = parseInt(session.user.hospitalId);
     const userId = parseInt(session.user.id);
     const userRole = session.user.role;
@@ -33,10 +33,8 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // Doctors see only their assigned patients unless showAll is true
-    if (userRole === 'doctor' && !showAll) {
-      where.primaryDoctorId = userId;
-    }
+    // Doctors can see all hospital patients (removed restriction to assigned patients only)
+    // This enables better care coordination and medical record access
 
     // Specific email filter (for finding patient by email)
     if (email && userRole !== 'patient') {
