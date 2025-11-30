@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, Select } from '@momentum/ui';
 import { ArrowLeft, Receipt, User, DollarSign, CreditCard, Calendar } from 'lucide-react';
@@ -50,9 +51,13 @@ interface Invoice {
 }
 
 export default function InvoiceDetailPage() {
+  const { data: session } = useSession();
   const params = useParams();
   const queryClient = useQueryClient();
   const invoiceId = params.id as string;
+  
+  // Check if current user is a patient
+  const isPatient = session?.user?.role === 'patient';
 
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentData, setPaymentData] = useState({
@@ -253,7 +258,7 @@ export default function InvoiceDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Payment History ({invoice.payments.length})</h2>
-              {balance > 0 && !showPaymentForm && (
+              {!isPatient && balance > 0 && !showPaymentForm && (
                 <Button
                   variant="primary"
                   size="sm"
@@ -266,7 +271,7 @@ export default function InvoiceDetailPage() {
             </div>
 
             {/* Payment Form */}
-            {showPaymentForm && (
+            {!isPatient && showPaymentForm && (
               <form
                 onSubmit={handlePaymentSubmit}
                 className="mb-6 p-4 border border-green-haze/20 bg-green-haze/5 rounded-lg"
@@ -402,12 +407,14 @@ export default function InvoiceDetailPage() {
                 </p>
               </div>
             </div>
-            <Link href={`/patients/${invoice.patient.id}`}>
-              <Button variant="outline" size="sm" className="w-full">
-                <User className="w-4 h-4 mr-2" />
-                View Patient Profile
-              </Button>
-            </Link>
+            {!isPatient && (
+              <Link href={`/patients/${invoice.patient.id}`}>
+                <Button variant="outline" size="sm" className="w-full">
+                  <User className="w-4 h-4 mr-2" />
+                  View Patient Profile
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Appointment Info */}

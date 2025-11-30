@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@momentum/ui';
 import { ArrowLeft, Save } from 'lucide-react';
@@ -21,8 +21,11 @@ interface PatientsResponse {
 
 export default function NewAdmissionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const preSelectedPatientId = searchParams.get('patientId');
+
   const [formData, setFormData] = useState({
-    patientId: '',
+    patientId: preSelectedPatientId || '',
     ward: '',
     bedNumber: '',
     admissionReason: '',
