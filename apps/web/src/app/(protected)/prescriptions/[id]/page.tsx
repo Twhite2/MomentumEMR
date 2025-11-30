@@ -106,7 +106,7 @@ export default function PrescriptionDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -199,7 +199,7 @@ export default function PrescriptionDetailPage() {
           {prescription.treatmentPlan && (
             <div className="bg-white rounded-lg border border-border p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-tory-blue" />
+                <FileText className="w-5 h-5 text-primary" />
                 Treatment Plan & Instructions
               </h2>
               <div className="p-4 bg-muted/50 border border-border rounded-lg">
@@ -233,8 +233,8 @@ export default function PrescriptionDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Patient</h2>
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-16 h-16 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold text-tory-blue">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-xl font-bold text-primary">
                   {prescription.patient.firstName.charAt(0)}
                   {prescription.patient.lastName.charAt(0)}
                 </span>
@@ -286,7 +286,7 @@ export default function PrescriptionDetailPage() {
                 <Link href={`/invoices/new?prescriptionId=${prescription.id}&patientId=${prescription.patient.id}`}>
                   <Button
                     variant="outline"
-                    className="w-full border-tory-blue text-tory-blue hover:bg-tory-blue hover:text-white"
+                    className="w-full border-primary text-primary hover:bg-primary hover:text-white"
                   >
                     <Receipt className="w-4 h-4 mr-2" />
                     Generate Invoice

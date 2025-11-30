@@ -94,7 +94,7 @@ export default function NewAdmissionPage() {
             <select
               value={formData.patientId}
               onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
             >
               <option value="">Select a patient</option>
@@ -115,7 +115,7 @@ export default function NewAdmissionPage() {
               type="text"
               value={formData.ward}
               onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="e.g., General Ward, ICU, Maternity"
             />
           </div>
@@ -129,7 +129,7 @@ export default function NewAdmissionPage() {
               type="text"
               value={formData.bedNumber}
               onChange={(e) => setFormData({ ...formData, bedNumber: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="e.g., A-12, B-05"
             />
           </div>
@@ -143,7 +143,7 @@ export default function NewAdmissionPage() {
           <textarea
             value={formData.admissionReason}
             onChange={(e) => setFormData({ ...formData, admissionReason: e.target.value })}
-            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue min-h-[120px]"
+            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-h-[120px]"
             placeholder="Enter reason for admission..."
             required
           />

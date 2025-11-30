@@ -82,7 +82,7 @@ export default function PatientDetailPage() {
   const getPatientTypeColor = (type: string) => {
     switch (type) {
       case 'hmo':
-        return 'bg-tory-blue/10 text-tory-blue';
+        return 'bg-primary/10 text-primary';
       case 'corporate':
         return 'bg-danube/10 text-danube';
       case 'self_pay':
@@ -95,7 +95,7 @@ export default function PatientDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -157,8 +157,8 @@ export default function PatientDetailPage() {
           {/* Basic Info Card */}
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-20 h-20 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                <span className="text-3xl font-bold text-tory-blue">
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-3xl font-bold text-primary">
                   {patient.firstName.charAt(0)}
                   {patient.lastName.charAt(0)}
                 </span>
@@ -262,7 +262,7 @@ export default function PatientDetailPage() {
             {canCreateMedicalRecords && (
               <Link href={`/medical-records/new?patientId=${patient.id}`}>
                 <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
-                  <FileText className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+                  <FileText className="w-6 h-6 mx-auto mb-2 text-primary" />
                   <p className="text-sm font-medium">Add Record</p>
                 </button>
               </Link>
@@ -272,7 +272,7 @@ export default function PatientDetailPage() {
             {canPrescribe && (
               <Link href={`/prescriptions/new?patientId=${patient.id}`}>
                 <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
-                  <Pill className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+                  <Pill className="w-6 h-6 mx-auto mb-2 text-primary" />
                   <p className="text-sm font-medium">Prescribe</p>
                 </button>
               </Link>
@@ -282,7 +282,7 @@ export default function PatientDetailPage() {
             {canOrderLabs && (
               <Link href={`/lab-orders/new?patientId=${patient.id}`}>
                 <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
-                  <TestTube className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+                  <TestTube className="w-6 h-6 mx-auto mb-2 text-primary" />
                   <p className="text-sm font-medium">Lab Order</p>
                 </button>
               </Link>
@@ -292,7 +292,7 @@ export default function PatientDetailPage() {
             {canCreateInvoices && (
               <Link href={`/invoices/new?patientId=${patient.id}`}>
                 <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
-                  <DollarSign className="w-6 h-6 mx-auto mb-2 text-tory-blue" />
+                  <DollarSign className="w-6 h-6 mx-auto mb-2 text-primary" />
                   <p className="text-sm font-medium">Create Invoice</p>
                 </button>
               </Link>
@@ -309,7 +309,7 @@ export default function PatientDetailPage() {
               <div className="space-y-2">
                 {patient.appointments.map((apt: any) => (
                   <Link key={apt.id} href={`/appointments/${apt.id}`}>
-                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-primary transition-all cursor-pointer">
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium text-sm">{apt.appointmentType}</p>
@@ -325,7 +325,7 @@ export default function PatientDetailPage() {
                             apt.status === 'completed'
                               ? 'bg-green-haze/10 text-green-haze'
                               : apt.status === 'scheduled'
-                              ? 'bg-tory-blue/10 text-tory-blue'
+                              ? 'bg-primary/10 text-primary'
                               : 'bg-muted text-muted-foreground'
                           }`}
                         >
@@ -352,7 +352,7 @@ export default function PatientDetailPage() {
                 <div className="space-y-2">
                   {patient.medicalRecords.map((record: any) => (
                     <Link key={record.id} href={`/medical-records/${record.id}`}>
-                      <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                      <div className="p-3 border rounded-lg hover:bg-spindle hover:border-primary transition-all cursor-pointer">
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="font-medium text-sm">{record.diagnosis || 'No diagnosis'}</p>
@@ -384,7 +384,7 @@ export default function PatientDetailPage() {
               <div className="space-y-2">
                 {patient.prescriptions.map((prescription: any) => (
                   <Link key={prescription.id} href={`/prescriptions/${prescription.id}`}>
-                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-primary transition-all cursor-pointer">
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium text-sm">
@@ -426,7 +426,7 @@ export default function PatientDetailPage() {
               <div className="space-y-2">
                 {patient.labOrders.map((labOrder: any) => (
                   <Link key={labOrder.id} href={`/lab-orders/${labOrder.id}`}>
-                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-primary transition-all cursor-pointer">
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium text-sm">{labOrder.orderType}</p>
@@ -468,7 +468,7 @@ export default function PatientDetailPage() {
               <div className="space-y-2">
                 {patient.invoices.map((invoice: any) => (
                   <Link key={invoice.id} href={`/invoices/${invoice.id}`}>
-                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-tory-blue transition-all cursor-pointer">
+                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-primary transition-all cursor-pointer">
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium text-sm">Invoice #{invoice.id.toString().padStart(6, '0')}</p>

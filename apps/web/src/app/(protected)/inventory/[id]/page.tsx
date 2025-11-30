@@ -110,17 +110,17 @@ export default function InventoryDetailPage() {
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       'Antibacterial (Antibiotic)': 'bg-green-haze/10 text-green-haze',
-      'Antifungal': 'bg-tory-blue/10 text-tory-blue',
+      'Antifungal': 'bg-primary/10 text-primary',
       'Antiviral': 'bg-amaranth/10 text-amaranth',
       'Antimalarial': 'bg-danube/10 text-danube',
       'Antidiarrheal': 'bg-saffron/10 text-saffron',
       'Laxative': 'bg-green-haze/10 text-green-haze',
-      'Antihypertensive': 'bg-tory-blue/10 text-tory-blue',
+      'Antihypertensive': 'bg-primary/10 text-primary',
       'Anti-diabetic': 'bg-amaranth/10 text-amaranth',
       'Antihistamine': 'bg-danube/10 text-danube',
       'Antitussive': 'bg-saffron/10 text-saffron',
       'Antidepressant': 'bg-green-haze/10 text-green-haze',
-      'Sedative/Anxiolytic': 'bg-tory-blue/10 text-tory-blue',
+      'Sedative/Anxiolytic': 'bg-primary/10 text-primary',
       'NSAIDs': 'bg-amaranth/10 text-amaranth',
       'Statins': 'bg-danube/10 text-danube',
       'Other': 'bg-muted text-muted-foreground',
@@ -131,7 +131,7 @@ export default function InventoryDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -236,7 +236,7 @@ export default function InventoryDetailPage() {
             {showStockForm && (
               <form
                 onSubmit={handleStockSubmit}
-                className="mb-6 p-4 border border-tory-blue/20 bg-tory-blue/5 rounded-lg"
+                className="mb-6 p-4 border border-primary/20 bg-primary/5 rounded-lg"
               >
                 <h3 className="font-semibold mb-4">Adjust Stock Level</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -362,7 +362,7 @@ export default function InventoryDetailPage() {
           {/* Batch Information */}
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Package className="w-5 h-5 text-tory-blue" />
+              <Package className="w-5 h-5 text-primary" />
               Batch Information
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -153,7 +153,7 @@ export default function AppointmentsPage() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+            className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
 
           <Select value={status} onChange={(e) => setStatus(e.target.value)}>

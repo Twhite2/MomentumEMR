@@ -248,7 +248,7 @@ export default function ChatPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <MessageCircle className="w-12 h-12 text-tory-blue animate-pulse mx-auto mb-4" />
+          <MessageCircle className="w-12 h-12 text-primary animate-pulse mx-auto mb-4" />
           <p className="text-muted-foreground">Loading chats...</p>
         </div>
       </div>
@@ -292,29 +292,29 @@ export default function ChatPage() {
                 className={`w-full p-4 border-b border-border text-left transition-colors ${
                   room.roomType === 'general'
                     ? selectedRoomId === room.id
-                      ? 'bg-tory-blue/15'
-                      : 'bg-tory-blue/5 hover:bg-tory-blue/10'
+                      ? 'bg-primary/15'
+                      : 'bg-primary/5 hover:bg-primary/10'
                     : selectedRoomId === room.id
-                    ? 'bg-tory-blue/10'
+                    ? 'bg-primary/10'
                     : 'hover:bg-muted/50'
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-tory-blue/20 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                     {room.roomType === 'general' ? (
-                      <Users className="w-5 h-5 text-tory-blue" />
+                      <Users className="w-5 h-5 text-primary" />
                     ) : (
-                      <MessageCircle className="w-5 h-5 text-tory-blue" />
+                      <MessageCircle className="w-5 h-5 text-primary" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       {room.roomType === 'general' && (
-                        <Pin className="w-3.5 h-3.5 text-tory-blue flex-shrink-0" />
+                        <Pin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                       )}
                       <p className="font-semibold truncate">{getRoomDisplayName(room)}</p>
                       {room.roomType === 'general' && (
-                        <span className="bg-tory-blue text-white text-xs rounded px-1.5 py-0.5 flex-shrink-0">
+                        <span className="bg-primary text-white text-xs rounded px-1.5 py-0.5 flex-shrink-0">
                           GROUP
                         </span>
                       )}
@@ -335,7 +335,7 @@ export default function ChatPage() {
                 </div>
               </button>
               {room.roomType === 'general' && index === 0 && (
-                <div className="border-b-2 border-tory-blue/20"></div>
+                <div className="border-b-2 border-primary/20"></div>
               )}
             </div>
           ))}
@@ -357,18 +357,18 @@ export default function ChatPage() {
             {/* Chat Header */}
             <div className="p-4 border-b border-border bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-tory-blue/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                   {selectedRoom?.roomType === 'general' ? (
-                    <Users className="w-5 h-5 text-tory-blue" />
+                    <Users className="w-5 h-5 text-primary" />
                   ) : (
-                    <MessageCircle className="w-5 h-5 text-tory-blue" />
+                    <MessageCircle className="w-5 h-5 text-primary" />
                   )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="font-semibold">{selectedRoom ? getRoomDisplayName(selectedRoom) : ''}</h2>
                     {selectedRoom?.roomType === 'general' && (
-                      <span className="bg-tory-blue text-white text-xs rounded px-1.5 py-0.5">
+                      <span className="bg-primary text-white text-xs rounded px-1.5 py-0.5">
                         GROUP
                       </span>
                     )}
@@ -413,7 +413,7 @@ export default function ChatPage() {
                         <div
                           className={`rounded-lg p-3 ${
                             isOwnMessage
-                              ? 'bg-tory-blue text-white'
+                              ? 'bg-primary text-white'
                               : 'bg-white border border-border'
                           }`}
                         >
@@ -460,12 +460,12 @@ export default function ChatPage() {
               {/* Attachment Preview */}
               {pendingAttachment && (
                 <div className="px-4 pt-3 pb-2 border-b border-border">
-                  <div className="flex items-center gap-3 p-3 bg-tory-blue/5 border border-tory-blue/20 rounded-lg">
+                  <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
                     <div className="flex-shrink-0">
                       {pendingAttachment.fileType.startsWith('image/') ? (
-                        <ImageIcon className="w-8 h-8 text-tory-blue" />
+                        <ImageIcon className="w-8 h-8 text-primary" />
                       ) : (
-                        <FileText className="w-8 h-8 text-tory-blue" />
+                        <FileText className="w-8 h-8 text-primary" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

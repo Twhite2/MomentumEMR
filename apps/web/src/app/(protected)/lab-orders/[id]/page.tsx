@@ -315,7 +315,7 @@ export default function LabOrderDetailPage() {
       case 'pending':
         return 'bg-saffron text-black';
       case 'in_progress':
-        return 'bg-tory-blue text-white';
+        return 'bg-primary text-white';
       case 'completed':
         return 'bg-green-haze text-white';
       case 'cancelled':
@@ -328,7 +328,7 @@ export default function LabOrderDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -373,7 +373,7 @@ export default function LabOrderDetailPage() {
           {/* Test Details */}
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <TestTube className="w-5 h-5 text-tory-blue" />
+              <TestTube className="w-5 h-5 text-primary" />
               Test Details
             </h2>
             <div className="space-y-3">
@@ -435,7 +435,7 @@ export default function LabOrderDetailPage() {
 
             {/* Upload Form */}
             {showUploadForm && (
-              <form onSubmit={handleUploadSubmit} className="mb-6 p-4 border border-tory-blue/20 bg-tory-blue/5 rounded-lg">
+              <form onSubmit={handleUploadSubmit} className="mb-6 p-4 border border-primary/20 bg-primary/5 rounded-lg">
                 <h3 className="font-semibold mb-4">Upload Test Results</h3>
                 
                 <div className="space-y-4 mb-4">
@@ -509,14 +509,14 @@ export default function LabOrderDetailPage() {
                           setUploadedFiles([...uploadedFiles, ...Array.from(e.target.files)]);
                         }
                       }}
-                      className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-tory-blue file:text-white hover:file:bg-tory-blue/90"
+                      className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
                     />
                     {uploadedFiles.length > 0 && (
                       <div className="mt-2 space-y-1">
                         {uploadedFiles.map((file, index) => (
                           <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
                             <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-tory-blue" />
+                              <FileText className="w-4 h-4 text-primary" />
                               <span className="text-sm">{file.name}</span>
                               <span className="text-xs text-muted-foreground">
                                 ({(file.size / 1024).toFixed(1)} KB)
@@ -732,13 +732,13 @@ export default function LabOrderDetailPage() {
                             return (
                               <div key={attachment.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
                                 <div className="flex items-center gap-2">
-                                  <FileText className="w-4 h-4 text-tory-blue" />
+                                  <FileText className="w-4 h-4 text-primary" />
                                   <span className="text-sm">{attachment.fileName}</span>
                                 </div>
                                 <a
                                   href={dataUrl}
                                   download={attachment.fileName}
-                                  className="flex items-center gap-1 text-sm text-tory-blue hover:underline cursor-pointer"
+                                  className="flex items-center gap-1 text-sm text-primary hover:underline cursor-pointer"
                                 >
                                   <Download className="w-4 h-4" />
                                   Download
@@ -824,8 +824,8 @@ export default function LabOrderDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Patient</h2>
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-16 h-16 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold text-tory-blue">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-xl font-bold text-primary">
                   {order.patient.firstName.charAt(0)}
                   {order.patient.lastName.charAt(0)}
                 </span>
@@ -962,8 +962,8 @@ export default function LabOrderDetailPage() {
               <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm font-medium mb-2">Sending to:</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-tory-blue">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">
                       {order.patient.firstName.charAt(0)}{order.patient.lastName.charAt(0)}
                     </span>
                   </div>

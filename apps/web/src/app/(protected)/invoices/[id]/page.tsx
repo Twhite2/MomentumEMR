@@ -40,14 +40,10 @@ interface Invoice {
   }>;
   payments: Array<{
     id: number;
-    amount: number;
-    paymentMethod: string;
-    reference: string | null;
+    amountPaid: number;
+    paymentGateway: string | null;
+    transactionRef: string | null;
     paymentDate: string;
-    processedBy: {
-      id: number;
-      name: string;
-    };
   }>;
   createdAt: string;
   updatedAt: string;
@@ -61,8 +57,8 @@ export default function InvoiceDetailPage() {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentData, setPaymentData] = useState({
     amount: '',
-    paymentMethod: 'Cash',
-    reference: '',
+    paymentGateway: 'Cash',
+    transactionRef: '',
   });
 
   const { data: invoice, isLoading, error } = useQuery<Invoice>({
@@ -82,7 +78,7 @@ export default function InvoiceDetailPage() {
     onSuccess: () => {
       toast.success('Payment recorded successfully!');
       setShowPaymentForm(false);
-      setPaymentData({ amount: '', paymentMethod: 'Cash', reference: '' });
+      setPaymentData({ amount: '', paymentGateway: 'Cash', transactionRef: '' });
       queryClient.invalidateQueries({ queryKey: ['invoice', invoiceId] });
     },
     onError: (error: any) => {
@@ -142,7 +138,7 @@ export default function InvoiceDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -292,9 +288,9 @@ export default function InvoiceDetailPage() {
                   />
                   <Select
                     label="Payment Method"
-                    value={paymentData.paymentMethod}
+                    value={paymentData.paymentGateway}
                     onChange={(e) =>
-                      setPaymentData({ ...paymentData, paymentMethod: e.target.value })
+                      setPaymentData({ ...paymentData, paymentGateway: e.target.value })
                     }
                     required
                   >
@@ -307,9 +303,9 @@ export default function InvoiceDetailPage() {
                   <div className="md:col-span-2">
                     <Input
                       label="Reference/Transaction ID (Optional)"
-                      value={paymentData.reference}
+                      value={paymentData.transactionRef}
                       onChange={(e) =>
-                        setPaymentData({ ...paymentData, reference: e.target.value })
+                        setPaymentData({ ...paymentData, transactionRef: e.target.value })
                       }
                       placeholder="Enter transaction reference"
                     />
@@ -345,17 +341,16 @@ export default function InvoiceDetailPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <CreditCard className="w-4 h-4 text-green-haze" />
-                          <span className="font-semibold">{formatCurrency(payment.amount)}</span>
-                          <span className="text-xs px-2 py-1 bg-green-haze/10 text-green-haze rounded">
-                            {payment.paymentMethod}
-                          </span>
+                          <span className="font-semibold">{formatCurrency(payment.amountPaid)}</span>
+                          {payment.paymentGateway && (
+                            <span className="text-xs px-2 py-1 bg-green-haze/10 text-green-haze rounded">
+                              {payment.paymentGateway}
+                            </span>
+                          )}
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          Processed by {payment.processedBy.name}
-                        </p>
-                        {payment.reference && (
+                        {payment.transactionRef && (
                           <p className="text-sm text-muted-foreground">
-                            Ref: {payment.reference}
+                            Ref: {payment.transactionRef}
                           </p>
                         )}
                       </div>
@@ -389,8 +384,8 @@ export default function InvoiceDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Patient</h2>
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-16 h-16 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold text-tory-blue">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-xl font-bold text-primary">
                   {invoice.patient.firstName.charAt(0)}
                   {invoice.patient.lastName.charAt(0)}
                 </span>

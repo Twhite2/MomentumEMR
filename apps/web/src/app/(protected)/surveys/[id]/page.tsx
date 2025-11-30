@@ -79,7 +79,7 @@ export default function SurveyResultsPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-tory-blue">{survey.title}</h1>
+            <h1 className="text-3xl font-bold text-primary">{survey.title}</h1>
             <p className="text-muted-foreground mt-1">{survey.description}</p>
           </div>
         </div>
@@ -101,9 +101,9 @@ export default function SurveyResultsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Responses</p>
-              <p className="text-3xl font-bold text-tory-blue mt-1">{survey.totalResponses}</p>
+              <p className="text-3xl font-bold text-primary mt-1">{survey.totalResponses}</p>
             </div>
-            <Users className="w-12 h-12 text-tory-blue/20" />
+            <Users className="w-12 h-12 text-primary/20" />
           </div>
         </div>
 
@@ -121,9 +121,9 @@ export default function SurveyResultsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Questions</p>
-              <p className="text-3xl font-bold text-tory-blue mt-1">{survey.questions.length}</p>
+              <p className="text-3xl font-bold text-primary mt-1">{survey.questions.length}</p>
             </div>
-            <BarChart3 className="w-12 h-12 text-tory-blue/20" />
+            <BarChart3 className="w-12 h-12 text-primary/20" />
           </div>
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function SurveyResultsPage() {
           
           return (
             <div key={idx} className="bg-white rounded-lg border border-border p-6">
-              <h3 className="text-lg font-semibold text-tory-blue mb-4">
+              <h3 className="text-lg font-semibold text-primary mb-4">
                 Question {idx + 1}: {q.question}
               </h3>
               <div className="space-y-3">
@@ -152,7 +152,7 @@ export default function SurveyResultsPage() {
                       </div>
                       <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                         <div
-                          className="bg-tory-blue h-full rounded-full transition-all"
+                          className="bg-primary h-full rounded-full transition-all"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
@@ -162,7 +162,7 @@ export default function SurveyResultsPage() {
               </div>
               <div className="mt-4 pt-4 border-t border-border">
                 <p className="text-sm text-muted-foreground">
-                  Total Responses: <span className="font-semibold text-tory-blue">{total}</span>
+                  Total Responses: <span className="font-semibold text-primary">{total}</span>
                 </p>
               </div>
             </div>

@@ -89,7 +89,7 @@ export default function AppointmentDetailPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'scheduled':
-        return 'bg-tory-blue/10 text-tory-blue';
+        return 'bg-primary/10 text-primary';
       case 'checked_in':
         return 'bg-saffron/10 text-saffron';
       case 'completed':
@@ -132,7 +132,7 @@ export default function AppointmentDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -182,7 +182,7 @@ export default function AppointmentDetailPage() {
           {/* Schedule Card */}
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-tory-blue" />
+              <Calendar className="w-5 h-5 text-primary" />
               Schedule
             </h2>
             <div className="space-y-3">
@@ -219,8 +219,8 @@ export default function AppointmentDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Patient Information</h2>
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 bg-tory-blue/10 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold text-tory-blue">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-xl font-bold text-primary">
                   {appointment.patient.firstName.charAt(0)}
                   {appointment.patient.lastName.charAt(0)}
                 </span>
@@ -336,7 +336,7 @@ export default function AppointmentDetailPage() {
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Appointment Type</h2>
             <div className="text-center">
-              <span className="inline-block px-4 py-2 bg-tory-blue/10 text-tory-blue rounded-lg font-medium">
+              <span className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium">
                 {appointment.appointmentType === 'follow_up'
                   ? 'FOLLOW UP'
                   : appointment.appointmentType.toUpperCase()}

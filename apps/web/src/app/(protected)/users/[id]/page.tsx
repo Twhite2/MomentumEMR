@@ -152,7 +152,7 @@ export default function UserDetailPage() {
   const getRoleColor = (role: string) => {
     const colors: Record<string, string> = {
       admin: 'bg-red-ribbon text-white',
-      doctor: 'bg-tory-blue text-white',
+      doctor: 'bg-primary text-white',
       nurse: 'bg-green-haze text-white',
       pharmacist: 'bg-amaranth text-white',
       lab_tech: 'bg-danube text-white',
@@ -166,7 +166,7 @@ export default function UserDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }

@@ -117,7 +117,7 @@ export default function HospitalDetailPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-tory-blue flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
               <Building2 className="w-8 h-8" />
               {hospital.name}
             </h1>
@@ -143,7 +143,7 @@ export default function HospitalDetailPage() {
 
       {/* Hospital Details Form */}
       <div className="bg-white rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold text-tory-blue mb-4">Hospital Information</h2>
+        <h2 className="text-lg font-semibold text-primary mb-4">Hospital Information</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -186,7 +186,7 @@ export default function HospitalDetailPage() {
                 value={formData.subscriptionPlan}
                 onChange={(e) => setFormData({ ...formData, subscriptionPlan: e.target.value })}
                 disabled={!isEditing}
-                className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-tory-blue disabled:bg-muted disabled:cursor-not-allowed"
+                className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-muted disabled:cursor-not-allowed"
               >
                 <option value="Basic">Basic</option>
                 <option value="Standard">Standard</option>
@@ -205,7 +205,7 @@ export default function HospitalDetailPage() {
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 disabled={!isEditing}
                 rows={3}
-                className="flex-1 px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-tory-blue disabled:bg-muted disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-muted disabled:cursor-not-allowed"
                 required
               />
             </div>
@@ -218,7 +218,7 @@ export default function HospitalDetailPage() {
               checked={formData.active}
               onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
               disabled={!isEditing}
-              className="h-4 w-4 text-tory-blue focus:ring-tory-blue border-border rounded disabled:cursor-not-allowed"
+              className="h-4 w-4 text-primary focus:ring-primary border-border rounded disabled:cursor-not-allowed"
             />
             <label htmlFor="active" className="text-sm font-medium">
               Hospital Active
@@ -229,7 +229,7 @@ export default function HospitalDetailPage() {
 
       {/* Branding Section */}
       <div className="bg-white rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold text-tory-blue mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
           <Palette className="w-5 h-5" />
           Hospital Branding
         </h2>
@@ -343,7 +343,7 @@ export default function HospitalDetailPage() {
 
       {/* Metadata */}
       <div className="bg-white rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold text-tory-blue mb-4">System Information</h2>
+        <h2 className="text-lg font-semibold text-primary mb-4">System Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
             <div className="flex items-center gap-2 text-muted-foreground mb-1">

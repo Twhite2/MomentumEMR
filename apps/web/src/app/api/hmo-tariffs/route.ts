@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
     const where: any = {
       hmoId: finalHmoId,
       active: true,
+      AND: [],
     };
 
     // Filter by category if provided
@@ -59,18 +60,22 @@ export async function GET(request: NextRequest) {
 
     // Search functionality
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { code: { contains: search, mode: 'insensitive' } },
-      ];
+      where.AND.push({
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { code: { contains: search, mode: 'insensitive' } },
+        ],
+      });
     }
 
     // Check if tariff expires
     const now = new Date();
-    where.OR = [
-      { expiryDate: null },
-      { expiryDate: { gte: now } },
-    ];
+    where.AND.push({
+      OR: [
+        { expiryDate: null },
+        { expiryDate: { gte: now } },
+      ],
+    });
 
     const tariffs = await prisma.hmoTariff.findMany({
       where,

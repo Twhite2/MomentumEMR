@@ -112,7 +112,7 @@ export default function AdmissionsPage() {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+            className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="">All Statuses</option>
             <option value="admitted">Admitted</option>

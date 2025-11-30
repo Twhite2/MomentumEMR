@@ -129,7 +129,7 @@ export default function NewVitalsPage() {
           <select
             value={formData.patientId}
             onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             required
           >
             <option value="">Select a patient</option>
@@ -152,7 +152,7 @@ export default function NewVitalsPage() {
                 type="text"
                 value={formData.bloodPressure}
                 onChange={handleBloodPressureChange}
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="120/80"
                 maxLength={7}
               />
@@ -174,7 +174,7 @@ export default function NewVitalsPage() {
                 step="1"
                 value={formData.heartRate}
                 onChange={(e) => setFormData({ ...formData, heartRate: e.target.value })}
-                className="w-full px-4 py-2 pr-16 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                className="w-full px-4 py-2 pr-16 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="72"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
@@ -194,7 +194,7 @@ export default function NewVitalsPage() {
                 step="0.1"
                 value={formData.temperature}
                 onChange={(e) => setFormData({ ...formData, temperature: e.target.value })}
-                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="37.0"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
@@ -214,7 +214,7 @@ export default function NewVitalsPage() {
                 step="1"
                 value={formData.respiratoryRate}
                 onChange={(e) => setFormData({ ...formData, respiratoryRate: e.target.value })}
-                className="w-full px-4 py-2 pr-24 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                className="w-full px-4 py-2 pr-24 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="16"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
@@ -236,7 +236,7 @@ export default function NewVitalsPage() {
                 max="100"
                 value={formData.oxygenSaturation}
                 onChange={(e) => setFormData({ ...formData, oxygenSaturation: e.target.value })}
-                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="98.0"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
@@ -256,7 +256,7 @@ export default function NewVitalsPage() {
                 step="0.1"
                 value={formData.weight}
                 onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="70.0"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
@@ -276,7 +276,7 @@ export default function NewVitalsPage() {
                 step="0.1"
                 value={formData.height}
                 onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                className="w-full px-4 py-2 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="170.0"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">

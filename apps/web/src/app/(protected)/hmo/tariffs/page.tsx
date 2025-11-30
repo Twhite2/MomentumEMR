@@ -73,7 +73,7 @@ export default function AllHMOTariffsPage() {
             <select
               value={selectedHMO}
               onChange={(e) => setSelectedHMO(e.target.value)}
-              className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-tory-blue"
+              className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="all">All HMOs</option>
               {hmos?.map((hmo) => (
@@ -89,7 +89,7 @@ export default function AllHMOTariffsPage() {
       {/* HMO Cards */}
       {hmosLoading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tory-blue mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Loading HMO providers...</p>
         </div>
       ) : (
@@ -97,7 +97,7 @@ export default function AllHMOTariffsPage() {
           {filteredHMOs?.map((hmo) => (
             <div
               key={hmo.id}
-              className="bg-white rounded-lg border border-border hover:border-tory-blue transition-all hover:shadow-md p-6"
+              className="bg-white rounded-lg border border-border hover:border-primary transition-all hover:shadow-md p-6"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
@@ -120,13 +120,13 @@ export default function AllHMOTariffsPage() {
               </div>
 
               {/* Stats */}
-              <div className="bg-tory-blue/5 rounded-lg p-4 mb-4">
+              <div className="bg-primary/5 rounded-lg p-4 mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <FileSpreadsheet className="w-5 h-5 text-tory-blue" />
+                    <FileSpreadsheet className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">Tariff Items</span>
                   </div>
-                  <span className="text-2xl font-bold text-tory-blue">
+                  <span className="text-2xl font-bold text-primary">
                     {hmo._count.tariffs.toLocaleString()}
                   </span>
                 </div>
@@ -173,25 +173,25 @@ export default function AllHMOTariffsPage() {
         <h3 className="text-lg font-semibold mb-4">How to Import Tariff Data</h3>
         <ol className="space-y-3 text-sm text-muted-foreground">
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-tory-blue text-white flex items-center justify-center text-xs font-bold">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
               1
             </span>
             <span>Select the HMO provider you want to update from the list above</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-tory-blue text-white flex items-center justify-center text-xs font-bold">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
               2
             </span>
             <span>Click "Upload New Data" to access the tariff management page</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-tory-blue text-white flex items-center justify-center text-xs font-bold">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
               3
             </span>
             <span>Choose your Excel/CSV file and select the correct HMO type (AXA, Leadway, or Reliance)</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-tory-blue text-white flex items-center justify-center text-xs font-bold">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
               4
             </span>
             <span>Click Import to upload the tariff data. The system will automatically parse and validate the data</span>
