@@ -114,7 +114,7 @@ export default function MedicalRecordDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin w-8 h-8 border-4 border-tory-blue border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -155,35 +155,35 @@ export default function MedicalRecordDetailPage() {
         {/* Top Info Bar */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Patient Name & ID */}
-          <div className="bg-white border-2 border-tory-blue rounded-lg p-4 md:col-span-2 lg:col-span-1">
-            <h3 className="text-lg font-bold text-tory-blue">{record.patient.firstName} {record.patient.lastName}</h3>
+          <div className="bg-white border-2 border-primary rounded-lg p-4 md:col-span-2 lg:col-span-1">
+            <h3 className="text-lg font-bold text-primary">{record.patient.firstName} {record.patient.lastName}</h3>
             <p className="text-xs text-muted-foreground mt-1">ID: {record.patient.id}</p>
           </div>
 
           {/* Biodata & Total Visits */}
-          <div className="bg-white border-2 border-tory-blue rounded-lg p-4">
+          <div className="bg-white border-2 border-primary rounded-lg p-4">
             <div className="space-y-3">
               <div>
-                <h4 className="text-xs font-semibold mb-1 text-tory-blue">Biodata</h4>
+                <h4 className="text-xs font-semibold mb-1 text-primary">Biodata</h4>
                 <p className="text-sm text-foreground">{calculateAge(record.patient.dob)} yrs • {record.patient.gender}</p>
                 {record.patient.tribe && <p className="text-xs text-muted-foreground">{record.patient.tribe}</p>}
               </div>
               <div className="pt-3 border-t border-border">
-                <p className="text-xs font-semibold text-tory-blue">Total Visits</p>
+                <p className="text-xs font-semibold text-primary">Total Visits</p>
                 <p className="text-xl font-bold text-foreground">{record.patient._count?.medicalRecords || 1}</p>
               </div>
             </div>
           </div>
 
           {/* Status & Vital Signs */}
-          <div className="bg-white border-2 border-tory-blue rounded-lg p-4">
+          <div className="bg-white border-2 border-primary rounded-lg p-4">
             <div className="space-y-3">
               <div className="text-center pb-3 border-b border-border">
-                <p className="text-xs font-semibold text-tory-blue">Status</p>
+                <p className="text-xs font-semibold text-primary">Status</p>
                 <p className="text-lg font-bold text-foreground">{record.patient.patientType === 'inpatient' ? 'ADMITTED' : 'OPD'}</p>
               </div>
               <div>
-                <h4 className="text-xs font-semibold mb-2 text-tory-blue">Vital Signs</h4>
+                <h4 className="text-xs font-semibold mb-2 text-primary">Vital Signs</h4>
                 {record.latestVital ? (
                   <div className="space-y-1 text-xs text-foreground">
                     <p>BP: {record.latestVital.bloodPressure}</p>
@@ -198,8 +198,8 @@ export default function MedicalRecordDetailPage() {
           </div>
 
           {/* Allergies */}
-          <div className="bg-white border-2 border-tory-blue rounded-lg p-4">
-            <h4 className="text-xs font-semibold mb-2 text-tory-blue">Allergies</h4>
+          <div className="bg-white border-2 border-primary rounded-lg p-4">
+            <h4 className="text-xs font-semibold mb-2 text-primary">Allergies</h4>
             <p className="text-sm text-foreground">{record.patient.allergies || 'None recorded'}</p>
           </div>
         </div>
@@ -210,10 +210,10 @@ export default function MedicalRecordDetailPage() {
           <div className="lg:col-span-2 space-y-4">
             {/* Clinical Notes */}
             <Link href={`/medical-records/${record.id}/edit`}>
-              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-primary hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 text-tory-blue" />
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-base mb-1">Clinical notes</h3>
@@ -227,10 +227,10 @@ export default function MedicalRecordDetailPage() {
 
             {/* Diagnosis */}
             <Link href={`/medical-records/${record.id}/edit`}>
-              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-primary hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Stethoscope className="w-5 h-5 text-tory-blue" />
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Stethoscope className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-base mb-1">Diagnosis (differentials)</h3>
@@ -262,10 +262,10 @@ export default function MedicalRecordDetailPage() {
 
             {/* Vitals & Clinical History */}
             <Link href={`/vitals?patientId=${record.patient.id}`}>
-              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-primary hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Activity className="w-5 h-5 text-tory-blue" />
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Activity className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-base mb-1">Vitals & Clinical History</h3>
@@ -279,10 +279,10 @@ export default function MedicalRecordDetailPage() {
 
             {/* Complete Patient Profile */}
             <Link href={`/patients/${record.patient.id}`}>
-              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-primary hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <User className="w-5 h-5 text-tory-blue" />
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <User className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-base mb-1">Complete Patient Profile</h3>
@@ -343,10 +343,10 @@ export default function MedicalRecordDetailPage() {
 
             {/* Previous Prescriptions */}
             <Link href={`/prescriptions?patientId=${record.patient.id}`}>
-              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-primary hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <ClipboardList className="w-5 h-5 text-tory-blue" />
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <ClipboardList className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-base mb-1">Previous prescriptions</h3>
@@ -360,10 +360,10 @@ export default function MedicalRecordDetailPage() {
 
             {/* Previous Lab Orders */}
             <Link href={`/lab-orders?patientId=${record.patient.id}`}>
-              <div className="bg-white border border-border rounded-lg p-5 hover:border-tory-blue hover:shadow-md transition-all cursor-pointer">
+              <div className="bg-white border border-border rounded-lg p-5 hover:border-primary hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-tory-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <History className="w-5 h-5 text-tory-blue" />
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <History className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-base mb-1">Previous lab orders</h3>

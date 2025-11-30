@@ -378,16 +378,15 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Save Button */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <Button 
-              onClick={handleSave}
-              loading={activeTab === 'branding' && saveBrandingMutation.isPending}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
+          {/* Save Button - Hidden on branding tab since BrandingSettings has its own save button */}
+          {activeTab !== 'branding' && (
+            <div className="mt-6 pt-6 border-t border-border">
+              <Button onClick={handleSave}>
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

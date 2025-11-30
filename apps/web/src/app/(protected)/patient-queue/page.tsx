@@ -193,7 +193,7 @@ export default function PatientQueuePage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tory-blue mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Loading patient queue...</p>
         </div>
       </div>
@@ -251,10 +251,10 @@ export default function PatientQueuePage() {
 
       {/* Walk-In Patient Search */}
       {canAddWalkIns && (
-        <div className="bg-gradient-to-r from-tory-blue/5 to-spindle rounded-lg border-2 border-dashed border-tory-blue/30">
+        <div className="bg-gradient-to-r from-primary/5 to-spindle rounded-lg border-2 border-dashed border-primary/30">
           <div className="p-6">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-lg bg-tory-blue flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
                 <UserPlus className="w-6 h-6 text-white" />
               </div>
               <div className="text-left">
@@ -276,7 +276,7 @@ export default function PatientQueuePage() {
                     setWalkInSearch(e.target.value);
                     handleWalkInSearch(e.target.value);
                   }}
-                  className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                  className="w-full pl-10 pr-10 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 {walkInSearch && (
                   <button
@@ -299,7 +299,7 @@ export default function PatientQueuePage() {
                       </div>
                     ) : isSearching ? (
                       <div className="p-4 text-center">
-                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-tory-blue"></div>
+                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                         <p className="mt-2 text-sm text-muted-foreground">Searching patients...</p>
                       </div>
                     ) : searchResults.length > 0 ? (
@@ -309,7 +309,7 @@ export default function PatientQueuePage() {
                           className="p-4 hover:bg-spindle border-b border-border last:border-b-0 flex items-center justify-between"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-tory-blue flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                               <span className="text-white font-medium text-sm">
                                 {patient.firstName?.[0]}{patient.lastName?.[0]}
                               </span>
@@ -366,7 +366,7 @@ export default function PatientQueuePage() {
             placeholder="Search patients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -434,7 +434,7 @@ export default function PatientQueuePage() {
                   <tr key={patient.appointment.id} className="hover:bg-spindle transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-tory-blue rounded-full flex items-center justify-center">
+                        <div className="flex-shrink-0 h-10 w-10 bg-primary rounded-full flex items-center justify-center">
                           <span className="text-white font-medium">
                             {patient.firstName[0]}{patient.lastName[0]}
                           </span>
@@ -535,7 +535,7 @@ export default function PatientQueuePage() {
                   id="skipVitals"
                   checked={skipVitals}
                   onChange={(e) => setSkipVitals(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-border text-tory-blue focus:ring-tory-blue"
+                  className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
                 />
                 <label htmlFor="skipVitals" className="text-sm text-foreground cursor-pointer">
                   <div className="font-medium">Skip Vitals</div>
