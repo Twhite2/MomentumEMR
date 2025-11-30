@@ -147,6 +147,15 @@ export default function NewMedicalRecordPage() {
             <h2 className="text-lg font-semibold mb-4">Clinical Information</h2>
             <div className="space-y-4">
               <Textarea
+                label={isLabTech ? "Lab Notes" : "Clinical Notes"}
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows={8}
+                placeholder="Document patient symptoms, examination findings, treatment plan, and any other relevant clinical information..."
+              />
+
+              <Textarea
                 label="Diagnosis"
                 name="diagnosis"
                 value={formData.diagnosis}
@@ -154,15 +163,6 @@ export default function NewMedicalRecordPage() {
                 rows={3}
                 placeholder="Enter patient diagnosis..."
                 required
-              />
-
-              <Textarea
-                label={isLabTech ? "Lab Notes" : "Clinical Notes"}
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows={8}
-                placeholder="Document patient symptoms, examination findings, treatment plan, and any other relevant clinical information..."
               />
 
               <div className="space-y-2">
