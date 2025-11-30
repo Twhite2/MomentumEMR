@@ -1,0 +1,135 @@
+═══════════════════════════════════════════════════════════════
+   MOMENTUM EMR - BACKUP DEPLOYMENT CHECKLIST
+═══════════════════════════════════════════════════════════════
+
+Follow these steps on your Vultr server to set up automated backups.
+
+═══════════════════════════════════════════════════════════════
+STEP 1: UPLOAD FILES TO SERVER
+═══════════════════════════════════════════════════════════════
+
+From your LOCAL machine:
+
+□ Push changes to Git:
+  git add scripts/
+  git commit -m "Add automated backup scripts"
+  git push
+
+On your SERVER:
+  
+□ Pull latest changes:
+  cd /root/Momentum_EMR
+  git pull
+
+═══════════════════════════════════════════════════════════════
+STEP 2: CONFIGURE CREDENTIALS
+═══════════════════════════════════════════════════════════════
+
+□ Copy environment template:
+  cp scripts/.backup.env.example scripts/.backup.env
+
+□ Edit with actual credentials:
+  nano scripts/.backup.env
+  
+  Update these fields:
+  - DB_NAME="momentum_db"
+  - DB_USER="momentum_user"  
+  - DB_PASSWORD="YOUR_ACTUAL_PASSWORD"
+  - DB_HOST="localhost"
+  - DB_PORT="5432"
+
+□ Save and exit (Ctrl+X, Y, Enter)
+
+□ Secure the file:
+  chmod 600 scripts/.backup.env
+
+═══════════════════════════════════════════════════════════════
+STEP 3: MAKE SCRIPTS EXECUTABLE
+═══════════════════════════════════════════════════════════════
+
+□ Set permissions:
+  chmod +x scripts/backup.sh
+  chmod +x scripts/restore.sh
+  chmod +x scripts/test-backup.sh
+
+═══════════════════════════════════════════════════════════════
+STEP 4: TEST CONFIGURATION
+═══════════════════════════════════════════════════════════════
+
+□ Run test script:
+  ./scripts/test-backup.sh
+
+□ Fix any errors before proceeding
+
+═══════════════════════════════════════════════════════════════
+STEP 5: RUN FIRST BACKUP (MANUAL TEST)
+═══════════════════════════════════════════════════════════════
+
+□ Create first backup:
+  ./scripts/backup.sh
+
+□ Verify backup files created:
+  ls -lh /var/backups/momentum-emr/
+
+□ Check backup log:
+  tail -20 /var/log/momentum-backup.log
+
+═══════════════════════════════════════════════════════════════
+STEP 6: SET UP AUTOMATIC DAILY BACKUPS
+═══════════════════════════════════════════════════════════════
+
+□ Open crontab:
+  crontab -e
+
+□ Add this line at the end:
+  0 2 * * * /root/Momentum_EMR/scripts/backup.sh >> /var/log/momentum-backup.log 2>&1
+
+□ Save and exit
+
+□ Verify cron job:
+  crontab -l
+
+═══════════════════════════════════════════════════════════════
+STEP 7: VERIFY EVERYTHING WORKS
+═══════════════════════════════════════════════════════════════
+
+□ Check cron service is running:
+  systemctl status cron
+
+□ Verify backup directory:
+  ls -lh /var/backups/momentum-emr/
+
+□ Check disk space:
+  df -h
+
+═══════════════════════════════════════════════════════════════
+DONE! ✅
+═══════════════════════════════════════════════════════════════
+
+Your automated backup system is now active!
+
+What happens now:
+✓ Database and files backed up daily at 2 AM
+✓ Backups kept for 30 days
+✓ Old backups automatically deleted
+✓ Logs written to /var/log/momentum-backup.log
+
+═══════════════════════════════════════════════════════════════
+MAINTENANCE TASKS
+═══════════════════════════════════════════════════════════════
+
+Weekly:
+□ Check backup log:
+  tail -50 /var/log/momentum-backup.log
+
+Monthly:
+□ Test a restore:
+  ./scripts/restore.sh
+
+Quarterly:
+□ Review disk space:
+  du -sh /var/backups/momentum-emr/
+
+═══════════════════════════════════════════════════════════════
+COST SAVINGS: ~$10-20/month by using this vs Vultr's paid backup
+═══════════════════════════════════════════════════════════════

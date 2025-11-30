@@ -64,3 +64,6 @@ verify-railway-users.ps1
 import-to-railway-postgres.ps1
 railway-push-schema.ps1
 *.ps1
+
+# Backup configuration (contains database credentials)
+scripts/.backup.env
