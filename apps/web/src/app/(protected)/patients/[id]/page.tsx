@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Edit, Calendar, FileText, Pill, TestTube, DollarSign, User, BedDouble } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, FileText, Pill, TestTube, DollarSign, User, BedDouble, Activity } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
@@ -258,12 +258,32 @@ export default function PatientDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Quick Actions - Role-based */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Only doctors and admins can add medical records (nurses have view-only) */}
+            {/* Only doctors and admins can add medical records */}
             {canCreateMedicalRecords && (
               <Link href={`/medical-records/new?patientId=${patient.id}`}>
                 <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
                   <FileText className="w-6 h-6 mx-auto mb-2 text-primary" />
                   <p className="text-sm font-medium">Add Record</p>
+                </button>
+              </Link>
+            )}
+
+            {/* Only nurses can add nursing notes */}
+            {isNurse && (
+              <Link href={`/nursing-notes/new?patientId=${patient.id}`}>
+                <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+                  <FileText className="w-6 h-6 mx-auto mb-2 text-primary" />
+                  <p className="text-sm font-medium">Add Nursing Notes</p>
+                </button>
+              </Link>
+            )}
+
+            {/* Only nurses can add vitals */}
+            {isNurse && (
+              <Link href={`/vitals/new?patientId=${patient.id}`}>
+                <button className="w-full p-4 bg-white border border-border rounded-lg hover:bg-spindle transition-colors text-center">
+                  <Activity className="w-6 h-6 mx-auto mb-2 text-primary" />
+                  <p className="text-sm font-medium">Add Vitals</p>
                 </button>
               </Link>
             )}

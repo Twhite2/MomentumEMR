@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@momentum/ui';
 import { ArrowLeft, Save } from 'lucide-react';
@@ -21,8 +21,11 @@ interface PatientsResponse {
 
 export default function NewVitalsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const preSelectedPatientId = searchParams.get('patientId');
+  
   const [formData, setFormData] = useState({
-    patientId: '',
+    patientId: preSelectedPatientId || '',
     bloodPressure: '',
     heartRate: '',
     temperature: '',
@@ -131,6 +134,7 @@ export default function NewVitalsPage() {
             onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
             className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             required
+            disabled={!!preSelectedPatientId}
           >
             <option value="">Select a patient</option>
             {patientsData?.patients.map((patient) => (
@@ -139,6 +143,11 @@ export default function NewVitalsPage() {
               </option>
             ))}
           </select>
+          {preSelectedPatientId && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Patient pre-selected from previous page
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

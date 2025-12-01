@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Edit, Calendar, Clock, User, MapPin, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, Clock, User, MapPin, CheckCircle, XCircle, Activity } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
@@ -45,8 +45,9 @@ export default function AppointmentDetailPage() {
   
   // Check if user is patient
   const isPatient = session?.user?.role === 'patient';
+  const isNurse = session?.user?.role === 'nurse';
   const canManageAppointments = ['admin', 'doctor', 'nurse', 'receptionist'].includes(session?.user?.role || '');
-  const canCreateMedicalRecords = ['admin', 'doctor', 'nurse'].includes(session?.user?.role || '');
+  const canCreateMedicalRecords = ['admin', 'doctor'].includes(session?.user?.role || '');
 
   const { data: appointment, isLoading, error } = useQuery<Appointment>({
     queryKey: ['appointment', appointmentId],
@@ -315,10 +316,30 @@ export default function AppointmentDetailPage() {
                 </Button>
               )}
 
+              {/* Doctors/Admins: Add Medical Record */}
               {canCreateMedicalRecords && appointment.status !== 'cancelled' && (
                 <Link href={`/medical-records/new?patientId=${appointment.patient.id}&appointmentId=${appointment.id}`}>
                   <Button variant="outline" className="w-full">
                     Add Medical Record
+                  </Button>
+                </Link>
+              )}
+
+              {/* Nurses: Add Nursing Notes */}
+              {isNurse && appointment.status !== 'cancelled' && (
+                <Link href={`/nursing-notes/new?patientId=${appointment.patient.id}&appointmentId=${appointment.id}`}>
+                  <Button variant="outline" className="w-full">
+                    Add Nursing Notes
+                  </Button>
+                </Link>
+              )}
+
+              {/* Nurses: Add Vitals */}
+              {isNurse && appointment.status !== 'cancelled' && (
+                <Link href={`/vitals/new?patientId=${appointment.patient.id}&appointmentId=${appointment.id}`}>
+                  <Button variant="outline" className="w-full">
+                    <Activity className="w-4 h-4 mr-2" />
+                    Add Vitals
                   </Button>
                 </Link>
               )}

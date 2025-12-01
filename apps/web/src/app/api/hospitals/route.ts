@@ -49,9 +49,30 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
 
     // Validate required fields
-    if (!data.name || !data.contactEmail || !data.password) {
+    if (!data.name || !data.subdomain || !data.contactEmail || !data.password) {
       return NextResponse.json(
-        { error: 'Name, contact email, and password are required' },
+        { error: 'Name, subdomain, contact email, and password are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate subdomain format (lowercase alphanumeric and hyphens only)
+    const subdomainRegex = /^[a-z0-9-]+$/;
+    if (!subdomainRegex.test(data.subdomain)) {
+      return NextResponse.json(
+        { error: 'Subdomain must contain only lowercase letters, numbers, and hyphens' },
+        { status: 400 }
+      );
+    }
+
+    // Check if subdomain already exists
+    const existingSubdomain = await prisma.hospital.findUnique({
+      where: { subdomain: data.subdomain.toLowerCase() },
+    });
+
+    if (existingSubdomain) {
+      return NextResponse.json(
+        { error: 'This subdomain is already taken. Please choose a different one.' },
         { status: 400 }
       );
     }
@@ -68,6 +89,7 @@ export async function POST(request: NextRequest) {
       const hospital = await tx.hospital.create({
         data: {
           name: hospitalData.name,
+          subdomain: hospitalData.subdomain.toLowerCase(),
           address: hospitalData.address,
           phoneNumber: hospitalData.phoneNumber,
           contactEmail: hospitalData.contactEmail,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
@@ -23,8 +23,11 @@ interface PatientsResponse {
 export default function NewNursingNotePage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const preSelectedPatientId = searchParams.get('patientId');
+  
   const [formData, setFormData] = useState({
-    patientId: '',
+    patientId: preSelectedPatientId || '',
     noteType: 'assessment',
     note: '',
   });
@@ -88,8 +91,9 @@ export default function NewNursingNotePage() {
             <select
               value={formData.patientId}
               onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
+              disabled={!!preSelectedPatientId}
             >
               <option value="">Select a patient</option>
               {patientsData?.patients.map((patient) => (
@@ -98,6 +102,11 @@ export default function NewNursingNotePage() {
                 </option>
               ))}
             </select>
+            {preSelectedPatientId && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Patient pre-selected from previous page
+              </p>
+            )}
           </div>
 
           {/* Note Type */}
@@ -108,7 +117,7 @@ export default function NewNursingNotePage() {
             <select
               value={formData.noteType}
               onChange={(e) => setFormData({ ...formData, noteType: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
             >
               <option value="assessment">Assessment</option>
@@ -127,7 +136,7 @@ export default function NewNursingNotePage() {
           <textarea
             value={formData.note}
             onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tory-blue min-h-[200px]"
+            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-h-[200px]"
             placeholder="Enter nursing note details..."
             required
           />

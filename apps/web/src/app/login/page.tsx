@@ -1,17 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@momentum/ui';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import axios from 'axios';
+
+interface HospitalBranding {
+  id: number;
+  name: string;
+  subdomain: string;
+  logoUrl: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  tagline: string | null;
+}
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [branding, setBranding] = useState<HospitalBranding | null>(null);
+  const [brandingLoading, setBrandingLoading] = useState(true);
+
+  // Fetch hospital branding based on subdomain
+  useEffect(() => {
+    const fetchBranding = async () => {
+      try {
+        const response = await axios.get('/api/branding/public');
+        setBranding(response.data.hospital);
+        
+        // Apply CSS variables for dynamic theming
+        if (response.data.hospital) {
+          document.documentElement.style.setProperty('--color-primary', response.data.hospital.primaryColor);
+          document.documentElement.style.setProperty('--color-secondary', response.data.hospital.secondaryColor);
+        }
+      } catch (error) {
+        console.log('No subdomain branding found, using default');
+        // Use default branding
+      } finally {
+        setBrandingLoading(false);
+      }
+    };
+
+    fetchBranding();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +74,24 @@ export default function LoginPage() {
     }
   };
 
+  // Show loading spinner while branding loads
+  if (brandingLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-tory-blue/5 to-spindle/20">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-tory-blue/5 to-spindle/20">
+    <div 
+      className="min-h-screen flex items-center justify-center" 
+      style={{
+        background: branding 
+          ? `linear-gradient(to bottom right, ${branding.primaryColor}10, ${branding.secondaryColor}20)`
+          : 'linear-gradient(to bottom right, rgba(15, 76, 129, 0.05), rgba(74, 144, 226, 0.2))'
+      }}
+    >
       <div className="w-full max-w-md">
         {/* Login Card */}
         <div className="bg-white rounded-xl shadow-lg p-8">
@@ -47,11 +99,18 @@ export default function LoginPage() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-3">
               <div className="w-64 h-32 flex items-center justify-center overflow-hidden">
-                <img src="/logo.png" alt="Momentum EMR" className="w-full h-full object-contain" />
+                <img 
+                  src={branding?.logoUrl || '/logo.png'} 
+                  alt={branding?.name || 'Momentum EMR'} 
+                  className="w-full h-full object-contain" 
+                />
               </div>
             </div>
+            <h1 className="text-xl font-bold mb-1" style={{ color: branding?.primaryColor || '#0F4C81' }}>
+              {branding?.name || 'Momentum EMR'}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Electronic Medical Records System
+              {branding?.tagline || 'Electronic Medical Records System'}
             </p>
           </div>
 
@@ -66,7 +125,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="user@hospital.com"
                 required
               />
@@ -81,7 +140,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-tory-blue"
+                className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="••••••••"
                 required
               />
@@ -92,7 +151,7 @@ export default function LoginPage() {
                 <input
                   id="remember"
                   type="checkbox"
-                  className="h-4 w-4 text-primary focus:ring-tory-blue border-border rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                 />
                 <label htmlFor="remember" className="ml-2 text-sm text-muted-foreground">
                   Remember me

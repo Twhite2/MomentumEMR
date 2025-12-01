@@ -99,9 +99,9 @@ export default function HospitalsPage() {
             <thead className="border-b border-border bg-muted/50">
               <tr>
                 <th className="text-left p-4 font-semibold text-sm">Hospital Name</th>
+                <th className="text-left p-4 font-semibold text-sm">Subdomain</th>
                 <th className="text-left p-4 font-semibold text-sm">Contact</th>
                 <th className="text-left p-4 font-semibold text-sm">Location</th>
-                <th className="text-left p-4 font-semibold text-sm">Subscription</th>
                 <th className="text-left p-4 font-semibold text-sm">Status</th>
                 <th className="text-left p-4 font-semibold text-sm">Actions</th>
               </tr>
@@ -124,6 +124,16 @@ export default function HospitalsPage() {
                         </p>
                       </div>
                     </div>
+                  </td>
+                  <td className="p-4">
+                    <a 
+                      href={`https://${(hospital as any).subdomain}.momentumhealthcare.io`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-mono text-primary hover:underline"
+                    >
+                      {(hospital as any).subdomain}.momentumhealthcare.io
+                    </a>
                   </td>
                   <td className="p-4">
                     <div className="space-y-1 text-sm">

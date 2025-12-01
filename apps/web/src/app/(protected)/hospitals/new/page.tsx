@@ -15,6 +15,7 @@ export default function NewHospitalPage() {
   
   const [formData, setFormData] = useState({
     name: '',
+    subdomain: '',
     address: '',
     phoneNumber: '',
     contactEmail: '',
@@ -26,6 +27,25 @@ export default function NewHospitalPage() {
     secondaryColor: '#729ad2', // Momentum danube
     tagline: '',
   });
+  
+  // Auto-generate subdomain from hospital name
+  const generateSubdomain = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  };
+  
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      name,
+      subdomain: generateSubdomain(name) // Auto-generate subdomain
+    }));
+  };
 
   const [creationResult, setCreationResult] = useState<any>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -104,6 +124,23 @@ export default function NewHospitalPage() {
           </div>
 
           <div className="bg-primary/5 rounded-lg p-6 mb-6">
+            <h3 className="font-semibold mb-4">Hospital Subdomain</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Login URL:</span>
+                <a 
+                  href={`https://${creationResult.hospital.subdomain}.momentumhealthcare.io`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-primary hover:underline"
+                >
+                  {creationResult.hospital.subdomain}.momentumhealthcare.io
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-primary/5 rounded-lg p-6 mb-6">
             <h3 className="font-semibold mb-4">Admin Account Created</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -127,7 +164,7 @@ export default function NewHospitalPage() {
               Account Ready to Use
             </h3>
             <p className="text-sm text-muted-foreground">
-              The hospital admin account has been created and activated. The admin can now login using the email address and password you provided.
+              The hospital admin account has been created and activated. The admin can now login at <span className="font-mono text-primary">{creationResult.hospital.subdomain}.momentumhealthcare.io</span> using the email address and password you provided.
             </p>
           </div>
 
@@ -179,10 +216,25 @@ export default function NewHospitalPage() {
                 <label className="block text-sm font-medium mb-2">Hospital Name *</label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={handleNameChange}
                   placeholder="City General Hospital"
                   required
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Subdomain *</label>
+                <div className="space-y-1">
+                  <Input
+                    value={formData.subdomain}
+                    onChange={(e) => setFormData({ ...formData, subdomain: e.target.value.toLowerCase() })}
+                    placeholder="citygeneralhospital"
+                    required
+                    pattern="[a-z0-9-]+"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Access URL: <span className="font-mono text-primary">{formData.subdomain || 'your-subdomain'}.momentumhealthcare.io</span>
+                  </p>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Contact Email *</label>
