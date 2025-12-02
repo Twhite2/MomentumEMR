@@ -44,7 +44,8 @@ export default function LoginPage() {
           console.log('[Login] Applying brand colors:', {
             primary: response.data.hospital.primaryColor,
             secondary: response.data.hospital.secondaryColor,
-            logo: response.data.hospital.logoUrl
+            logo: response.data.hospital.logoUrl,
+            backgroundImage: response.data.hospital.backgroundImageUrl
           });
           
           document.documentElement.style.setProperty('--color-primary', response.data.hospital.primaryColor);
@@ -98,18 +99,20 @@ export default function LoginPage() {
   return (
     <div 
       className="min-h-screen flex items-center justify-center relative" 
-      style={{
-        backgroundImage: branding?.backgroundImageUrl 
-          ? `url(${branding.backgroundImageUrl})`
-          : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        background: !branding?.backgroundImageUrl 
-          ? (branding 
-              ? `linear-gradient(to bottom right, ${branding.primaryColor}10, ${branding.secondaryColor}20)`
-              : 'linear-gradient(to bottom right, rgba(15, 76, 129, 0.05), rgba(74, 144, 226, 0.2))')
-          : undefined,
-      }}
+      style={
+        branding?.backgroundImageUrl 
+          ? {
+              backgroundImage: `url(${branding.backgroundImageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }
+          : {
+              background: branding 
+                ? `linear-gradient(to bottom right, ${branding.primaryColor}10, ${branding.secondaryColor}20)`
+                : 'linear-gradient(to bottom right, rgba(15, 76, 129, 0.05), rgba(74, 144, 226, 0.2))',
+            }
+      }
     >
       {/* Overlay for readability when background image exists */}
       {branding?.backgroundImageUrl && (
