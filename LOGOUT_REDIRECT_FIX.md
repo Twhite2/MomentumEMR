@@ -2,31 +2,42 @@
 
 ## 🐛 **The Problem:**
 
-When hospital admins logged out from a subdomain (e.g., `function.momentumhealthcare.io`), they were redirected to the **main domain** or **super admin dashboard** instead of staying on their hospital's login page.
+When hospital admins logged out from a subdomain (e.g., `function.momentumhealthcare.io`), they were redirected to the **main domain** (`momentumhealthcare.io`) instead of staying on their hospital's login page.
+
+**Root Cause:** NextAuth's `signOut()` with `callbackUrl` was not respecting the subdomain and always redirecting to the relative `/login` path on the main domain.
 
 ---
 
 ## ✅ **The Fix:**
 
-Updated `apps/web/src/components/layout/header.tsx` to preserve the subdomain on logout.
+Updated `apps/web/src/components/layout/header.tsx` to **manually redirect** after logout.
 
-### **Before:**
+### **Before (Didn't Work):**
 ```tsx
 const handleSignOut = async () => {
-  await signOut({ callbackUrl: '/login' });
+  // NextAuth ignores the full URL and redirects to main domain
+  await signOut({ callbackUrl: `${window.location.origin}/login` });
 };
 ```
-**Problem:** `/login` is a relative path that redirects to the main domain.
+**Problem:** NextAuth's internal redirect logic stripped the subdomain.
 
-### **After:**
+### **After (Works!):**
 ```tsx
 const handleSignOut = async () => {
-  // Get current hostname to preserve subdomain
-  const currentUrl = window.location.origin;
-  await signOut({ callbackUrl: `${currentUrl}/login` });
+  // Get current full URL to preserve subdomain
+  const currentOrigin = window.location.origin;
+  const loginUrl = `${currentOrigin}/login`;
+  
+  // Sign out without redirect, then manually redirect to preserve subdomain
+  await signOut({ redirect: false });
+  
+  // Manually redirect to login page on same subdomain
+  window.location.href = loginUrl;
 };
 ```
-**Solution:** Uses full URL with subdomain, so logout stays on the same domain.
+**Solution:** 
+1. Sign out with `redirect: false` to prevent NextAuth from redirecting
+2. Manually redirect using `window.location.href` to preserve the subdomain
 
 ---
 
@@ -78,7 +89,7 @@ await signOut({ callbackUrl: `${origin}/login` })
 ```bash
 # 1. Commit changes
 git add .
-git commit -m "fix: Logout redirects to login on same subdomain"
+git commit -m "fix: Logout redirects to login on same subdomain using manual redirect"
 git push origin main
 
 # 2. Deploy on server
@@ -92,6 +103,28 @@ pm2 restart momentum
 # - Login to a hospital subdomain
 # - Logout
 # - Should stay on hospital subdomain login page
+```
+
+---
+
+## 📊 **Expected PM2 Logs After Fix:**
+
+### **Before (Wrong):**
+```
+[Middleware] Hostname: function.momentumhealthcare.io
+[Middleware] Detected subdomain: function
+[Middleware] Hostname: momentumhealthcare.io     ← Subdomain lost!
+[Middleware] Detected subdomain: null
+```
+
+### **After (Correct):**
+```
+[Middleware] Hostname: function.momentumhealthcare.io
+[Middleware] Detected subdomain: function
+[Middleware] Set header x-hospital-subdomain: function
+[Middleware] Hostname: function.momentumhealthcare.io    ← Subdomain preserved!
+[Middleware] Detected subdomain: function
+[Middleware] Set header x-hospital-subdomain: function
 ```
 
 ---

@@ -23,9 +23,15 @@ export function Header({ userName, userRole, onMenuClick }: HeaderProps) {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    // Get current hostname to preserve subdomain
-    const currentUrl = window.location.origin;
-    await signOut({ callbackUrl: `${currentUrl}/login` });
+    // Get current full URL to preserve subdomain
+    const currentOrigin = window.location.origin;
+    const loginUrl = `${currentOrigin}/login`;
+    
+    // Sign out without redirect, then manually redirect to preserve subdomain
+    await signOut({ redirect: false });
+    
+    // Manually redirect to login page on same subdomain
+    window.location.href = loginUrl;
   };
 
   const navigateTo = (path: string) => {
