@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input } from '@momentum/ui';
 import { Upload, Search, Trash2, Download, FileText, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -111,9 +112,7 @@ export default function HmoTariffsPage({ params }: { params: Promise<{ id: strin
             {hmo?.name || 'Loading...'} - Import and manage pricing tariffs
           </p>
         </div>
-        <Link href="/hmo">
-          <Button variant="outline">Back to HMOs</Button>
-        </Link>
+        <BackButton />
       </div>
 
       {/* Import Section */}

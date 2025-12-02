@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
-import { prisma } from '@momentum/database';
+import { prisma, Prisma } from '@momentum/database';
 import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
-import { Decimal } from '@prisma/client/runtime/library';
+const Decimal = Prisma.Decimal;
 
 interface VitalRow {
   patientId: number;
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await requireRole(['admin', 'doctor', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
-    const recordedBy = session.user.id;
+    const recordedBy = parseInt(session.user.id);
 
     // Get form data
     const formData = await request.formData();

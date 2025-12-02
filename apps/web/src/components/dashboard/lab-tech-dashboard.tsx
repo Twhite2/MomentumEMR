@@ -1,7 +1,7 @@
 'use client';
 
 import { StatCard } from './stat-card';
-import { TestTube, CheckCircle, Upload, FileCheck, Clock } from 'lucide-react';
+import { TestTube, CheckCircle, Upload, FileCheck, Clock, AlertTriangle, AlertCircle } from 'lucide-react';
 import { Session } from 'next-auth';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -28,6 +28,33 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
       const response = await axios.get('/api/lab-results?limit=100');
       return response.data;
     },
+  });
+
+  // Fetch lab supplies inventory (only Lab category)
+  const { data: labInventoryData, isLoading: inventoryLoading } = useQuery({
+    queryKey: ['lab-inventory'],
+    queryFn: async () => {
+      const response = await axios.get('/api/inventory?category=Lab&limit=100');
+      return response.data;
+    },
+  });
+
+  const allLabSupplies = labInventoryData?.inventory || [];
+  
+  // Calculate inventory stats
+  const lowStockSupplies = allLabSupplies.filter((item: any) => 
+    item.stockQuantity <= (item.reorderLevel || 10)
+  );
+
+  // Get supplies expiring within 90 days
+  const today = new Date();
+  const ninetyDaysFromNow = new Date(today);
+  ninetyDaysFromNow.setDate(today.getDate() + 90);
+
+  const expiringSupplies = allLabSupplies.filter((item: any) => {
+    if (!item.expiryDate) return false;
+    const expiryDate = new Date(item.expiryDate);
+    return expiryDate <= ninetyDaysFromNow && expiryDate > today;
   });
 
   // Calculate stats from real data
@@ -111,6 +138,37 @@ export default function LabTechDashboard({ session }: LabTechDashboardProps) {
             icon={FileCheck} 
             color="red" 
           />
+        </Link>
+      </div>
+
+      {/* Lab Supplies Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/lab/supplies">
+          <div className="bg-white p-6 rounded-lg border-2 border-red-500 hover:border-red-600 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Low Stock Supplies</p>
+                <p className="text-2xl font-bold text-red-600 mt-1">
+                  {inventoryLoading ? '...' : lowStockSupplies.length}
+                </p>
+              </div>
+              <AlertTriangle className="w-10 h-10 text-red-600/20" />
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/lab/supplies">
+          <div className="bg-white p-6 rounded-lg border-2 border-amber-500 hover:border-amber-600 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Expiring Soon (90 days)</p>
+                <p className="text-2xl font-bold text-amber-600 mt-1">
+                  {inventoryLoading ? '...' : expiringSupplies.length}
+                </p>
+              </div>
+              <AlertCircle className="w-10 h-10 text-amber-600/20" />
+            </div>
+          </div>
         </Link>
       </div>
 

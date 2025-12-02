@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, Plus, Trash2, Receipt, Search, AlertCircle } from 'lucide-react';
+import { Save, Plus, Trash2, DollarSign, Search, X, Receipt, AlertCircle } from 'lucide-react';
+import { BackButton } from '@/components/shared/BackButton';
 import Link from 'next/link';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -318,12 +319,7 @@ export default function NewInvoicePage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href={preSelectedPatientId ? `/patients/${preSelectedPatientId}` : "/invoices"}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {preSelectedPatientId ? "Back to Patient" : "Back to Invoices"}
-          </Button>
-        </Link>
+        <BackButton label={preSelectedPatientId ? "Back to Patient" : "Back to Invoices"} />
         <div>
           <h1 className="text-3xl font-bold">New Invoice</h1>
           <p className="text-muted-foreground mt-1">Create billing invoice for patient</p>

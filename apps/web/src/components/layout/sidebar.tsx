@@ -147,7 +147,7 @@ const navItems: NavItem[] = [
     label: 'Admissions',
     href: '/admissions',
     icon: BedDouble,
-    roles: ['admin', 'doctor', 'nurse', 'receptionist'],
+    roles: ['admin', 'doctor', 'nurse', 'pharmacist', 'receptionist'], // Pharmacist view-only
   },
   {
     label: 'Investigations',

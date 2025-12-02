@@ -3,8 +3,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Activity, User, Calendar, Clock, Thermometer, Heart, Wind, Droplet, Weight, Ruler, TrendingUp, FileText, UserCircle } from 'lucide-react';
+import { Activity, User, Calendar, Heart, Thermometer, Wind, Droplet, Weight, Ruler, TrendingUp, FileText, UserCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 
@@ -113,12 +114,7 @@ export default function VitalDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/vitals">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold">Vital Signs Record</h1>
             <p className="text-muted-foreground mt-1">Complete vital measurements</p>

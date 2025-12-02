@@ -3,8 +3,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Edit, Calendar, Clock, User, MapPin, CheckCircle, XCircle, Activity } from 'lucide-react';
+import { Calendar, User, Clock, FileText, CheckCircle, XCircle, AlertCircle, MapPin, Activity } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -159,12 +160,7 @@ export default function AppointmentDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/appointments">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold">Appointment Details</h1>
             <p className="text-muted-foreground mt-1">

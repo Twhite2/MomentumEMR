@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, TestTube } from 'lucide-react';
+import { Save, TestTube } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -104,12 +105,7 @@ export default function NewLabOrderPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href={preSelectedPatientId ? `/patients/${preSelectedPatientId}` : "/lab-orders"}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {preSelectedPatientId ? "Back to Patient" : "Back to Lab Orders"}
-          </Button>
-        </Link>
+        <BackButton />
         <div>
           <h1 className="text-3xl font-bold">New Lab Order</h1>
           <p className="text-muted-foreground mt-1">Request diagnostic test for patient</p>
@@ -249,11 +245,13 @@ export default function NewLabOrderPage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t">
-            <Link href="/lab-orders">
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
             <Button
               variant="primary"
               type="submit"

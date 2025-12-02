@@ -469,8 +469,16 @@ model PrescriptionItem {
   duration        String? // Duration value
   durationUnit    String?  @default("days") @map("duration_unit") // "days", "weeks", "months"
   totalTablets    Int?     @map("total_tablets") // Auto-calculated: dosage × frequency × duration
+  packagesNeeded  Int?     @map("packages_needed") // Packages to dispense (calculated)
   inventoryId     Int?     @map("inventory_id") // Link to inventory if available
   isCustomDrug    Boolean  @default(false) @map("is_custom_drug") // True if not in facility inventory
+  
+  // Pricing fields (calculated at prescription time based on patient type)
+  unitPrice       Decimal? @map("unit_price") @db.Decimal(10, 2) // Price per tablet/unit
+  subtotal        Decimal? @default(0) @map("subtotal") @db.Decimal(10, 2) // totalTablets × unitPrice
+  hmoContribution Decimal? @default(0) @map("hmo_contribution") @db.Decimal(10, 2) // Amount HMO pays
+  patientPays     Decimal? @default(0) @map("patient_pays") @db.Decimal(10, 2) // Amount patient pays
+  
   notes           String?  @db.Text
 
   // Relations
@@ -486,7 +494,7 @@ model Inventory {
   id                 Int       @id @default(autoincrement())
   hospitalId         Int       @map("hospital_id")
   itemName           String    @map("item_name")
-  itemCode           String?   @unique @map("item_code")
+  itemCode           String?   @map("item_code") // Batch number (optional, not unique since many items won't have one)
   category           String?   // "Medication", "Supply", "Equipment", "Lab", "Nursing"
   drugCategory       String?   @map("drug_category") // "Antimalarial", "Antibiotic", "Analgesic", etc.
   dosageForm         String?   @map("dosage_form") // "Tablet", "Capsule", "Syrup", "Injection", etc.

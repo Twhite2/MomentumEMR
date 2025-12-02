@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Input } from '@momentum/ui';
+import { Button, Input, Select, Textarea } from '@momentum/ui';
 import { Building2, ArrowLeft, Save, MapPin, Phone, Mail, Palette, Upload, Image } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { BackButton } from '@/components/shared/BackButton';
 
 export default function NewHospitalPage() {
   const router = useRouter();
@@ -190,12 +191,7 @@ export default function NewHospitalPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/hospitals">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Hospitals
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
               <Building2 className="w-8 h-8" />

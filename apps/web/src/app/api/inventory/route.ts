@@ -108,15 +108,23 @@ export async function GET(request: NextRequest) {
 // POST /api/inventory - Add new inventory item
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'pharmacist']);
+    const session = await requireRole(['admin', 'pharmacist', 'nurse', 'lab_scientist']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const body = await request.json();
     const {
       itemName,
       itemCode,
+      category,
+      drugCategory,
+      dosageForm,
+      dosageStrength,
       stockQuantity,
+      packagingUnit,
+      tabletsPerPackage,
       unitPrice,
+      corporatePrice,
+      hmoPrice,
       reorderLevel,
       expiryDate,
     } = body;
@@ -126,18 +134,42 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Missing required fields' }, 400);
     }
 
+    // Build data object
+    const data: any = {
+      hospitalId,
+      itemName,
+      category: category || 'Medication',
+      stockQuantity: parseInt(stockQuantity),
+      packagingUnit: packagingUnit || 'tablet',
+      tabletsPerPackage: tabletsPerPackage ? parseInt(tabletsPerPackage) : 1,
+      unitPrice: parseFloat(unitPrice),
+      reorderLevel: reorderLevel ? parseInt(reorderLevel) : 10,
+      expiryDate: expiryDate ? new Date(expiryDate) : null,
+    };
+
+    console.log('📥 API Received stockQuantity:', stockQuantity);
+    console.log('📊 API Parsed stockQuantity:', parseInt(stockQuantity));
+    console.log('💾 Data to save:', data);
+
+    // Only include itemCode if provided (to avoid unique constraint issues)
+    if (itemCode && itemCode.trim()) {
+      data.itemCode = itemCode.trim();
+    }
+
+    // Optional fields
+    if (drugCategory) data.drugCategory = drugCategory;
+    if (dosageForm) data.dosageForm = dosageForm;
+    if (dosageStrength) data.dosageStrength = dosageStrength;
+    if (corporatePrice) data.corporatePrice = parseFloat(corporatePrice);
+    if (hmoPrice) data.hmoPrice = parseFloat(hmoPrice);
+
     // Create inventory item
     const item = await prisma.inventory.create({
-      data: {
-        hospitalId,
-        itemName,
-        itemCode: itemCode || null,
-        stockQuantity: parseInt(stockQuantity),
-        unitPrice: parseFloat(unitPrice),
-        reorderLevel: reorderLevel ? parseInt(reorderLevel) : 10,
-        expiryDate: expiryDate ? new Date(expiryDate) : null,
-      },
+      data,
     });
+
+    console.log('✅ Item created with stockQuantity:', item.stockQuantity);
+    console.log('✅ Full item:', item);
 
     return apiResponse(item, 201);
   } catch (error) {

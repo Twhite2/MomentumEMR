@@ -3,20 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, Select } from '@momentum/ui';
-import {
-  ArrowLeft,
-  Save,
-  UserX,
-  UserCheck,
-  Shield,
-  Mail,
-  Calendar,
-} from 'lucide-react';
+import { ArrowLeft, Save, UserX, UserCheck, Shield, Mail, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { getRoleDisplayName, ROLE_BADGE_COLORS, type UserRole } from '@/lib/role-utils';
+import { BackButton } from '@/components/shared/BackButton';
 
 interface User {
   id: number;
@@ -180,12 +173,7 @@ export default function UserDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/users">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold">{user.name}</h1>
             <p className="text-muted-foreground mt-1">{user.email}</p>

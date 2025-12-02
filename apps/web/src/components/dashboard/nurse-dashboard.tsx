@@ -1,7 +1,7 @@
 'use client';
 
 import { StatCard } from './stat-card';
-import { Calendar, UserCheck, Pill, ClipboardCheck, Clock, AlertCircle, Users, Activity } from 'lucide-react';
+import { Calendar, UserCheck, Pill, ClipboardCheck, Clock, AlertCircle, Users, Activity, Package, AlertTriangle } from 'lucide-react';
 import { Session } from 'next-auth';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -38,6 +38,33 @@ export default function NurseDashboard({ session }: NurseDashboardProps) {
       const response = await axios.get('/api/prescriptions?status=active&limit=10');
       return response.data;
     },
+  });
+
+  // Fetch nursing supplies inventory (only Nursing category)
+  const { data: nursingInventoryData, isLoading: inventoryLoading } = useQuery({
+    queryKey: ['nursing-inventory'],
+    queryFn: async () => {
+      const response = await axios.get('/api/inventory?category=Nursing&limit=100');
+      return response.data;
+    },
+  });
+
+  const allNursingSupplies = nursingInventoryData?.inventory || [];
+  
+  // Calculate inventory stats
+  const lowStockSupplies = allNursingSupplies.filter((item: any) => 
+    item.stockQuantity <= (item.reorderLevel || 10)
+  );
+
+  // Get supplies expiring within 90 days
+  const today = new Date();
+  const ninetyDaysFromNow = new Date(today);
+  ninetyDaysFromNow.setDate(today.getDate() + 90);
+
+  const expiringSupplies = allNursingSupplies.filter((item: any) => {
+    if (!item.expiryDate) return false;
+    const expiryDate = new Date(item.expiryDate);
+    return expiryDate <= ninetyDaysFromNow && expiryDate > today;
   });
 
   // Calculate today's appointment statuses
@@ -111,6 +138,37 @@ export default function NurseDashboard({ session }: NurseDashboardProps) {
             icon={Pill} 
             color="purple" 
           />
+        </Link>
+      </div>
+
+      {/* Nursing Supplies Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/nursing/supplies">
+          <div className="bg-white p-6 rounded-lg border-2 border-red-500 hover:border-red-600 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Low Stock Supplies</p>
+                <p className="text-2xl font-bold text-red-600 mt-1">
+                  {inventoryLoading ? '...' : lowStockSupplies.length}
+                </p>
+              </div>
+              <AlertTriangle className="w-10 h-10 text-red-600/20" />
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/nursing/supplies">
+          <div className="bg-white p-6 rounded-lg border-2 border-amber-500 hover:border-amber-600 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Expiring Soon (90 days)</p>
+                <p className="text-2xl font-bold text-amber-600 mt-1">
+                  {inventoryLoading ? '...' : expiringSupplies.length}
+                </p>
+              </div>
+              <AlertCircle className="w-10 h-10 text-amber-600/20" />
+            </div>
+          </div>
         </Link>
       </div>
 

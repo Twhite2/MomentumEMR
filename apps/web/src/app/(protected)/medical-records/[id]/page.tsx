@@ -3,8 +3,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Edit, Calendar, User, FileText, Stethoscope, Download, ExternalLink, Activity, AlertTriangle, Pill, ClipboardList, TestTube, FileSearch, History, Bell, Hospital } from 'lucide-react';
+import { Edit, Calendar, User, FileText, Stethoscope, Download, ExternalLink, Activity, AlertTriangle, Pill, ClipboardList, TestTube, FileSearch, History, Bell, Hospital } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 
@@ -139,12 +140,7 @@ export default function MedicalRecordDetailPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/medical-records">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            </Link>
+            <BackButton />
             <div>
               <h1 className="text-3xl font-bold">Patient Dashboard</h1>
               <p className="text-muted-foreground mt-1">Comprehensive medical overview</p>
@@ -261,7 +257,11 @@ export default function MedicalRecordDetailPage() {
             </Link>
 
             {/* Vitals & Clinical History */}
-            <Link href={`/vitals?patientId=${record.patient.id}`}>
+            <Link href={
+              (record.patient._count?.vitals ?? 0) > 0 || record.latestVital
+                ? `/vitals?patientId=${record.patient.id}` // Has vitals → view all
+                : `/vitals/new?patientId=${record.patient.id}` // No vitals → record new
+            }>
               <div className="bg-white border border-border rounded-lg p-5 hover:border-primary hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -270,7 +270,10 @@ export default function MedicalRecordDetailPage() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-base mb-1">Vitals & Clinical History</h3>
                     <p className="text-sm text-muted-foreground">
-                      View all recorded vital signs and measurements
+                      {(record.patient._count?.vitals ?? 0) > 0 || record.latestVital
+                        ? 'View all recorded vital signs and measurements'
+                        : 'Record first vital signs for this patient'
+                      }
                     </p>
                   </div>
                 </div>
@@ -386,12 +389,7 @@ export default function MedicalRecordDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/medical-records">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold">Medical Record</h1>
             <p className="text-muted-foreground mt-1">Record #{record.id}</p>

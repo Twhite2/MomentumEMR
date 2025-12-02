@@ -5,8 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save } from 'lucide-react';
-import Link from 'next/link';
+import { Save } from 'lucide-react';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -42,6 +42,7 @@ interface Patient {
   address: string;
   emergencyContact: string;
   insuranceId: number | null;
+  hmoEnrolleeNumber: string | null;
   corporateClientId: number | null;
   primaryDoctorId: number | null;
   primaryDoctor?: Doctor;
@@ -69,6 +70,7 @@ export default function EditPatientPage() {
     address: '',
     emergencyContact: '',
     insuranceId: '',
+    hmoEnrolleeNumber: '',
     corporateClientId: '',
     primaryDoctorId: '',
   });
@@ -123,6 +125,7 @@ export default function EditPatientPage() {
         address: patient.address || '',
         emergencyContact: patient.emergencyContact || '',
         insuranceId: patient.insuranceId?.toString() || '',
+        hmoEnrolleeNumber: patient.hmoEnrolleeNumber || '',
         corporateClientId: patient.corporateClientId?.toString() || '',
         primaryDoctorId: patient.primaryDoctorId?.toString() || '',
       });
@@ -173,6 +176,7 @@ export default function EditPatientPage() {
       address: formData.address || null,
       emergencyContact: formData.emergencyContact || null,
       insuranceId: formData.patientType === 'hmo' && formData.insuranceId ? formData.insuranceId : null,
+      hmoEnrolleeNumber: formData.patientType === 'hmo' && formData.hmoEnrolleeNumber ? formData.hmoEnrolleeNumber : null,
       corporateClientId:
         formData.patientType === 'corporate' && formData.corporateClientId
           ? formData.corporateClientId
@@ -195,12 +199,7 @@ export default function EditPatientPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href={`/patients/${patientId}`}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Patient
-          </Button>
-        </Link>
+        <BackButton />
         <div>
           <h1 className="text-3xl font-bold">Edit Patient</h1>
           <p className="text-muted-foreground mt-1">Update patient information</p>
@@ -294,20 +293,30 @@ export default function EditPatientPage() {
                 </Select>
 
                 {patientType === 'hmo' && (
-                  <Select
-                    label="HMO Policy"
-                    name="insuranceId"
-                    value={formData.insuranceId}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select HMO policy</option>
-                    {hmoList?.map((hmo) => (
-                      <option key={hmo.id} value={hmo.id}>
-                        {hmo.name}{hmo.policyName ? ` - ${hmo.policyName}` : ''}{hmo.provider ? ` (${hmo.provider})` : ''}
-                      </option>
-                    ))}
-                  </Select>
+                  <>
+                    <Select
+                      label="HMO Policy"
+                      name="insuranceId"
+                      value={formData.insuranceId}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Select HMO policy</option>
+                      {hmoList?.map((hmo) => (
+                        <option key={hmo.id} value={hmo.id}>
+                          {hmo.name}{hmo.policyName ? ` - ${hmo.policyName}` : ''}{hmo.provider ? ` (${hmo.provider})` : ''}
+                        </option>
+                      ))}
+                    </Select>
+                    <Input
+                      label="HMO Enrollee Number"
+                      name="hmoEnrolleeNumber"
+                      value={formData.hmoEnrolleeNumber}
+                      onChange={handleInputChange}
+                      placeholder="Enter member/enrollee number"
+                      required
+                    />
+                  </>
                 )}
 
                 {patientType === 'corporate' && (
@@ -375,11 +384,13 @@ export default function EditPatientPage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t">
-            <Link href={`/patients/${patientId}`}>
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
             <Button
               variant="primary"
               type="submit"

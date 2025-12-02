@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
 import { ArrowLeft, Edit, Save, X, FileText, Users, Building2 } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -149,12 +150,7 @@ export default function HMODetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/hmo">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Building2 className="w-8 h-8" />

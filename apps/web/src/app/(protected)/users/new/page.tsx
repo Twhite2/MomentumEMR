@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { Button, Input, Select } from '@momentum/ui';
-import { ArrowLeft, Save, UserPlus } from 'lucide-react';
-import Link from 'next/link';
+import { Save, Eye, EyeOff, UserPlus } from 'lucide-react';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -65,12 +65,7 @@ export default function NewUserPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/users">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Users
-          </Button>
-        </Link>
+        <BackButton />
         <div>
           <h1 className="text-3xl font-bold">Add New User</h1>
           <p className="text-muted-foreground mt-1">Create a new staff account</p>
@@ -210,11 +205,13 @@ export default function NewUserPage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t">
-            <Link href="/users">
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
             <Button
               variant="primary"
               type="submit"

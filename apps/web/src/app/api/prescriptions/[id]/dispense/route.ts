@@ -54,23 +54,33 @@ export async function POST(
       );
     }
 
-    // Check stock availability and prepare deductions
+    // Check stock availability and prepare deductions (package-based)
     const stockErrors: string[] = [];
-    const stockDeductions: Array<{ inventoryId: number; quantity: number; drugName: string }> = [];
+    const stockDeductions: Array<{ 
+      inventoryId: number; 
+      packages: number; 
+      tablets: number;
+      drugName: string;
+    }> = [];
 
     for (const item of prescription.prescriptionItems) {
       if (item.inventoryId && item.inventory) {
-        const totalNeeded = item.totalTablets || 1;
+        // Use packagesNeeded (new system) or fallback to totalTablets
+        const packagesNeeded = (item as any).packagesNeeded || 
+          Math.ceil((item.totalTablets || 1) / (item.inventory.tabletsPerPackage || 1));
         const availableStock = item.inventory.stockQuantity;
 
-        if (availableStock < totalNeeded) {
+        if (availableStock < packagesNeeded) {
+          const tabletsAvailable = availableStock * (item.inventory.tabletsPerPackage || 1);
+          const tabletsNeeded = item.totalTablets || 1;
           stockErrors.push(
-            `${item.drugName}: Need ${totalNeeded} but only ${availableStock} available`
+            `${item.drugName}: Need ${packagesNeeded} packages (${tabletsNeeded} tablets) but only ${availableStock} packages (${tabletsAvailable} tablets) available`
           );
         } else {
           stockDeductions.push({
             inventoryId: item.inventoryId,
-            quantity: totalNeeded,
+            packages: packagesNeeded,
+            tablets: item.totalTablets || 1,
             drugName: item.drugName,
           });
         }
@@ -88,21 +98,33 @@ export async function POST(
       );
     }
 
-    // Calculate invoice total
+    // Calculate invoice total (using new pricing if available)
     let totalAmount = 0;
+    let totalHMOContribution = 0;
     const invoiceItems: Array<{
       description: string;
       quantity: number;
       unitPrice: number;
       amount: number;
+      hmoContribution?: number;
     }> = [];
 
     for (const item of prescription.prescriptionItems) {
+      const itemData = item as any;
       const quantity = item.totalTablets || 1;
+      
+      // Use pre-calculated pricing if available (from new system)
       let unitPrice = 0;
+      let itemAmount = 0;
+      let hmoContribution = 0;
 
-      if (item.inventory) {
-        // Get price based on patient type
+      if (itemData.unitPrice && itemData.patientPays !== undefined) {
+        // New system: use pre-calculated values
+        unitPrice = parseFloat(itemData.unitPrice.toString());
+        itemAmount = parseFloat(itemData.patientPays.toString()); // Patient pays after HMO
+        hmoContribution = parseFloat(itemData.hmoContribution?.toString() || '0');
+      } else if (item.inventory) {
+        // Fallback: calculate from inventory prices
         const inventory = item.inventory as any;
         if (prescription.patient.patientType === 'hmo' && inventory.hmoPrice) {
           unitPrice = parseFloat(inventory.hmoPrice.toString());
@@ -111,10 +133,11 @@ export async function POST(
         } else {
           unitPrice = parseFloat(item.inventory.unitPrice?.toString() || '0');
         }
+        itemAmount = quantity * unitPrice;
       }
 
-      const amount = quantity * unitPrice;
-      totalAmount += amount;
+      totalAmount += itemAmount;
+      totalHMOContribution += hmoContribution;
 
       invoiceItems.push({
         description: `${item.drugName}${item.dosage ? ` - ${item.dosage}` : ''}${
@@ -122,19 +145,20 @@ export async function POST(
         }${item.duration ? ` for ${item.duration}` : ''}`,
         quantity,
         unitPrice,
-        amount,
+        amount: itemAmount,
+        hmoContribution: hmoContribution > 0 ? hmoContribution : undefined,
       });
     }
 
     // Use transaction to ensure atomicity
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Deduct stock from inventory
+      // 1. Deduct stock from inventory (package-based)
       for (const deduction of stockDeductions) {
         await tx.inventory.update({
           where: { id: deduction.inventoryId },
           data: {
             stockQuantity: {
-              decrement: deduction.quantity,
+              decrement: deduction.packages, // Deduct packages, not tablets
             },
           },
         });

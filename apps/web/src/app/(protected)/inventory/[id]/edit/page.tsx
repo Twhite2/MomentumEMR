@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button, Input, Select } from '@momentum/ui';
-import { ArrowLeft, Save, Pill } from 'lucide-react';
-import Link from 'next/link';
+import { Button, Input, Select, Textarea } from '@momentum/ui';
+import { Save, Pill } from 'lucide-react';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -20,6 +20,8 @@ export default function EditInventoryPage() {
     drugCategory: '',
     dosageForm: '',
     dosageStrength: '',
+    packagingUnit: 'tablet',
+    tabletsPerPackage: '1',
     quantity: '',
     unitPrice: '',
     corporatePrice: '',
@@ -47,6 +49,8 @@ export default function EditInventoryPage() {
         drugCategory: inventoryItem.drugCategory || '',
         dosageForm: inventoryItem.dosageForm || '',
         dosageStrength: inventoryItem.dosageStrength || '',
+        packagingUnit: inventoryItem.packagingUnit || 'tablet',
+        tabletsPerPackage: inventoryItem.tabletsPerPackage?.toString() || '1',
         quantity: inventoryItem.stockQuantity?.toString() || '',
         unitPrice: inventoryItem.unitPrice?.toString() || '',
         corporatePrice: inventoryItem.corporatePrice?.toString() || '',
@@ -85,13 +89,19 @@ export default function EditInventoryPage() {
     // Transform form data to match API expectations
     const apiData: any = {
       itemName: formData.drugName,
-      itemCode: formData.batchNumber || null,
       stockQuantity: parseInt(formData.quantity) || 0,
+      packagingUnit: formData.packagingUnit,
+      tabletsPerPackage: parseInt(formData.tabletsPerPackage) || 1,
       unitPrice: parseFloat(formData.unitPrice) || 0,
       reorderLevel: parseInt(formData.reorderLevel) || 10,
       expiryDate: formData.expiryDate || null,
       category: formData.category,
     };
+
+    // Only include itemCode if batch number is provided
+    if (formData.batchNumber && formData.batchNumber.trim()) {
+      apiData.itemCode = formData.batchNumber.trim();
+    }
 
     // Add optional fields if provided
     if (formData.corporatePrice) {
@@ -122,12 +132,7 @@ export default function EditInventoryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href={`/inventory/${inventoryId}`}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Details
-          </Button>
-        </Link>
+        <BackButton />
         <div>
           <h1 className="text-3xl font-bold">Edit Medication</h1>
           <p className="text-muted-foreground mt-1">Update medication information</p>
@@ -152,20 +157,6 @@ export default function EditInventoryPage() {
                 placeholder="e.g., Paracetamol 500mg"
                 required
               />
-
-              <Select
-                label="Category"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="Medication">Medication</option>
-                <option value="Supply">Supply</option>
-                <option value="Equipment">Equipment</option>
-                <option value="Lab">Lab</option>
-                <option value="Nursing">Nursing</option>
-              </Select>
 
               <Select
                 label="Drug Category (Optional)"
@@ -206,9 +197,38 @@ export default function EditInventoryPage() {
           {/* Stock Information */}
           <div>
             <h2 className="text-lg font-semibold mb-4">Stock Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {/* Package Configuration */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <Select
+                label="Packaging Unit"
+                name="packagingUnit"
+                value={formData.packagingUnit}
+                onChange={handleInputChange}
+              >
+                <option value="tablet">Tablet/Capsule</option>
+                <option value="blister_pack">Blister Pack</option>
+                <option value="strip">Strip</option>
+                <option value="bottle">Bottle</option>
+                <option value="box">Box</option>
+                <option value="vial">Vial/Ampoule</option>
+                <option value="sachet">Sachet</option>
+              </Select>
+
               <Input
-                label="Current Quantity"
+                label="Units per Package"
+                name="tabletsPerPackage"
+                type="number"
+                min="1"
+                step="1"
+                value={formData.tabletsPerPackage}
+                onChange={handleInputChange}
+                placeholder="e.g., 10 tablets per blister"
+                required
+              />
+
+              <Input
+                label="Stock Quantity (Packages)"
                 name="quantity"
                 type="number"
                 min="0"
@@ -218,9 +238,27 @@ export default function EditInventoryPage() {
                 placeholder="0"
                 required
               />
+            </div>
 
+            {/* Total Units Display */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Total Units in Stock</p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    {formData.quantity || 0} {formData.packagingUnit}s × {formData.tabletsPerPackage || 1} units each
+                  </p>
+                </div>
+                <p className="text-2xl font-bold text-blue-900">
+                  {(parseInt(formData.quantity) || 0) * (parseInt(formData.tabletsPerPackage) || 1)} units
+                </p>
+              </div>
+            </div>
+
+            {/* Pricing */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
-                label="Unit Price (₦)"
+                label="Unit Price (₦ per tablet)"
                 name="unitPrice"
                 type="number"
                 min="0"
@@ -232,7 +270,7 @@ export default function EditInventoryPage() {
               />
 
               <Input
-                label="Corporate Price (₦)"
+                label="Corporate Price (₦ per tablet)"
                 name="corporatePrice"
                 type="number"
                 min="0"
@@ -243,7 +281,7 @@ export default function EditInventoryPage() {
               />
 
               <Input
-                label="Reorder Level"
+                label="Reorder Level (Packages)"
                 name="reorderLevel"
                 type="number"
                 min="0"
@@ -255,6 +293,9 @@ export default function EditInventoryPage() {
               />
             </div>
             <p className="text-sm text-muted-foreground mt-2">
+              Prices are per individual unit (tablet/capsule). Stock tracking is by package.
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
               Reorder level: You'll be alerted when stock falls to or below this quantity
             </p>
           </div>
@@ -306,11 +347,13 @@ export default function EditInventoryPage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t">
-            <Link href={`/inventory/${inventoryId}`}>
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
             <Button
               variant="primary"
               type="submit"

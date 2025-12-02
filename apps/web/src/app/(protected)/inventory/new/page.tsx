@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, Pill } from 'lucide-react';
-import Link from 'next/link';
+import { Save, Package, Pill } from 'lucide-react';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -15,9 +15,15 @@ export default function NewInventoryPage() {
   const [formData, setFormData] = useState({
     drugName: '',
     genericName: '',
-    category: 'Other',
+    category: 'Medication',
+    drugCategory: '',
+    dosageForm: '',
+    dosageStrength: '',
+    packagingUnit: 'tablet',
+    tabletsPerPackage: '1',
     quantity: '',
     unitPrice: '',
+    corporatePrice: '',
     reorderLevel: '10',
     expiryDate: '',
     batchNumber: '',
@@ -50,14 +56,35 @@ export default function NewInventoryPage() {
     e.preventDefault();
     
     // Transform form data to match API expectations
-    const apiData = {
+    const apiData: any = {
       itemName: formData.drugName,
-      itemCode: formData.batchNumber || null,
+      category: formData.category,
       stockQuantity: parseInt(formData.quantity) || 0,
+      packagingUnit: formData.packagingUnit,
+      tabletsPerPackage: parseInt(formData.tabletsPerPackage) || 1,
       unitPrice: parseFloat(formData.unitPrice) || 0,
       reorderLevel: parseInt(formData.reorderLevel) || 10,
       expiryDate: formData.expiryDate || null,
     };
+
+    // Only include itemCode if batch number is provided
+    if (formData.batchNumber && formData.batchNumber.trim()) {
+      apiData.itemCode = formData.batchNumber.trim();
+    }
+
+    // Add optional fields if provided
+    if (formData.corporatePrice) {
+      apiData.corporatePrice = parseFloat(formData.corporatePrice);
+    }
+    if (formData.drugCategory) {
+      apiData.drugCategory = formData.drugCategory;
+    }
+    if (formData.dosageForm) {
+      apiData.dosageForm = formData.dosageForm;
+    }
+    if (formData.dosageStrength) {
+      apiData.dosageStrength = formData.dosageStrength;
+    }
     
     createItem.mutate(apiData);
   };
@@ -66,12 +93,7 @@ export default function NewInventoryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/inventory">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Inventory
-          </Button>
-        </Link>
+        <BackButton />
         <div>
           <h1 className="text-3xl font-bold">Add Medication</h1>
           <p className="text-muted-foreground mt-1">Add new medication to inventory</p>
@@ -93,41 +115,43 @@ export default function NewInventoryPage() {
                 name="drugName"
                 value={formData.drugName}
                 onChange={handleInputChange}
-                placeholder="e.g., Paracetamol 500mg"
+                placeholder="e.g., Paracetamol Tablet"
                 required
-              />
-
-              <Input
-                label="Generic Name (Optional)"
-                name="genericName"
-                value={formData.genericName}
-                onChange={handleInputChange}
-                placeholder="e.g., Acetaminophen"
               />
 
               <Select
-                label="Category"
-                name="category"
-                value={formData.category}
+                label="Drug Category (Optional)"
+                name="drugCategory"
+                value={formData.drugCategory}
                 onChange={handleInputChange}
-                required
               >
-                <option value="Antibacterial (Antibiotic)">Antibacterial (Antibiotic)</option>
+                <option value="">Select category...</option>
+                <option value="Antimalarial">Antimalarial</option>
+                <option value="Antibiotic">Antibiotic</option>
+                <option value="Analgesic">Analgesic</option>
                 <option value="Antifungal">Antifungal</option>
                 <option value="Antiviral">Antiviral</option>
-                <option value="Antimalarial">Antimalarial</option>
-                <option value="Antidiarrheal">Antidiarrheal</option>
-                <option value="Laxative">Laxative</option>
                 <option value="Antihypertensive">Antihypertensive</option>
                 <option value="Anti-diabetic">Anti-diabetic</option>
-                <option value="Antihistamine">Antihistamine</option>
-                <option value="Antitussive">Antitussive</option>
-                <option value="Antidepressant">Antidepressant</option>
-                <option value="Sedative/Anxiolytic">Sedative/Anxiolytic</option>
                 <option value="NSAIDs">NSAIDs</option>
-                <option value="Statins">Statins</option>
                 <option value="Other">Other</option>
               </Select>
+
+              <Input
+                label="Dosage Form (Optional)"
+                name="dosageForm"
+                value={formData.dosageForm}
+                onChange={handleInputChange}
+                placeholder="e.g., Tablet, Syrup, Injection"
+              />
+
+              <Input
+                label="Dosage Strength (Optional)"
+                name="dosageStrength"
+                value={formData.dosageStrength}
+                onChange={handleInputChange}
+                placeholder="e.g., 500mg, 250mg/5ml"
+              />
 
               <Input
                 label="Manufacturer (Optional)"
@@ -142,9 +166,38 @@ export default function NewInventoryPage() {
           {/* Stock Information */}
           <div>
             <h2 className="text-lg font-semibold mb-4">Stock Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {/* Package Configuration */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <Select
+                label="Packaging Unit"
+                name="packagingUnit"
+                value={formData.packagingUnit}
+                onChange={handleInputChange}
+              >
+                <option value="tablet">Tablet/Capsule</option>
+                <option value="blister_pack">Blister Pack</option>
+                <option value="strip">Strip</option>
+                <option value="bottle">Bottle</option>
+                <option value="box">Box</option>
+                <option value="vial">Vial/Ampoule</option>
+                <option value="sachet">Sachet</option>
+              </Select>
+
               <Input
-                label="Initial Quantity"
+                label="Units per Package"
+                name="tabletsPerPackage"
+                type="number"
+                min="1"
+                step="1"
+                value={formData.tabletsPerPackage}
+                onChange={handleInputChange}
+                placeholder="e.g., 10 tablets per blister"
+                required
+              />
+
+              <Input
+                label="Initial Stock (Packages)"
                 name="quantity"
                 type="number"
                 min="0"
@@ -154,9 +207,27 @@ export default function NewInventoryPage() {
                 placeholder="0"
                 required
               />
+            </div>
 
+            {/* Total Units Display */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Total Units in Stock</p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    {formData.quantity || 0} {formData.packagingUnit}s × {formData.tabletsPerPackage || 1} units each
+                  </p>
+                </div>
+                <p className="text-2xl font-bold text-blue-900">
+                  {(parseInt(formData.quantity) || 0) * (parseInt(formData.tabletsPerPackage) || 1)} units
+                </p>
+              </div>
+            </div>
+
+            {/* Pricing */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
-                label="Unit Price (₦)"
+                label="Unit Price (₦ per tablet)"
                 name="unitPrice"
                 type="number"
                 min="0"
@@ -168,7 +239,18 @@ export default function NewInventoryPage() {
               />
 
               <Input
-                label="Reorder Level"
+                label="Corporate Price (₦ per tablet)"
+                name="corporatePrice"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.corporatePrice}
+                onChange={handleInputChange}
+                placeholder="0.00"
+              />
+
+              <Input
+                label="Reorder Level (Packages)"
                 name="reorderLevel"
                 type="number"
                 min="0"
@@ -180,7 +262,10 @@ export default function NewInventoryPage() {
               />
             </div>
             <p className="text-sm text-muted-foreground mt-2">
-              Reorder level: You'll be alerted when stock falls to or below this quantity
+              💡 Prices are per individual unit (tablet/capsule). Stock tracking is by package.
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              ⚠️ Reorder level: You'll be alerted when stock falls to or below this quantity
             </p>
           </div>
 
@@ -231,11 +316,13 @@ export default function NewInventoryPage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t">
-            <Link href="/inventory">
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
             <Button
               variant="primary"
               type="submit"

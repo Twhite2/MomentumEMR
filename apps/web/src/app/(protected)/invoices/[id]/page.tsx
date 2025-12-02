@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, Select } from '@momentum/ui';
 import { ArrowLeft, Receipt, User, DollarSign, CreditCard, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -168,12 +169,7 @@ export default function InvoiceDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/invoices">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold">Invoice</h1>
             <p className="text-muted-foreground mt-1">

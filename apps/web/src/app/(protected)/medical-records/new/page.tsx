@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, FileText, Upload, X, File } from 'lucide-react';
-import Link from 'next/link';
+import { Save, FileText, Upload, X, File } from 'lucide-react';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -16,16 +16,24 @@ interface Patient {
   lastName: string;
 }
 
+interface Doctor {
+  id: number;
+  name: string;
+}
+
 export default function NewMedicalRecordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const isLabTech = session?.user?.role === 'lab_tech';
+  const isDoctor = session?.user?.role === 'doctor';
+  const requiresDoctorSelection = session?.user?.role && ['admin', 'nurse', 'receptionist'].includes(session.user.role);
   const preSelectedPatientId = searchParams.get('patientId');
   const appointmentId = searchParams.get('appointmentId');
 
   const [formData, setFormData] = useState({
     patientId: preSelectedPatientId || '',
+    doctorId: '',
     visitDate: new Date().toISOString().split('T')[0],
     diagnosis: '',
     notes: '',
@@ -42,6 +50,16 @@ export default function NewMedicalRecordPage() {
       const response = await axios.get('/api/patients?limit=100');
       return response.data;
     },
+  });
+
+  // Fetch doctors (only if user is not a doctor)
+  const { data: doctors } = useQuery<{ users: Doctor[] }>({
+    queryKey: ['doctors-all'],
+    queryFn: async () => {
+      const response = await axios.get('/api/users?role=doctor&limit=100');
+      return response.data;
+    },
+    enabled: requiresDoctorSelection,
   });
 
   // Create medical record mutation
@@ -78,7 +96,7 @@ export default function NewMedicalRecordPage() {
       ? formData.allergies.split(',').map((a) => a.trim()).filter((a) => a.length > 0)
       : [];
 
-    const payload = {
+    const payload: any = {
       patientId: formData.patientId,
       visitDate: formData.visitDate,
       diagnosis: formData.diagnosis || null,
@@ -87,6 +105,15 @@ export default function NewMedicalRecordPage() {
       attachments: attachments.length > 0 ? JSON.stringify(attachments) : null,
     };
 
+    // Add doctorId if required (for non-doctor users)
+    if (requiresDoctorSelection) {
+      if (!formData.doctorId) {
+        toast.error('Please select a doctor');
+        return;
+      }
+      payload.doctorId = formData.doctorId;
+    }
+
     createRecord.mutate(payload);
   };
 
@@ -94,12 +121,7 @@ export default function NewMedicalRecordPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href={preSelectedPatientId ? `/patients/${preSelectedPatientId}` : "/medical-records"}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {preSelectedPatientId ? "Back to Patient" : "Back to Medical Records"}
-          </Button>
-        </Link>
+        <BackButton label={preSelectedPatientId ? "Back to Patient" : "Back to Medical Records"} />
         <div>
           <h1 className="text-3xl font-bold">New Medical Record</h1>
           <p className="text-muted-foreground mt-1">Document patient visit and clinical findings</p>
@@ -141,6 +163,27 @@ export default function NewMedicalRecordPage() {
               />
             </div>
           </div>
+
+          {/* Doctor Selection (for non-doctors) */}
+          {requiresDoctorSelection && (
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Attending Doctor</h2>
+              <Select
+                label="Doctor"
+                name="doctorId"
+                value={formData.doctorId}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select doctor</option>
+                {doctors?.users.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    Dr. {doctor.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
 
           {/* Clinical Information */}
           <div>
@@ -278,11 +321,13 @@ export default function NewMedicalRecordPage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t">
-            <Link href="/medical-records">
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
             <Button
               variant="primary"
               type="submit"

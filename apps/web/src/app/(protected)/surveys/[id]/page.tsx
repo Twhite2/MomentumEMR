@@ -1,8 +1,8 @@
 'use client';
 
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Download, Share2, BarChart3, TrendingUp, Users } from 'lucide-react';
-import Link from 'next/link';
+import { Download, Share2, BarChart3, TrendingUp, Users } from 'lucide-react';
+import { BackButton } from '@/components/shared/BackButton';
 import { useParams } from 'next/navigation';
 
 export default function SurveyResultsPage() {
@@ -72,12 +72,7 @@ export default function SurveyResultsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/surveys">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Surveys
-            </Button>
-          </Link>
+          <BackButton label="Back to Surveys" />
           <div>
             <h1 className="text-3xl font-bold text-primary">{survey.title}</h1>
             <p className="text-muted-foreground mt-1">{survey.description}</p>

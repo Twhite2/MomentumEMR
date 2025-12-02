@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, FileText, Upload, X, File } from 'lucide-react';
+import { Button, Input, Textarea, Select } from '@momentum/ui';
+import { Save, Upload, X, FileText, File as FileIcon } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -172,12 +173,7 @@ export default function EditMedicalRecordPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href={`/medical-records/${recordId}`}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Record
-          </Button>
-        </Link>
+        <BackButton />
         <div>
           <h1 className="text-3xl font-bold">Edit Medical Record</h1>
           <p className="text-muted-foreground mt-1">Update patient visit and clinical findings</p>
@@ -322,7 +318,7 @@ export default function EditMedicalRecordPage() {
                       className="flex items-center justify-between p-3 bg-muted rounded-lg"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <File className="w-5 h-5 text-primary flex-shrink-0" />
+                        <FileIcon className="w-5 h-5 text-primary flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{file.name}</p>
                           <p className="text-xs text-muted-foreground">

@@ -2,8 +2,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Pill, User, Calendar, CheckCircle, FileText, Receipt } from 'lucide-react';
+import { User, Calendar, FileText, Pill, CheckCircle, XCircle, Clock, Receipt } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -129,12 +130,7 @@ export default function PrescriptionDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/prescriptions">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold">Prescription</h1>
             <p className="text-muted-foreground mt-1">RX-{prescription.id.toString().padStart(6, '0')}</p>

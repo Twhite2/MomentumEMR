@@ -69,8 +69,11 @@ export async function PUT(
       batchNumber,
       stockQuantity,
       quantity,
+      packagingUnit,
+      tabletsPerPackage,
       unitPrice,
       corporatePrice,
+      hmoPrice,
       reorderLevel,
       expiryDate,
       category,
@@ -96,10 +99,14 @@ export async function PUT(
     // Build update data
     const updateData: any = {};
     if (finalItemName !== undefined) updateData.itemName = finalItemName;
-    if (finalItemCode !== undefined) updateData.itemCode = finalItemCode;
+    // Only include itemCode if it has a value (to avoid unique constraint issues)
+    if (finalItemCode && finalItemCode.trim()) updateData.itemCode = finalItemCode.trim();
     if (finalStockQuantity !== undefined) updateData.stockQuantity = parseInt(finalStockQuantity);
+    if (packagingUnit !== undefined) updateData.packagingUnit = packagingUnit;
+    if (tabletsPerPackage !== undefined) updateData.tabletsPerPackage = parseInt(tabletsPerPackage);
     if (unitPrice !== undefined) updateData.unitPrice = parseFloat(unitPrice);
     if (corporatePrice !== undefined) updateData.corporatePrice = parseFloat(corporatePrice);
+    if (hmoPrice !== undefined) updateData.hmoPrice = parseFloat(hmoPrice);
     if (reorderLevel !== undefined) updateData.reorderLevel = parseInt(reorderLevel);
     if (expiryDate) updateData.expiryDate = new Date(expiryDate);
     if (category !== undefined) updateData.category = category;

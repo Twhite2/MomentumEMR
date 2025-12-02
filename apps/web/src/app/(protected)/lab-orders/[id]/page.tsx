@@ -10,6 +10,7 @@ import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { getRoleDisplayName } from '@/lib/role-utils';
+import { BackButton } from '@/components/shared/BackButton';
 
 interface LabOrder {
   id: number;
@@ -352,12 +353,7 @@ export default function LabOrderDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/lab-orders">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold">Lab Order</h1>
             <p className="text-muted-foreground mt-1">Order #LAB-{order.id.toString().padStart(6, '0')}</p>

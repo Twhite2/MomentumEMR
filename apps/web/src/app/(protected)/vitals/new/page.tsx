@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@momentum/ui';
-import { ArrowLeft, Save } from 'lucide-react';
-import Link from 'next/link';
+import { Save } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { BackButton } from '@/components/shared/BackButton';
 
 interface Patient {
   id: number;
@@ -51,7 +51,12 @@ export default function NewVitalsPage() {
     },
     onSuccess: () => {
       toast.success('Vitals recorded successfully');
-      router.push('/vitals');
+      // If came from a specific patient, go back to their vitals
+      if (preSelectedPatientId) {
+        router.push(`/vitals?patientId=${preSelectedPatientId}`);
+      } else {
+        router.push('/vitals');
+      }
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Failed to record vitals');
@@ -110,12 +115,7 @@ export default function NewVitalsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/vitals">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-        </Link>
+        <BackButton />
         <div>
           <h1 className="text-3xl font-bold">Record Vitals</h1>
           <p className="text-muted-foreground mt-1">Record patient vital signs</p>
@@ -303,11 +303,14 @@ export default function NewVitalsPage() {
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
-          <Link href="/vitals">
-            <Button variant="outline" size="md" type="button">
-              Cancel
-            </Button>
-          </Link>
+          <Button 
+            variant="outline" 
+            size="md" 
+            type="button"
+            onClick={() => router.back()}
+          >
+            Cancel
+          </Button>
           <Button
             variant="primary"
             size="md"

@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, Plus, Trash2, Pill, Search, Check } from 'lucide-react';
-import Link from 'next/link';
+import { Save, Plus, Trash2, Pill, Search, Check } from 'lucide-react';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -209,12 +209,7 @@ export default function NewPrescriptionPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href={preSelectedPatientId ? `/patients/${preSelectedPatientId}` : "/prescriptions"}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {preSelectedPatientId ? "Back to Patient" : "Back to Prescriptions"}
-          </Button>
-        </Link>
+        <BackButton label={preSelectedPatientId ? "Back to Patient" : "Back to Prescriptions"} />
         <div>
           <h1 className="text-3xl font-bold">New Prescription</h1>
           <p className="text-muted-foreground mt-1">Create medication order for patient</p>
@@ -485,11 +480,13 @@ export default function NewPrescriptionPage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-4">
-            <Link href="/prescriptions">
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
             <Button
               variant="primary"
               type="submit"

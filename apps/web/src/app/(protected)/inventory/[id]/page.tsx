@@ -3,17 +3,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, Textarea } from '@momentum/ui';
-import {
-  ArrowLeft,
-  Pill,
-  Plus,
-  Minus,
-  AlertTriangle,
-  Edit,
-  Calendar,
-  Package,
-} from 'lucide-react';
+import { Package, Edit, Calendar, AlertTriangle, CheckCircle, Plus, Minus, Pill } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -156,12 +148,7 @@ export default function InventoryDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/inventory">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-3xl font-bold">{item.drugName}</h1>
             {item.genericName && (

@@ -22,11 +22,11 @@ export default function PharmacistDashboard({ session }: PharmacistDashboardProp
     },
   });
 
-  // Fetch inventory data
+  // Fetch inventory data (only Medication category for pharmacists)
   const { data: inventoryData, isLoading: inventoryLoading } = useQuery({
     queryKey: ['pharmacist-inventory'],
     queryFn: async () => {
-      const response = await axios.get('/api/inventory?limit=100');
+      const response = await axios.get('/api/inventory?category=Medication&limit=100');
       return response.data;
     },
   });
