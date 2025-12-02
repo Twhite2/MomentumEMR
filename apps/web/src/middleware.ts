@@ -35,9 +35,14 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const subdomain = getSubdomain(hostname);
   
+  // Log subdomain detection for debugging
+  console.log('[Middleware] Hostname:', hostname);
+  console.log('[Middleware] Detected subdomain:', subdomain);
+  
   const session = await auth();
   const isAuthPage = request.nextUrl.pathname.startsWith('/login');
   const isChangePasswordPage = request.nextUrl.pathname.startsWith('/auth/change-password');
+  const isBrandingAPI = request.nextUrl.pathname === '/api/branding/public';
   
   // If on login page and authenticated, redirect to dashboard (unless must change password)
   if (isAuthPage && session) {
@@ -48,7 +53,7 @@ export async function middleware(request: NextRequest) {
   }
   
   // If not authenticated and trying to access protected routes, redirect to login
-  if (!session && !isAuthPage && !isChangePasswordPage) {
+  if (!session && !isAuthPage && !isChangePasswordPage && !isBrandingAPI) {
     let from = request.nextUrl.pathname;
     if (request.nextUrl.search) {
       from += request.nextUrl.search;
@@ -68,6 +73,7 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   if (subdomain) {
     response.headers.set('x-hospital-subdomain', subdomain);
+    console.log('[Middleware] Set header x-hospital-subdomain:', subdomain);
   }
   
   return response;

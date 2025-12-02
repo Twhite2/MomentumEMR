@@ -47,7 +47,6 @@ export async function GET(request: Request) {
     const hospital = await prisma.hospital.findUnique({
       where: {
         subdomain: subdomain.toLowerCase(),
-        active: true, // Only return active hospitals
       },
       select: {
         id: true,
@@ -57,15 +56,22 @@ export async function GET(request: Request) {
         primaryColor: true,
         secondaryColor: true,
         tagline: true,
+        active: true,
       },
     });
     
     if (!hospital) {
+      console.log(`[Branding API] No hospital found for subdomain: ${subdomain}`);
       return NextResponse.json(
         { error: 'Hospital not found for this subdomain' },
         { status: 404 }
       );
     }
+    
+    // Log branding fetch for debugging
+    console.log(`[Branding API] Fetched branding for: ${hospital.name} (${subdomain})`);
+    console.log(`[Branding API] Logo URL: ${hospital.logoUrl || 'none'}`);
+    console.log(`[Branding API] Colors: ${hospital.primaryColor}, ${hospital.secondaryColor}`);
     
     // Return branding information
     return NextResponse.json({

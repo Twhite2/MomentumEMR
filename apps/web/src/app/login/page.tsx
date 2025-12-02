@@ -32,16 +32,25 @@ export default function LoginPage() {
   useEffect(() => {
     const fetchBranding = async () => {
       try {
+        console.log('[Login] Fetching hospital branding...');
         const response = await axios.get('/api/branding/public');
+        console.log('[Login] Branding response:', response.data);
+        
         setBranding(response.data.hospital);
         
         // Apply CSS variables for dynamic theming
         if (response.data.hospital) {
+          console.log('[Login] Applying brand colors:', {
+            primary: response.data.hospital.primaryColor,
+            secondary: response.data.hospital.secondaryColor,
+            logo: response.data.hospital.logoUrl
+          });
+          
           document.documentElement.style.setProperty('--color-primary', response.data.hospital.primaryColor);
           document.documentElement.style.setProperty('--color-secondary', response.data.hospital.secondaryColor);
         }
-      } catch (error) {
-        console.log('No subdomain branding found, using default');
+      } catch (error: any) {
+        console.log('[Login] No subdomain branding found, using default:', error.message);
         // Use default branding
       } finally {
         setBrandingLoading(false);
@@ -188,6 +197,10 @@ export default function LoginPage() {
               className="w-full"
               loading={loading}
               disabled={loading}
+              style={branding ? {
+                backgroundColor: branding.primaryColor,
+                borderColor: branding.primaryColor,
+              } : undefined}
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
