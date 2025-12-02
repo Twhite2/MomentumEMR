@@ -135,8 +135,30 @@ export async function POST(request: NextRequest) {
       },
       message: 'Hospital created successfully. Admin account is ready to use.',
     }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating hospital:', error);
+    
+    // Handle Prisma unique constraint errors
+    if (error.code === 'P2002') {
+      const target = error.meta?.target;
+      if (target?.includes('subdomain')) {
+        return NextResponse.json(
+          { error: 'This subdomain is already taken. Please choose a different one.' },
+          { status: 400 }
+        );
+      }
+      if (target?.includes('id')) {
+        return NextResponse.json(
+          { error: 'Database sequence error. Please contact support or try again.' },
+          { status: 500 }
+        );
+      }
+      return NextResponse.json(
+        { error: `A record with this ${target?.[0] || 'value'} already exists.` },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Failed to create hospital' },
       { status: 500 }
