@@ -12,6 +12,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const lowStock = searchParams.get('lowStock');
     const expired = searchParams.get('expired');
+    const category = searchParams.get('category');
+    const drugCategory = searchParams.get('drugCategory');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
@@ -24,6 +26,16 @@ export async function GET(request: NextRequest) {
         { itemName: { contains: search, mode: 'insensitive' } },
         { itemCode: { contains: search, mode: 'insensitive' } },
       ];
+    }
+
+    // Filter by category if specified
+    if (category && category !== '') {
+      where.category = category;
+    }
+
+    // Filter by drugCategory if specified
+    if (drugCategory && drugCategory !== '') {
+      where.drugCategory = drugCategory;
     }
 
     let lowStockFilter = false;
@@ -67,7 +79,7 @@ export async function GET(request: NextRequest) {
         // Transform database field names to match frontend expectations
         drugName: item.itemName,
         genericName: null,
-        category: 'Other',
+        category: item.category || 'Other', // Use actual category from database
         quantity: item.stockQuantity,
         batchNumber: item.itemCode,
         manufacturer: null,
@@ -80,6 +92,7 @@ export async function GET(request: NextRequest) {
 
     return apiResponse({
       items: itemsWithStatus,
+      inventory: itemsWithStatus, // For prescription page compatibility
       pagination: {
         page,
         limit,

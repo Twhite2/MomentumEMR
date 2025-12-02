@@ -365,7 +365,10 @@ export default function NewPrescriptionPage() {
                             <button
                               key={item.id}
                               type="button"
-                              onClick={() => selectDrug(index, item)}
+                              onMouseDown={(e) => {
+                                e.preventDefault(); // Prevent blur event
+                                selectDrug(index, item);
+                              }}
                               className="w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-b-0 focus:bg-muted/50 focus:outline-none"
                             >
                               <div className="flex items-start justify-between">

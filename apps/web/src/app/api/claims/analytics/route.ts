@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const claimsByStatus = await prisma.claimSubmission.groupBy({
       by: ['status'],
       where,
-      _count: { id: true },
+      _count: { _all: true },
       _sum: { 
         submittedAmount: true,
         approvedAmount: true,
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     const claimsByHmo = await prisma.claimSubmission.groupBy({
       by: ['hmoId', 'status'],
       where,
-      _count: { id: true },
+      _count: { _all: true },
       _sum: {
         submittedAmount: true,
         approvedAmount: true,
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     };
 
     claimsByStatus.forEach(group => {
-      const count = group._count.id;
+      const count = group._count._all;
       const amount = Number(group._sum.submittedAmount || 0);
       
       summary.totalClaims += count;
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
         };
       }
 
-      const count = group._count.id;
+      const count = group._count._all;
       const amount = Number(group._sum.submittedAmount || 0);
       const status = group.status;
 
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
           gte: sixMonthsAgo,
         },
       },
-      _count: { id: true },
+      _count: { _all: true },
       _sum: { submittedAmount: true },
     });
 
