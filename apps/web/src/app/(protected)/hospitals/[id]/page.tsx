@@ -94,6 +94,78 @@ export default function HospitalDetailPage() {
     updateMutation.mutate(formData);
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    setUploadingLogo(true);
+    
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      const response = await axios.post('/api/upload', uploadFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setFormData((prev) => ({ ...prev, logoUrl: response.data.url }));
+      toast.success('Logo uploaded successfully');
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      toast.error('Failed to upload logo');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size must be less than 10MB');
+      return;
+    }
+
+    setUploadingBackground(true);
+    
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      const response = await axios.post('/api/upload', uploadFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setFormData((prev) => ({ ...prev, backgroundImageUrl: response.data.url }));
+      toast.success('Background image uploaded successfully');
+    } catch (error) {
+      console.error('Background upload error:', error);
+      toast.error('Failed to upload background image');
+    } finally {
+      setUploadingBackground(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -255,12 +327,63 @@ export default function HospitalDetailPage() {
                 )}
               </div>
               <div>
-                <Button variant="outline" size="sm" disabled={!isEditing}>
+                <input
+                  type="file"
+                  id="logo-upload-edit"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                  disabled={!isEditing}
+                />
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => document.getElementById('logo-upload-edit')?.click()}
+                  disabled={!isEditing || uploadingLogo}
+                >
                   <Upload className="w-4 h-4 mr-2" />
-                  Upload Logo
+                  {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">
                   Recommended: 200x200px, PNG or SVG
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Background Image Upload */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Login Page Background Image</label>
+            <div className="flex items-center gap-4">
+              <div className="w-40 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-muted overflow-hidden">
+                {formData.backgroundImageUrl ? (
+                  <img src={formData.backgroundImageUrl} alt="Background" className="w-full h-full object-cover rounded-lg" />
+                ) : (
+                  <Image className="w-8 h-8 text-muted-foreground" />
+                )}
+              </div>
+              <div>
+                <input
+                  type="file"
+                  id="background-upload-edit"
+                  accept="image/*"
+                  onChange={handleBackgroundUpload}
+                  className="hidden"
+                  disabled={!isEditing}
+                />
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => document.getElementById('background-upload-edit')?.click()}
+                  disabled={!isEditing || uploadingBackground}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploadingBackground ? 'Uploading...' : 'Upload Background'}
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Recommended: 1920x1080px, JPG or PNG. Creates immersive login experience.
                 </p>
               </div>
             </div>
