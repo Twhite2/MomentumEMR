@@ -79,8 +79,9 @@ export default function NotificationsDropdown() {
     }
     if (notification.link) {
       window.location.href = notification.link;
-      setIsOpen(false);
     }
+    // Close dropdown after clicking any notification
+    setIsOpen(false);
   };
 
   const getNotificationIcon = (type: string) => {

@@ -7,6 +7,7 @@ import { Plus, Users, Search, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import ExcelImportExport from '@/components/shared/ExcelImportExport';
+import { getRoleDisplayName, ROLE_BADGE_BG_LIGHT, type UserRole } from '@/lib/role-utils';
 
 interface User {
   id: number;
@@ -58,16 +59,7 @@ export default function UsersPage() {
   };
 
   const getRoleColor = (role: string) => {
-    const colors: Record<string, string> = {
-      admin: 'bg-red-ribbon/10 text-red-ribbon',
-      doctor: 'bg-primary/10 text-primary',
-      nurse: 'bg-green-haze/10 text-green-haze',
-      pharmacist: 'bg-amaranth/10 text-amaranth',
-      lab_tech: 'bg-danube/10 text-danube',
-      cashier: 'bg-saffron/10 text-saffron',
-      patient: 'bg-muted text-muted-foreground',
-    };
-    return colors[role] || 'bg-muted text-muted-foreground';
+    return ROLE_BADGE_BG_LIGHT[role as UserRole] || 'bg-muted text-muted-foreground';
   };
 
   const formatDate = (dateString: string) => {
@@ -244,7 +236,7 @@ export default function UsersPage() {
                             user.role
                           )}`}
                         >
-                          {user.role.replace('_', ' ').toUpperCase()}
+                          {getRoleDisplayName(user.role)}
                         </span>
                       </td>
                       <td className="py-4 px-4 text-center">

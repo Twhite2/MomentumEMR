@@ -47,7 +47,14 @@ export async function GET(request: NextRequest) {
           paidInvoicesThisMonth,
           pendingInvoicesThisMonth,
           invoiceSummary,
+          todayRevenue,
           patientsByType,
+          inventoryStats,
+          pharmacyLowStock,
+          labLowStock,
+          nurseLowStock,
+          admissionsToday,
+          dischargesToday,
         ] = await Promise.all([
           // Total patients
           prisma.patient.count({ where: { hospitalId } }),
@@ -144,12 +151,88 @@ export async function GET(request: NextRequest) {
             },
           }),
           
+          // Today's revenue (pending + paid)
+          prisma.invoice.aggregate({
+            where: {
+              hospitalId,
+              createdAt: {
+                gte: today,
+                lt: tomorrow,
+              },
+            },
+            _sum: {
+              totalAmount: true,
+              paidAmount: true,
+            },
+          }),
+          
           // Patients by type
           prisma.patient.groupBy({
             by: ['patientType'],
             where: { hospitalId },
             _count: true,
           }),
+          
+          // Inventory total value and count
+          prisma.$queryRaw`
+            SELECT 
+              COUNT(*) as total_items,
+              SUM(unit_price * stock_quantity) as total_value
+            FROM inventory
+            WHERE hospital_id = ${hospitalId}
+          `,
+          
+          // Pharmacy low stock (top 3)
+          prisma.$queryRaw`
+            SELECT item_name, stock_quantity, reorder_level
+            FROM inventory
+            WHERE hospital_id = ${hospitalId}
+            AND category = 'medicine'
+            AND stock_quantity <= reorder_level
+            ORDER BY stock_quantity ASC
+            LIMIT 3
+          `,
+          
+          // Lab low stock (top 3)
+          prisma.$queryRaw`
+            SELECT item_name, stock_quantity, reorder_level
+            FROM inventory
+            WHERE hospital_id = ${hospitalId}
+            AND category IN ('lab_supplies', 'test_kit')
+            AND stock_quantity <= reorder_level
+            ORDER BY stock_quantity ASC
+            LIMIT 3
+          `,
+          
+          // Nurse low stock (top 3)
+          prisma.$queryRaw`
+            SELECT item_name, stock_quantity, reorder_level
+            FROM inventory
+            WHERE hospital_id = ${hospitalId}
+            AND category IN ('medical_supply', 'consumable')
+            AND stock_quantity <= reorder_level
+            ORDER BY stock_quantity ASC
+            LIMIT 3
+          `,
+          
+          // Admissions today
+          prisma.$queryRaw`
+            SELECT COUNT(*) as count
+            FROM admissions
+            WHERE hospital_id = ${hospitalId}
+            AND admission_date >= ${today}
+            AND admission_date < ${tomorrow}
+          `,
+          
+          // Discharges today
+          prisma.$queryRaw`
+            SELECT COUNT(*) as count
+            FROM admissions
+            WHERE hospital_id = ${hospitalId}
+            AND discharge_date >= ${today}
+            AND discharge_date < ${tomorrow}
+            AND status = 'discharged'
+          `,
         ]);
 
         // Calculate percentages for patient types
@@ -164,6 +247,15 @@ export async function GET(request: NextRequest) {
           return acc;
         }, {} as Record<string, { count: number; percentage: number }>);
 
+        const inventoryData = inventoryStats as any[];
+        const admissionsTodayCount = Number((admissionsToday as any)[0]?.count || 0);
+        const dischargesTodayCount = Number((dischargesToday as any)[0]?.count || 0);
+
+        // Calculate today's revenue safely
+        const revenueTotal = Number(todayRevenue._sum.totalAmount ?? 0);
+        const revenuePaid = Number(todayRevenue._sum.paidAmount ?? 0);
+        const revenuePending = revenueTotal - revenuePaid;
+
         return NextResponse.json({
           ...baseStats,
           totalPatients,
@@ -176,7 +268,17 @@ export async function GET(request: NextRequest) {
           pendingInvoicesThisMonth,
           revenueThisMonth: invoiceSummary._sum.totalAmount || 0,
           collectedThisMonth: invoiceSummary._sum.paidAmount || 0,
+          revenueTodayTotal: revenueTotal,
+          revenueTodayPaid: revenuePaid,
+          revenueTodayPending: revenuePending,
           patientTypeBreakdown,
+          inventoryTotalValue: Number(inventoryData[0]?.total_value || 0),
+          inventoryTotalItems: Number(inventoryData[0]?.total_items || 0),
+          pharmacyLowStock: pharmacyLowStock || [],
+          labLowStock: labLowStock || [],
+          nurseLowStock: nurseLowStock || [],
+          admissionsToday: admissionsTodayCount,
+          dischargesToday: dischargesTodayCount,
         });
 
       case 'doctor':

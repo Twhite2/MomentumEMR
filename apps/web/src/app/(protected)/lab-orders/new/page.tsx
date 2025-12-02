@@ -104,10 +104,10 @@ export default function NewLabOrderPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/lab-orders">
+        <Link href={preSelectedPatientId ? `/patients/${preSelectedPatientId}` : "/lab-orders"}>
           <Button variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Lab Orders
+            {preSelectedPatientId ? "Back to Patient" : "Back to Lab Orders"}
           </Button>
         </Link>
         <div>

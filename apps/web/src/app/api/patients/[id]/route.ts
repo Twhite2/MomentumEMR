@@ -71,6 +71,15 @@ export async function GET(
             labResults: true,
           },
         },
+        vitals: {
+          take: 10,
+          orderBy: { recordedAt: 'desc' },
+          include: {
+            recordedByUser: {
+              select: { id: true, name: true },
+            },
+          },
+        },
       },
     });
 

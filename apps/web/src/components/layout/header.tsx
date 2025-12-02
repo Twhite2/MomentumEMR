@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import NotificationsDropdown from './notifications-dropdown';
+import { getRoleDisplayName } from '@/lib/role-utils';
 
 interface HeaderProps {
   userName: string;
@@ -322,7 +323,7 @@ export function Header({ userName, userRole, onMenuClick }: HeaderProps) {
               </div>
               <div className="text-left hidden md:block">
                 <p className="text-sm font-medium">{userName}</p>
-                <p className="text-xs text-muted-foreground capitalize">{userRole}</p>
+                <p className="text-xs text-muted-foreground">{getRoleDisplayName(userRole)}</p>
               </div>
             </button>
 

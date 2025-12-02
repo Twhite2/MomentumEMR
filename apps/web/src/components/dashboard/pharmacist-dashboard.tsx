@@ -1,7 +1,7 @@
 'use client';
 
 import { StatCard } from './stat-card';
-import { Pill, AlertTriangle, ShoppingCart, Package, TrendingUp, Calendar, Clock, CheckCircle, User, ArrowRight } from 'lucide-react';
+import { Pill, AlertTriangle, ShoppingCart, Package, TrendingUp, Calendar, Clock, CheckCircle, User, ArrowRight, AlertCircle } from 'lucide-react';
 import { Session } from 'next-auth';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -49,6 +49,24 @@ export default function PharmacistDashboard({ session }: PharmacistDashboardProp
 
   const outOfStockItems = allInventory.filter((item: any) => item.quantity === 0).length;
 
+  // Get medications expiring within 90 days
+  const today = new Date();
+  const ninetyDaysFromNow = new Date(today);
+  ninetyDaysFromNow.setDate(today.getDate() + 90);
+
+  const expiringItems = allInventory.filter((item: any) => {
+    if (!item.expiryDate) return false;
+    const expiryDate = new Date(item.expiryDate);
+    return expiryDate <= ninetyDaysFromNow && expiryDate > today;
+  }).sort((a: any, b: any) => {
+    return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+  });
+
+  const expiredItems = allInventory.filter((item: any) => {
+    if (!item.expiryDate) return false;
+    return new Date(item.expiryDate) <= today;
+  });
+
   // Get recent active prescriptions for queue
   const recentPrescriptions = allPrescriptions
     .filter((p: any) => p.status === 'active')
@@ -74,7 +92,7 @@ export default function PharmacistDashboard({ session }: PharmacistDashboardProp
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Link href="/prescriptions">
           <div className="bg-white p-6 rounded-lg border border-border hover:border-orange-500 transition-colors cursor-pointer">
             <div className="flex items-center justify-between">
@@ -130,7 +148,98 @@ export default function PharmacistDashboard({ session }: PharmacistDashboardProp
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Expiry Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/inventory">
+          <div className="bg-white p-6 rounded-lg border-2 border-amber-500 hover:border-amber-600 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Expiring Soon (90 days)</p>
+                <p className="text-2xl font-bold text-amber-600 mt-1">
+                  {isLoading ? '...' : expiringItems.length}
+                </p>
+              </div>
+              <AlertCircle className="w-10 h-10 text-amber-600/20" />
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/inventory">
+          <div className="bg-white p-6 rounded-lg border-2 border-red-600 hover:border-red-700 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Expired Items</p>
+                <p className="text-2xl font-bold text-red-600 mt-1">
+                  {isLoading ? '...' : expiredItems.length}
+                </p>
+              </div>
+              <AlertTriangle className="w-10 h-10 text-red-600/20" />
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Expiring Medications */}
+        <div className="bg-white rounded-lg border border-border p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-amber-600" />
+              Expiring Soon
+            </h2>
+            <Link href="/inventory">
+              <Button variant="ghost" size="sm">
+                View All
+              </Button>
+            </Link>
+          </div>
+          
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+            </div>
+          ) : expiringItems.length === 0 ? (
+            <div className="text-center py-8">
+              <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3 opacity-20" />
+              <p className="text-sm text-muted-foreground">No items expiring soon</p>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {expiringItems.slice(0, 10).map((item: any) => {
+                const daysUntilExpiry = Math.ceil((new Date(item.expiryDate).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                const isUrgent = daysUntilExpiry <= 30;
+                
+                return (
+                  <Link key={item.id} href="/inventory">
+                    <div className={`p-3 rounded-lg border cursor-pointer hover:border-primary transition-colors ${
+                      isUrgent 
+                        ? 'bg-red-50 border-red-200' 
+                        : 'bg-amber-50 border-amber-200'
+                    }`}>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{item.itemName}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            <span className={isUrgent ? 'text-red-600 font-semibold' : 'text-amber-600 font-semibold'}>
+                              {daysUntilExpiry} day{daysUntilExpiry !== 1 ? 's' : ''} until expiry
+                            </span>
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Expires: {new Date(item.expiryDate).toLocaleDateString()}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Stock: {item.quantity} units
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Prescription Queue */}
         <div className="bg-white rounded-lg border border-border p-6">
           <div className="flex items-center justify-between mb-4">

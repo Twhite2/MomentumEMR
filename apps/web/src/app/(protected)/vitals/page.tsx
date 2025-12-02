@@ -116,9 +116,10 @@ export default function VitalsPage() {
           <>
             <div className="divide-y divide-border">
               {data?.vitals.map((vital) => (
-                <div
+                <Link
                   key={vital.id}
-                  className="p-6 hover:bg-muted/30 transition-colors"
+                  href={`/vitals/${vital.id}`}
+                  className="block p-6 hover:bg-muted/30 transition-colors cursor-pointer"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
@@ -169,15 +170,13 @@ export default function VitalsPage() {
                     </div>
 
                     <div className="flex-shrink-0">
-                      <Link href={`/patients/${vital.patient.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <User className="w-4 h-4 mr-2" />
-                          View Patient
-                        </Button>
-                      </Link>
+                      <Button variant="ghost" size="sm">
+                        <User className="w-4 h-4 mr-2" />
+                        View Patient
+                      </Button>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 

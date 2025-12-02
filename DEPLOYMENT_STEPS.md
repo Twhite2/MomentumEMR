@@ -71,7 +71,7 @@ cd ../..
 
 ```bash
 # Connect to PostgreSQL
-psql -U momentum_user -d momentum_db
+psql -U momentum_user -d momentum_emr
 
 # Run the migration SQL
 \i SUBDOMAIN_MIGRATION.sql

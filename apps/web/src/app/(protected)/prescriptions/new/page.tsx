@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button, Input, Select, Textarea } from '@momentum/ui';
-import { ArrowLeft, Save, Plus, Trash2, Pill } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, Pill, Search, Check } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -74,6 +74,9 @@ export default function NewPrescriptionPage() {
   ]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [customDurations, setCustomDurations] = useState<Record<number, string>>({});
+  const [searchQueries, setSearchQueries] = useState<Record<number, string>>({});
+  const [showDropdowns, setShowDropdowns] = useState<Record<number, boolean>>({});
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
 
   // Fetch inventory items for drug suggestions
   const { data: inventoryData } = useQuery<{ inventory: InventoryItem[] }>({
@@ -144,6 +147,30 @@ export default function NewPrescriptionPage() {
     setMedications(updated);
   };
 
+  const selectDrug = (index: number, item: InventoryItem) => {
+    updateMedication(index, 'drugName', item.itemName);
+    if (item.dosageStrength) {
+      updateMedication(index, 'dosage', item.dosageStrength);
+    }
+    setSearchQueries({ ...searchQueries, [index]: item.itemName });
+    setShowDropdowns({ ...showDropdowns, [index]: false });
+  };
+
+  const handleDrugNameChange = (index: number, value: string) => {
+    setSearchQueries({ ...searchQueries, [index]: value });
+    updateMedication(index, 'drugName', value);
+    setShowDropdowns({ ...showDropdowns, [index]: value.length > 0 });
+  };
+
+  const getFilteredInventory = (searchQuery: string) => {
+    if (!searchQuery || !inventoryData?.inventory) return [];
+    const query = searchQuery.toLowerCase();
+    return inventoryData.inventory.filter(item => 
+      item.itemName.toLowerCase().includes(query) ||
+      item.drugCategory?.toLowerCase().includes(query)
+    ).slice(0, 10); // Limit to 10 suggestions
+  };
+
   const updateCustomDuration = (index: number, value: string) => {
     setCustomDurations({ ...customDurations, [index]: value });
     updateMedication(index, 'duration', value);
@@ -182,10 +209,10 @@ export default function NewPrescriptionPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/prescriptions">
+        <Link href={preSelectedPatientId ? `/patients/${preSelectedPatientId}` : "/prescriptions"}>
           <Button variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Prescriptions
+            {preSelectedPatientId ? "Back to Patient" : "Back to Prescriptions"}
           </Button>
         </Link>
         <div>
@@ -301,55 +328,91 @@ export default function NewPrescriptionPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
+                    <div className="md:col-span-2 relative">
                       <label className="block text-sm font-medium mb-1">
                         Drug Name <span className="text-red-ribbon">*</span>
                       </label>
-                      {inventoryData?.inventory && inventoryData.inventory.length > 0 ? (
-                        <>
-                          <Select
-                            value={medication.drugName}
-                            onChange={(e) => {
-                              const selectedDrug = inventoryData.inventory.find(
-                                (item) => item.itemName === e.target.value
-                              );
-                              updateMedication(index, 'drugName', e.target.value);
-                              if (selectedDrug?.dosageStrength) {
-                                updateMedication(index, 'dosage', selectedDrug.dosageStrength);
-                              }
-                            }}
-                            required
-                          >
-                            <option value="">Select from inventory</option>
-                            {inventoryData.inventory.map((item) => (
-                              <option key={item.id} value={item.itemName}>
-                                {item.itemName} 
-                                {item.dosageStrength && ` - ${item.dosageStrength}`}
-                                {item.dosageForm && ` (${item.dosageForm})`}
-                                {` - Stock: ${item.stockQuantity}`}
-                              </option>
-                            ))}
-                            <option value="__custom__">⊕ Custom/Not in inventory</option>
-                          </Select>
-                          {medication.drugName === '__custom__' && (
-                            <Input
-                              value=""
-                              onChange={(e) => updateMedication(index, 'drugName', e.target.value)}
-                              placeholder="Enter drug name"
-                              className="mt-2"
-                              required
-                            />
-                          )}
-                        </>
-                      ) : (
+                      <div className="relative">
                         <Input
-                          value={medication.drugName}
-                          onChange={(e) =>
-                            updateMedication(index, 'drugName', e.target.value)
-                          }
-                          placeholder="e.g., Paracetamol"
+                          value={searchQueries[index] ?? medication.drugName}
+                          onChange={(e) => handleDrugNameChange(index, e.target.value)}
+                          onFocus={() => {
+                            setFocusedIndex(index);
+                            if ((searchQueries[index] || medication.drugName).length > 0) {
+                              setShowDropdowns({ ...showDropdowns, [index]: true });
+                            }
+                          }}
+                          onBlur={() => {
+                            // Delay to allow click on dropdown
+                            setTimeout(() => {
+                              if (focusedIndex === index) {
+                                setShowDropdowns({ ...showDropdowns, [index]: false });
+                                setFocusedIndex(-1);
+                              }
+                            }, 200);
+                          }}
+                          placeholder="Start typing drug name... (e.g., Paracetamol)"
                           required
+                          className="pr-10"
                         />
+                        <Search className="w-4 h-4 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                      
+                      {/* Autocomplete Dropdown */}
+                      {showDropdowns[index] && getFilteredInventory(searchQueries[index] || medication.drugName).length > 0 && (
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-border rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                          {getFilteredInventory(searchQueries[index] || medication.drugName).map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => selectDrug(index, item)}
+                              className="w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-b-0 focus:bg-muted/50 focus:outline-none"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <p className="font-medium text-sm">{item.itemName}</p>
+                                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                    {item.dosageStrength && (
+                                      <span className="flex items-center gap-1">
+                                        <span className="font-semibold">Strength:</span> {item.dosageStrength}
+                                      </span>
+                                    )}
+                                    {item.dosageForm && (
+                                      <span className="flex items-center gap-1">
+                                        <span className="font-semibold">Form:</span> {item.dosageForm}
+                                      </span>
+                                    )}
+                                    {item.drugCategory && (
+                                      <span className="px-2 py-0.5 bg-primary/10 text-primary rounded">
+                                        {item.drugCategory}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="ml-4 text-right">
+                                  <p className={`text-xs font-semibold ${
+                                    item.stockQuantity === 0 
+                                      ? 'text-red-600' 
+                                      : item.stockQuantity < 50 
+                                      ? 'text-amber-600' 
+                                      : 'text-green-600'
+                                  }`}>
+                                    Stock: {item.stockQuantity}
+                                  </p>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* No results message */}
+                      {showDropdowns[index] && 
+                       (searchQueries[index] || medication.drugName).length > 0 && 
+                       getFilteredInventory(searchQueries[index] || medication.drugName).length === 0 && (
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-border rounded-lg shadow-lg p-4 text-center text-sm text-muted-foreground">
+                          No medications found. You can still enter custom drug name.
+                        </div>
                       )}
                     </div>
 

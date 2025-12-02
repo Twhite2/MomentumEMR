@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     if (patientId) where.patientId = parseInt(patientId);
     if (appointmentId) where.appointmentId = parseInt(appointmentId);
 
-    const [vitals, total] = await Promise.all([
+    const [vitalsData, total] = await Promise.all([
       prisma.vital.findMany({
         where,
         skip,
@@ -39,6 +39,14 @@ export async function GET(request: NextRequest) {
       }),
       prisma.vital.count({ where }),
     ]);
+
+    // Format blood pressure for display
+    const vitals = vitalsData.map((vital: any) => ({
+      ...vital,
+      bloodPressure: vital.bloodPressureSys && vital.bloodPressureDia
+        ? `${vital.bloodPressureSys}/${vital.bloodPressureDia}`
+        : null,
+    }));
 
     return apiResponse({
       vitals,
@@ -62,10 +70,11 @@ export async function POST(request: NextRequest) {
     const recordedBy = parseInt(session.user.id);
 
     const body = await request.json();
-    const {
+    let {
       patientId,
       appointmentId,
       temperature,
+      bloodPressure,
       bloodPressureSys,
       bloodPressureDia,
       heartRate,
@@ -75,6 +84,13 @@ export async function POST(request: NextRequest) {
       height,
       notes,
     } = body;
+
+    // Parse blood pressure if provided as "120/80" format
+    if (bloodPressure && typeof bloodPressure === 'string' && bloodPressure.includes('/')) {
+      const [sys, dia] = bloodPressure.split('/').map((v: string) => v.trim());
+      bloodPressureSys = sys;
+      bloodPressureDia = dia;
+    }
 
     if (!patientId) {
       return apiResponse({ error: 'Patient ID is required' }, 400);
@@ -110,7 +126,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return apiResponse(vital, 201);
+    // Format blood pressure for display
+    const formattedVital = {
+      ...vital,
+      bloodPressure: vital.bloodPressureSys && vital.bloodPressureDia
+        ? `${vital.bloodPressureSys}/${vital.bloodPressureDia}`
+        : null,
+    };
+
+    return apiResponse(formattedVital, 201);
   } catch (error) {
     return handleApiError(error);
   }

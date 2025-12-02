@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Input } from '@momentum/ui';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { getRoleDisplayName } from '@/lib/role-utils';
 
 interface User {
   id: number;
@@ -146,8 +147,8 @@ export function MentionInput({
                 }`}
               >
                 <p className="font-medium text-sm">{user.name}</p>
-                <p className="text-xs text-muted-foreground capitalize">
-                  {user.role}
+                <p className="text-xs text-muted-foreground">
+                  {getRoleDisplayName(user.role)}
                 </p>
               </button>
             ))}

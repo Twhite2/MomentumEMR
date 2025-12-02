@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import AdminDashboard from '@/components/dashboard/admin-dashboard';
+import AdminDashboard from '@/components/dashboard/admin-dashboard-new';
 import DoctorDashboard from '@/components/dashboard/doctor-dashboard';
 import NurseDashboard from '@/components/dashboard/nurse-dashboard';
 import PharmacistDashboard from '@/components/dashboard/pharmacist-dashboard';

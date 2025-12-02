@@ -16,6 +16,11 @@ interface Prescription {
     id: number;
     firstName: string;
     lastName: string;
+    admissions?: Array<{
+      id: number;
+      status: string;
+      admissionDate: string;
+    }>;
   };
   doctor: {
     id: number;
@@ -175,9 +180,16 @@ export default function PrescriptionsPage() {
                           <Pill className="w-6 h-6 text-green-haze" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-lg">
-                            {prescription.patient.firstName} {prescription.patient.lastName}
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-lg">
+                              {prescription.patient.firstName} {prescription.patient.lastName}
+                            </h3>
+                            {prescription.patient.admissions && prescription.patient.admissions.length > 0 && (
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-ribbon/10 text-red-ribbon">
+                                ADMITTED
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">
                             Prescribed by Dr. {prescription.doctor.name}
                           </p>

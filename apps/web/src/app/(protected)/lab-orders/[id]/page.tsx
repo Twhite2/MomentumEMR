@@ -9,6 +9,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { getRoleDisplayName } from '@/lib/role-utils';
 
 interface LabOrder {
   id: number;
@@ -659,9 +660,17 @@ export default function LabOrderDetailPage() {
             )}
 
             {/* Results List */}
-            {order.labResults.length > 0 ? (
-              <div className="space-y-4">
-                {order.labResults.map((result) => (
+            {(() => {
+              // Doctors and pharmacists only see finalized results
+              // Lab scientists and admins see all results
+              const isDoctor = session?.user?.role === 'doctor' || session?.user?.role === 'pharmacist';
+              const visibleResults = isDoctor 
+                ? order.labResults.filter(r => r.finalized)
+                : order.labResults;
+              
+              return visibleResults.length > 0 ? (
+                <div className="space-y-4">
+                  {visibleResults.map((result) => (
                   <div key={result.id} className="p-4 border border-border rounded-lg">
                     <div className="flex items-start justify-between mb-3">
                       <div>
@@ -814,7 +823,8 @@ export default function LabOrderDetailPage() {
                 <TestTube className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground">No results uploaded yet</p>
               </div>
-            )}
+            );
+            })()}
           </div>
         </div>
 
@@ -942,7 +952,7 @@ export default function LabOrderDetailPage() {
               <div>
                 <h2 className="text-2xl font-bold">Send Results to Patient</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Add a doctor's note to accompany the lab results
+                  Add a note to accompany the lab results
                 </p>
               </div>
               <button
@@ -984,10 +994,10 @@ export default function LabOrderDetailPage() {
                 <p className="text-lg font-semibold">{order.orderType.replace('_', ' ')}</p>
               </div>
 
-              {/* Doctor's Note */}
+              {/* Note from current user */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Doctor's Note <span className="text-red-ribbon">*</span>
+                  {getRoleDisplayName(session?.user?.role)}'s Note <span className="text-red-ribbon">*</span>
                 </label>
                 <Textarea
                   value={doctorNote}

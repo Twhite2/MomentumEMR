@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Button, Input } from '@momentum/ui';
 import { User, Mail, Phone, Calendar, Shield, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { getRoleDisplayName } from '@/lib/role-utils';
 
 export default function ProfilePage() {
   const { data: session } = useSession();
@@ -46,7 +47,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-primary">{session?.user?.name}</h2>
-            <p className="text-muted-foreground capitalize">{session?.user?.role}</p>
+            <p className="text-muted-foreground">{getRoleDisplayName(session?.user?.role)}</p>
             <p className="text-sm text-muted-foreground mt-1">
               {session?.user?.hospitalName}
             </p>
@@ -100,9 +101,8 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-muted-foreground" />
                 <Input
-                  value={session?.user?.role || ''}
+                  value={getRoleDisplayName(session?.user?.role)}
                   disabled
-                  className="capitalize"
                 />
               </div>
             </div>

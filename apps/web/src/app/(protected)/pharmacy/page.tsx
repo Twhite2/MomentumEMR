@@ -177,13 +177,11 @@ export default function PharmacyPage() {
                           <h3 className="font-semibold text-primary">
                             {prescription.patient.firstName} {prescription.patient.lastName}
                           </h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            prescription.patient.patientType === 'inpatient'
-                              ? 'bg-red-ribbon/10 text-red-ribbon'
-                              : 'bg-tory-blue/10 text-tory-blue'
-                          }`}>
-                            {prescription.patient.patientType === 'inpatient' ? 'ADMITTED' : 'OPD'}
-                          </span>
+                          {prescription.patient.admissions && prescription.patient.admissions.length > 0 && (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-ribbon/10 text-red-ribbon">
+                              ADMITTED
+                            </span>
+                          )}
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             prescription.status === 'active' 
                               ? 'bg-green-haze/10 text-green-haze' 

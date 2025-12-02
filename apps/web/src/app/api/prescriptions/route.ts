@@ -53,6 +53,17 @@ export async function GET(request: NextRequest) {
               id: true,
               firstName: true,
               lastName: true,
+              admissions: {
+                where: {
+                  status: {
+                    in: ['admitted', 'in_treatment'],
+                  },
+                },
+                orderBy: {
+                  admissionDate: 'desc',
+                },
+                take: 1,
+              },
             },
           },
           doctor: {
@@ -116,7 +127,31 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Patient not found' }, 404);
     }
 
-    // Create prescription with items (calculate drug count)
+    // Helper function to calculate total tablets needed
+    const calculateTotalTablets = (frequency: string, duration: string): number => {
+      // Extract numeric values from frequency (e.g., "3 times daily" -> 3)
+      const freqMatch = frequency?.match(/(\d+)/);
+      const timesPerDay = freqMatch ? parseInt(freqMatch[1]) : 1;
+
+      // Extract numeric values and unit from duration
+      const durationMatch = duration?.match(/(\d+)\s*(day|week|month)/i);
+      if (!durationMatch) return timesPerDay; // Default to times per day if no duration
+
+      const durationValue = parseInt(durationMatch[1]);
+      const durationUnit = durationMatch[2].toLowerCase();
+
+      // Convert to days
+      let totalDays = durationValue;
+      if (durationUnit === 'week') {
+        totalDays = durationValue * 7;
+      } else if (durationUnit === 'month') {
+        totalDays = durationValue * 30;
+      }
+
+      return timesPerDay * totalDays;
+    };
+
+    // Create prescription with items (calculate drug count and total tablets)
     const prescription = await prisma.prescription.create({
       data: {
         hospitalId,
@@ -132,6 +167,9 @@ export async function POST(request: NextRequest) {
             frequency: med.frequency || null,
             duration: med.duration || null,
             notes: med.notes || null,
+            totalTablets: med.frequency && med.duration 
+              ? calculateTotalTablets(med.frequency, med.duration)
+              : null,
           })),
         },
       },

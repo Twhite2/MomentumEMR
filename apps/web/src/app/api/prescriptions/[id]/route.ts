@@ -19,7 +19,21 @@ export async function GET(
         hospitalId,
       },
       include: {
-        patient: true,
+        patient: {
+          include: {
+            admissions: {
+              where: {
+                status: {
+                  in: ['admitted', 'in_treatment'],
+                },
+              },
+              orderBy: {
+                admissionDate: 'desc',
+              },
+              take: 1,
+            },
+          },
+        },
         doctor: {
           select: {
             id: true,

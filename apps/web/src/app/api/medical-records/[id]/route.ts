@@ -49,9 +49,10 @@ export async function GET(
     const latestVital = await prisma.vital.findFirst({
       where: {
         patientId: record.patientId,
+        hospitalId,
       },
       orderBy: {
-        createdAt: 'desc',
+        recordedAt: 'desc',
       },
       select: {
         bloodPressureSys: true,

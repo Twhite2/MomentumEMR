@@ -16,6 +16,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { getRoleDisplayName, ROLE_BADGE_COLORS, type UserRole } from '@/lib/role-utils';
 
 interface User {
   id: number;
@@ -150,17 +151,7 @@ export default function UserDetailPage() {
   };
 
   const getRoleColor = (role: string) => {
-    const colors: Record<string, string> = {
-      admin: 'bg-red-ribbon text-white',
-      doctor: 'bg-primary text-white',
-      nurse: 'bg-green-haze text-white',
-      pharmacist: 'bg-amaranth text-white',
-      lab_tech: 'bg-danube text-white',
-      cashier: 'bg-saffron text-black',
-      receptionist: 'bg-purple-500 text-white',
-      patient: 'bg-muted text-muted-foreground',
-    };
-    return colors[role] || 'bg-muted text-muted-foreground';
+    return ROLE_BADGE_COLORS[role as UserRole] || 'bg-muted text-muted-foreground';
   };
 
   if (isLoading) {
@@ -201,7 +192,7 @@ export default function UserDetailPage() {
           </div>
         </div>
         <span className={`px-4 py-2 rounded-lg font-medium ${getRoleColor(user.role)}`}>
-          {user.role.replace('_', ' ').toUpperCase()}
+          {getRoleDisplayName(user.role)}
         </span>
       </div>
 
@@ -309,7 +300,7 @@ export default function UserDetailPage() {
                   <p className="text-sm text-muted-foreground">Role</p>
                   <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4 text-muted-foreground" />
-                    <p className="font-medium capitalize">{user.role.replace('_', ' ')}</p>
+                    <p className="font-medium">{getRoleDisplayName(user.role)}</p>
                   </div>
                 </div>
               </div>

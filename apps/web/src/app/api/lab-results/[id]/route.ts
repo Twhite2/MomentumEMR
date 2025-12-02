@@ -34,6 +34,7 @@ export async function GET(
           },
         },
         labResultValues: true,
+        attachments: true,
       },
     });
 

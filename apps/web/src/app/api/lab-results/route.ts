@@ -5,8 +5,9 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/lab-results - Get all lab results (for Lab Scientists)
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['lab_scientist', 'admin', 'doctor', 'pharmacist']);
+    const session = await requireRole(['lab_scientist', 'admin', 'doctor', 'pharmacist', 'lab_tech']);
     const hospitalId = parseInt(session.user.hospitalId);
+    const userRole = session.user.role;
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
@@ -20,11 +21,16 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    // Filter by finalized status if provided
-    if (status === 'finalized') {
+    // Doctors and pharmacists can ONLY see finalized results
+    if (userRole === 'doctor' || userRole === 'pharmacist') {
       whereClause.finalized = true;
-    } else if (status === 'pending') {
-      whereClause.finalized = false;
+    } else {
+      // Lab scientists and admins can filter by status
+      if (status === 'finalized') {
+        whereClause.finalized = true;
+      } else if (status === 'pending') {
+        whereClause.finalized = false;
+      }
     }
 
     // Get lab results with related data
