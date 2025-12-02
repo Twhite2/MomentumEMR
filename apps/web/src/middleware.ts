@@ -89,5 +89,6 @@ export const config = {
     '/files/:path*',
     '/queue/:path*',
     '/login',
+    '/api/branding/public', // Allow subdomain header for branding API
   ],
 };

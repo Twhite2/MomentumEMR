@@ -3,16 +3,38 @@ import { prisma } from '@momentum/database';
 import { headers } from 'next/headers';
 
 /**
+ * Extract subdomain from hostname
+ */
+function getSubdomainFromHost(hostname: string): string | null {
+  const hostWithoutPort = hostname.split(':')[0];
+  
+  if (hostWithoutPort === 'localhost' || hostWithoutPort === '127.0.0.1') {
+    return null;
+  }
+  
+  const parts = hostWithoutPort.split('.');
+  if (parts.length >= 3) {
+    return parts[0];
+  }
+  
+  return null;
+}
+
+/**
  * Public API endpoint to fetch hospital branding by subdomain
  * This endpoint does NOT require authentication
  * Used by the login page to show hospital-specific branding
  */
 export async function GET(request: Request) {
   try {
-    // Get subdomain from middleware header or query parameter
     const headersList = await headers();
-    const subdomain = headersList.get('x-hospital-subdomain') || 
-                     new URL(request.url).searchParams.get('subdomain');
+    const url = new URL(request.url);
+    
+    // Get subdomain from multiple sources (priority order)
+    const subdomain = 
+      headersList.get('x-hospital-subdomain') || // From middleware
+      url.searchParams.get('subdomain') ||       // From query param
+      getSubdomainFromHost(headersList.get('host') || ''); // From hostname directly
     
     if (!subdomain) {
       return NextResponse.json(
