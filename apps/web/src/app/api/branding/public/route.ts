@@ -72,6 +72,7 @@ export async function GET(request: Request) {
     // Log branding fetch for debugging
     console.log(`[Branding API] Fetched branding for: ${hospital.name} (${subdomain})`);
     console.log(`[Branding API] Logo URL: ${hospital.logoUrl || 'none'}`);
+    console.log(`[Branding API] Background Image URL: ${hospital.backgroundImageUrl || 'none'}`);
     console.log(`[Branding API] Colors: ${hospital.primaryColor}, ${hospital.secondaryColor}`);
     
     // Return branding information

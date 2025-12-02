@@ -16,7 +16,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads');
+    // Use absolute path outside build directory for production persistence
+    const uploadsDir = process.env.NODE_ENV === 'production' 
+      ? '/var/www/momentum_uploads'  // Production: persistent location
+      : join(process.cwd(), 'public', 'uploads');  // Development: public folder
+    
     try {
       await mkdir(uploadsDir, { recursive: true });
     } catch (error) {
@@ -34,7 +38,10 @@ export async function POST(request: NextRequest) {
     await writeFile(filepath, buffer);
 
     // Return public URL
-    const url = `/uploads/${filename}`;
+    // In production, serve via API route; in development, serve from public folder
+    const url = process.env.NODE_ENV === 'production'
+      ? `/api/uploads/${filename}`
+      : `/uploads/${filename}`;
     
     return apiResponse({ 
       success: true,
