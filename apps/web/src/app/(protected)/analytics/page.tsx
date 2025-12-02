@@ -64,6 +64,19 @@ export default function AnalyticsPage() {
     enabled: !isLoading && isSuperAdmin,
   });
 
+  // Fetch comprehensive super admin analytics
+  const { data: superAdminData } = useQuery({
+    queryKey: ['analytics-super-admin', dateRange],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (dateRange.startDate) params.append('startDate', dateRange.startDate);
+      if (dateRange.endDate) params.append('endDate', dateRange.endDate);
+      const response = await axios.get(`/api/analytics/super-admin?${params}`);
+      return response.data;
+    },
+    enabled: !isLoading && isSuperAdmin,
+  });
+
   // Fetch hospital analytics data for hospital staff
   const { data: revenueData } = useQuery({
     queryKey: ['analytics-revenue', dateRange],
@@ -176,61 +189,89 @@ export default function AnalyticsPage() {
 
       {/* Key Metrics */}
       {isSuperAdmin ? (
-        // Super Admin - Platform-wide metrics
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Hospitals */}
+        // Super Admin - Enhanced Platform-wide metrics (6 cards)
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          {/* Revenue */}
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Total Hospitals</p>
-              <Building2 className="w-5 h-5 text-primary" />
-            </div>
-            <p className="text-2xl font-bold">
-              {platformData ? platformData.summary.totalHospitals.toLocaleString() : '...'}
-            </p>
-            <p className="text-sm text-green-haze mt-1">
-              {platformData ? `${platformData.summary.activeHospitals} active` : ''}
-            </p>
-          </div>
-
-          {/* Monthly Revenue */}
-          <div className="bg-white rounded-lg border border-border p-6">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Monthly Revenue</p>
+              <p className="text-sm text-muted-foreground">Revenue</p>
               <DollarSign className="w-5 h-5 text-green-haze" />
             </div>
             <p className="text-2xl font-bold">
-              {subscriptionData ? formatCurrency(subscriptionData.summary.totalMonthlyRevenue) : '...'}
+              {superAdminData ? formatCurrency(superAdminData.topMetrics.revenue) : '...'}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              {subscriptionData ? `${subscriptionData.summary.activeSubscriptions} subscriptions` : ''}
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
             </p>
           </div>
 
-          {/* Total Users */}
+          {/* Medical Records Made */}
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Total Users</p>
-              <Users className="w-5 h-5 text-primary" />
+              <p className="text-sm text-muted-foreground">Medical Records</p>
+              <FileText className="w-5 h-5 text-primary" />
             </div>
             <p className="text-2xl font-bold">
-              {platformData ? platformData.summary.totalUsers.toLocaleString() : '...'}
+              {superAdminData ? superAdminData.topMetrics.medicalRecords.total.toLocaleString() : '...'}
             </p>
-            <p className="text-sm text-primary mt-1">
-              {systemData ? `${systemData.summary.activeUsers} active` : ''}
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
             </p>
           </div>
 
-          {/* System Activity */}
+          {/* Patients on Admission */}
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Today's Activity</p>
-              <Activity className="w-5 h-5 text-amaranth" />
+              <p className="text-sm text-muted-foreground">On Admission</p>
+              <BedDouble className="w-5 h-5 text-red-ribbon" />
             </div>
             <p className="text-2xl font-bold">
-              {systemData ? systemData.summary.todayAppointments.toLocaleString() : '...'}
+              {superAdminData ? superAdminData.topMetrics.admissions.total.toLocaleString() : '...'}
             </p>
-            <p className="text-sm text-amaranth mt-1">
-              {systemData ? 'appointments' : ''}
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
+            </p>
+          </div>
+
+          {/* Total Invoices */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Invoices</p>
+              <FileText className="w-5 h-5 text-saffron" />
+            </div>
+            <p className="text-2xl font-bold">
+              {superAdminData ? superAdminData.topMetrics.invoices.total.toLocaleString() : '...'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
+            </p>
+          </div>
+
+          {/* Total Prescriptions */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Prescriptions</p>
+              <Pill className="w-5 h-5 text-amaranth" />
+            </div>
+            <p className="text-2xl font-bold">
+              {superAdminData ? superAdminData.topMetrics.prescriptions.total.toLocaleString() : '...'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
+            </p>
+          </div>
+
+          {/* Total Investigations */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Investigations</p>
+              <TestTube className="w-5 h-5 text-danube" />
+            </div>
+            <p className="text-2xl font-bold">
+              {superAdminData ? superAdminData.topMetrics.investigations.total.toLocaleString() : '...'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
             </p>
           </div>
         </div>
@@ -427,6 +468,375 @@ export default function AnalyticsPage() {
                 <span className="text-green-700">Completed</span>
                 <span className="font-semibold">{comprehensiveData.metrics.investigations.byStatus?.completed || 0}</span>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Super Admin - Breakdown Cards */}
+      {isSuperAdmin && superAdminData && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          {/* Revenue Breakdown */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Revenue Breakdown</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">HMO</span>
+                <span className="font-semibold">{superAdminData.topMetrics.medicalRecords.byType?.hmo || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Self</span>
+                <span className="font-semibold">{superAdminData.topMetrics.medicalRecords.byType?.self_pay || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Corporate</span>
+                <span className="font-semibold">{superAdminData.topMetrics.medicalRecords.byType?.corporate || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Medical Records Breakdown */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Medical Records</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">HMO</span>
+                <span className="font-semibold">{superAdminData.topMetrics.medicalRecords.byType?.hmo || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Self</span>
+                <span className="font-semibold">{superAdminData.topMetrics.medicalRecords.byType?.self_pay || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Corporate</span>
+                <span className="font-semibold">{superAdminData.topMetrics.medicalRecords.byType?.corporate || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Admissions Breakdown */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Admissions</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">HMO</span>
+                <span className="font-semibold">{superAdminData.topMetrics.admissions.byType?.hmo || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Self</span>
+                <span className="font-semibold">{superAdminData.topMetrics.admissions.byType?.self_pay || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Corporate</span>
+                <span className="font-semibold">{superAdminData.topMetrics.admissions.byType?.corporate || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Invoices Status */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Invoices Status</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">Pending</span>
+                <span className="font-semibold">{superAdminData.topMetrics.invoices.byStatus?.pending || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Paid</span>
+                <span className="font-semibold">{superAdminData.topMetrics.invoices.byStatus?.paid || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Prescriptions Status */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Prescriptions Status</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">Active</span>
+                <span className="font-semibold">{superAdminData.topMetrics.prescriptions.byStatus?.active || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Completed</span>
+                <span className="font-semibold">{superAdminData.topMetrics.prescriptions.byStatus?.completed || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Investigations Status */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Investigations Status</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">Pending</span>
+                <span className="font-semibold">{superAdminData.topMetrics.investigations.byStatus?.pending || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Completed</span>
+                <span className="font-semibold">{superAdminData.topMetrics.investigations.byStatus?.completed || 0}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Super Admin - Analysis Cards */}
+      {isSuperAdmin && superAdminData && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Top 5 HMO Clients */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-primary" />
+              Top 5 HMO Clients
+            </h2>
+            <div className="space-y-3">
+              {superAdminData.analytics.topHMOClients && superAdminData.analytics.topHMOClients.length > 0 ? (
+                superAdminData.analytics.topHMOClients.map((client: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-muted/30 rounded">
+                    <p className="font-medium text-sm">{client.hmo_name}</p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                      <span>{client.invoice_count} invoices</span>
+                      <span className="font-bold text-primary">{formatCurrency(Number(client.total_revenue))}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No HMO data</p>
+              )}
+            </div>
+          </div>
+
+          {/* Top 5 Diagnoses */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-amaranth" />
+              Top 5 Diagnoses
+            </h2>
+            <div className="space-y-2">
+              {superAdminData.analytics.topDiagnoses && superAdminData.analytics.topDiagnoses.length > 0 ? (
+                superAdminData.analytics.topDiagnoses.map((diag: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded">
+                    <span className="text-sm truncate flex-1">{diag.diagnosis}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{diag.count}</span>
+                      <span className="text-sm font-semibold text-amaranth">{Number(diag.percentage).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No diagnosis data</p>
+              )}
+            </div>
+          </div>
+
+          {/* Total Claims by Facility */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-green-haze" />
+              Claims by Facility
+            </h2>
+            <div className="space-y-2">
+              {superAdminData.analytics.claimsByFacility && superAdminData.analytics.claimsByFacility.length > 0 ? (
+                superAdminData.analytics.claimsByFacility.slice(0, 5).map((facility: any, idx: number) => (
+                  <div key={idx} className="p-2 bg-muted/30 rounded">
+                    <p className="text-sm font-medium">{facility.hospital_name}</p>
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>{facility.claim_count} claims</span>
+                      <span className="font-bold">{formatCurrency(Number(facility.total_amount))}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No claims data</p>
+              )}
+            </div>
+          </div>
+
+          {/* Patient Type Distribution */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Percent className="w-5 h-5 text-danube" />
+              Patient Type Distribution
+            </h2>
+            <div className="space-y-3">
+              {superAdminData.analytics.patientTypeDistribution && superAdminData.analytics.patientTypeDistribution.length > 0 ? (
+                superAdminData.analytics.patientTypeDistribution.map((type: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-muted/30 rounded">
+                    <span className="text-sm capitalize">{type.patient_type.replace('_', ' ')}</span>
+                    <span className="text-lg font-bold text-primary">{Number(type.percentage).toFixed(1)}%</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No distribution data</p>
+              )}
+            </div>
+          </div>
+
+          {/* Top 5 Drug Categories */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Pill className="w-5 h-5 text-amaranth" />
+              Top 5 Drug Categories
+            </h2>
+            <div className="space-y-2">
+              {superAdminData.analytics.topDrugCategories && superAdminData.analytics.topDrugCategories.length > 0 ? (
+                superAdminData.analytics.topDrugCategories.map((drug: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded">
+                    <span className="text-sm truncate flex-1">{drug.drug_category || 'Unknown'}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{drug.count}</span>
+                      <span className="text-sm font-semibold text-amaranth">{Number(drug.percentage).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No drug data</p>
+              )}
+            </div>
+          </div>
+
+          {/* Top 5 Lab Test Areas */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <TestTube className="w-5 h-5 text-danube" />
+              Top 5 Lab Test Areas
+            </h2>
+            <div className="space-y-2">
+              {superAdminData.analytics.topLabTests && superAdminData.analytics.topLabTests.length > 0 ? (
+                superAdminData.analytics.topLabTests.map((test: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded">
+                    <span className="text-sm truncate flex-1">{test.order_type}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{test.count}</span>
+                      <span className="text-sm font-semibold text-danube">{Number(test.percentage).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No lab test data</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Super Admin - Clinical Analytics */}
+      {isSuperAdmin && superAdminData && (
+        <div className="bg-white rounded-lg border border-border p-6">
+          <h2 className="text-xl font-semibold text-primary mb-4">Clinical Analytics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Prescription Rate */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Prescription Rate Per Hospital</h3>
+              <div className="space-y-2">
+                {superAdminData.clinicalAnalytics.prescriptionRates && superAdminData.clinicalAnalytics.prescriptionRates.length > 0 ? (
+                  superAdminData.clinicalAnalytics.prescriptionRates.slice(0, 5).map((hosp: any, idx: number) => (
+                    <div key={idx} className="text-xs p-2 bg-muted/30 rounded">
+                      <p className="font-medium">{hosp.hospital_name}</p>
+                      <p className="text-muted-foreground">{Number(hosp.rate).toFixed(2)} per patient</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground">No data</p>
+                )}
+              </div>
+            </div>
+
+            {/* Antibiotics Rate */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Antibiotics Rate Per Hospital</h3>
+              <div className="space-y-2">
+                {superAdminData.clinicalAnalytics.antibioticsRates && superAdminData.clinicalAnalytics.antibioticsRates.length > 0 ? (
+                  superAdminData.clinicalAnalytics.antibioticsRates.slice(0, 5).map((hosp: any, idx: number) => (
+                    <div key={idx} className="text-xs p-2 bg-muted/30 rounded">
+                      <p className="font-medium">{hosp.hospital_name}</p>
+                      <p className="text-muted-foreground">{Number(hosp.percentage).toFixed(1)}%</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground">No data</p>
+                )}
+              </div>
+            </div>
+
+            {/* Admission Rates */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Admission Rates</h3>
+              <div className="space-y-2">
+                {superAdminData.clinicalAnalytics.admissionRates && superAdminData.clinicalAnalytics.admissionRates.length > 0 ? (
+                  superAdminData.clinicalAnalytics.admissionRates.slice(0, 5).map((hosp: any, idx: number) => (
+                    <div key={idx} className="text-xs p-2 bg-muted/30 rounded">
+                      <p className="font-medium">{hosp.hospital_name}</p>
+                      <p className="text-muted-foreground">{hosp.admission_count} admissions</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground">No data</p>
+                )}
+              </div>
+            </div>
+
+            {/* Discharge Rates */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Discharge Rates</h3>
+              <div className="space-y-2">
+                {superAdminData.clinicalAnalytics.dischargeRates && superAdminData.clinicalAnalytics.dischargeRates.length > 0 ? (
+                  superAdminData.clinicalAnalytics.dischargeRates.slice(0, 5).map((hosp: any, idx: number) => (
+                    <div key={idx} className="text-xs p-2 bg-muted/30 rounded">
+                      <p className="font-medium">{hosp.hospital_name}</p>
+                      <p className="text-muted-foreground">{Number(hosp.discharge_rate).toFixed(1)}%</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground">No data</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Super Admin - Demographics */}
+      {isSuperAdmin && superAdminData && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Patient Age Distribution */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Patient Age Distribution
+            </h2>
+            <div className="space-y-3">
+              {superAdminData.demographics.ageDistribution && superAdminData.demographics.ageDistribution.length > 0 ? (
+                superAdminData.demographics.ageDistribution.map((age: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-muted/30 rounded">
+                    <span className="text-sm font-medium">{age.age_group} years</span>
+                    <span className="text-lg font-bold text-primary">{Number(age.count)}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No age data</p>
+              )}
+            </div>
+          </div>
+
+          {/* Average Time Per User */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-saffron" />
+              Average Time on System
+            </h2>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {superAdminData.demographics.timeTracking && superAdminData.demographics.timeTracking.length > 0 ? (
+                superAdminData.demographics.timeTracking.map((user: any, idx: number) => (
+                  <div key={idx} className="text-xs p-2 bg-muted/30 rounded">
+                    <p className="font-medium">{user.user_name} ({user.role})</p>
+                    <p className="text-muted-foreground">{user.hospital_name}</p>
+                    <p className="text-primary font-semibold">{Number(user.avg_hours).toFixed(1)} hours avg</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No time tracking data</p>
+              )}
             </div>
           </div>
         </div>

@@ -15,6 +15,11 @@ export async function GET(request: NextRequest) {
     const today = new Date();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    // Get current week range
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
 
     // Get platform-wide statistics
     const [
@@ -29,6 +34,19 @@ export async function GET(request: NextRequest) {
       totalAppointments,
       totalLabOrders,
       totalInvoices,
+      
+      // New metrics
+      newPatientsThisWeek,
+      activeUsersNow,
+      totalNotifications,
+      unreadNotifications,
+      totalClaims,
+      medicationsDispensedThisWeek,
+      labTestsThisWeek,
+      completedRecordsPercentage,
+      hmoUsagePercentage,
+      appointmentsByDay,
+      totalPrescriptions,
     ] = await Promise.all([
       // Total hospitals
       prisma.hospital.count(),
@@ -97,6 +115,99 @@ export async function GET(request: NextRequest) {
         },
         _count: true,
       }),
+      
+      // New patients registered this week
+      prisma.patient.count({
+        where: {
+          createdAt: {
+            gte: startOfWeek,
+          },
+        },
+      }),
+      
+      // Active users now (users created/updated recently as proxy)
+      prisma.user.count({
+        where: {
+          updatedAt: {
+            gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+          },
+        },
+      }),
+      
+      // Total notifications
+      prisma.notification.count(),
+      
+      // Unread notifications
+      prisma.notification.count({
+        where: {
+          readAt: null,
+        },
+      }),
+      
+      // Total claims (HMO invoices)
+      prisma.$queryRaw`
+        SELECT COUNT(*) as count
+        FROM invoices i
+        JOIN patients p ON i.patient_id = p.id
+        WHERE p.patient_type = 'hmo'
+      `,
+      
+      // Medications dispensed this week
+      prisma.prescription.count({
+        where: {
+          status: 'completed',
+          updatedAt: {
+            gte: startOfWeek,
+          },
+        },
+      }),
+      
+      // Lab tests ordered this week
+      prisma.labOrder.count({
+        where: {
+          createdAt: {
+            gte: startOfWeek,
+          },
+        },
+      }),
+      
+      // Percentage of complete patient records
+      prisma.$queryRaw`
+        SELECT 
+          COUNT(CASE WHEN diagnosis IS NOT NULL AND treatment_plan IS NOT NULL THEN 1 END) * 100.0 / COUNT(*) as percentage
+        FROM medical_records
+      `,
+      
+      // HMO usage percentage
+      prisma.$queryRaw`
+        SELECT 
+          COUNT(CASE WHEN patient_type = 'hmo' THEN 1 END) * 100.0 / COUNT(*) as percentage
+        FROM patients
+      `,
+      
+      // Appointments by day of week (for chart)
+      prisma.$queryRaw`
+        SELECT 
+          CASE EXTRACT(DOW FROM start_time)
+            WHEN 0 THEN 'Sunday'
+            WHEN 1 THEN 'Monday'
+            WHEN 2 THEN 'Tuesday'
+            WHEN 3 THEN 'Wednesday'
+            WHEN 4 THEN 'Thursday'
+            WHEN 5 THEN 'Friday'
+            WHEN 6 THEN 'Saturday'
+          END as day_name,
+          EXTRACT(DOW FROM start_time) as day_num,
+          appointment_type,
+          COUNT(*) as count
+        FROM appointments
+        WHERE start_time >= ${startOfWeek}
+        GROUP BY day_name, day_num, appointment_type
+        ORDER BY day_num
+      `,
+      
+      // Total prescriptions (for activity scoring)
+      prisma.prescription.count(),
     ]);
 
     // Calculate patient type breakdown
@@ -120,6 +231,36 @@ export async function GET(request: NextRequest) {
       '60+': { percentage: 15 },
     };
 
+    // Process appointment data for chart
+    const appointmentChartData = (appointmentsByDay as any[]).reduce((acc, row) => {
+      const day = row.day_name;
+      if (!acc[day]) {
+        acc[day] = {};
+      }
+      acc[day][row.appointment_type] = Number(row.count);
+      return acc;
+    }, {} as Record<string, Record<string, number>>);
+
+    // Calculate read rate
+    const notificationReadRate = totalNotifications > 0 
+      ? Math.round(((totalNotifications - unreadNotifications) / totalNotifications) * 100)
+      : 0;
+
+    // Helper function to convert BigInt values
+    const convertBigInt = (obj: any): any => {
+      if (obj === null || obj === undefined) return obj;
+      if (typeof obj === 'bigint') return Number(obj);
+      if (Array.isArray(obj)) return obj.map(convertBigInt);
+      if (typeof obj === 'object') {
+        const newObj: any = {};
+        for (const key in obj) {
+          newObj[key] = convertBigInt(obj[key]);
+        }
+        return newObj;
+      }
+      return obj;
+    };
+
     return NextResponse.json({
       totalHospitals,
       hospitalsThisMonth,
@@ -129,12 +270,48 @@ export async function GET(request: NextRequest) {
       patientTypeBreakdown,
       ageDistribution,
       totalSubscriptionRevenue,
+      
+      // New metrics
+      newPatientsThisWeek,
+      activeUsersNow,
+      
+      systemMonitoring: {
+        activeUsersNow,
+        errorLogs: 0, // Placeholder - requires error logging system
+        failedProcesses: 0, // Placeholder - requires process tracking
+        avgTimePerUser: 0, // Placeholder - requires session tracking
+      },
+      
+      platformStatistics: {
+        totalInvoices: totalInvoices._count,
+        totalClaims: Number((totalClaims as any[])[0]?.count || 0),
+        totalNotifications,
+        notificationReadRate,
+      },
+      
+      weeklyActivity: {
+        medicationsDispensed: medicationsDispensedThisWeek,
+        labTestsOrdered: labTestsThisWeek,
+      },
+      
+      adoptionMetrics: {
+        userActivityLevel: Math.round((activeUsersNow / (await prisma.user.count())) * 100),
+        hospitalUsageScore: Math.round((activeSubscriptions / totalHospitals) * 100),
+        avgConsultTimePerHospital: 0, // Placeholder - requires time tracking
+        completeRecordsPercentage: Number((completedRecordsPercentage as any[])[0]?.percentage || 0),
+        hmoUsagePercentage: Number((hmoUsagePercentage as any[])[0]?.percentage || 0),
+      },
+      
+      appointmentActivity: convertBigInt(appointmentChartData),
+      
       analytics: {
-        avgCostPerPatient: totalInvoices._avg.totalAmount || 0,
+        avgCostPerPatient: Number(totalInvoices._avg.totalAmount || 0),
         totalAppointments,
         totalInvestigations: totalLabOrders,
         totalInvoices: totalInvoices._count,
+        totalPrescriptions,
       },
+      
       recentHospitals: recentHospitals.map(h => ({
         id: h.id,
         name: h.name,
