@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
           primaryColor: hospitalData.primaryColor || '#1253b2', // Momentum tory-blue
           secondaryColor: hospitalData.secondaryColor || '#729ad2', // Momentum danube
           tagline: hospitalData.tagline || null,
+          backgroundImageUrl: hospitalData.backgroundImageUrl || null,
         },
       });
 

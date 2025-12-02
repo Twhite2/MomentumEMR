@@ -89,10 +89,14 @@ export async function PUT(
       tagline: data.tagline,
     };
 
-    // Only update logoUrl if it's a valid B2 URL (not a proxy URL)
-    // Logo uploads should go through /api/hospitals/[id]/branding endpoint
-    if (data.logoUrl && data.logoUrl.includes('backblazeb2.com')) {
+    // Update logoUrl if provided
+    if (data.logoUrl) {
       updateData.logoUrl = data.logoUrl;
+    }
+
+    // Update backgroundImageUrl if provided
+    if (data.backgroundImageUrl) {
+      updateData.backgroundImageUrl = data.backgroundImageUrl;
     }
 
     const hospital = await prisma.hospital.update({
