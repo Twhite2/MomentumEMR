@@ -14,6 +14,12 @@ import {
   AlertTriangle,
   Building2,
   CreditCard,
+  FileText,
+  BedDouble,
+  Pill,
+  TestTube,
+  Clock,
+  Percent,
 } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
@@ -99,6 +105,19 @@ export default function AnalyticsPage() {
     queryKey: ['analytics-inventory'],
     queryFn: async () => {
       const response = await axios.get('/api/analytics/inventory');
+      return response.data;
+    },
+    enabled: !isLoading && !isSuperAdmin,
+  });
+
+  // Fetch comprehensive analytics (new detailed metrics)
+  const { data: comprehensiveData } = useQuery({
+    queryKey: ['analytics-comprehensive', dateRange],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (dateRange.startDate) params.append('startDate', dateRange.startDate);
+      if (dateRange.endDate) params.append('endDate', dateRange.endDate);
+      const response = await axios.get(`/api/analytics/comprehensive?${params}`);
       return response.data;
     },
     enabled: !isLoading && !isSuperAdmin,
@@ -216,12 +235,12 @@ export default function AnalyticsPage() {
           </div>
         </div>
       ) : (
-        // Hospital Staff - Hospital-specific metrics
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        // Hospital Staff - Hospital-specific metrics (Enhanced with 6 cards)
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Total Revenue */}
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Total Revenue</p>
+              <p className="text-sm text-muted-foreground">Revenue</p>
               <DollarSign className="w-5 h-5 text-green-haze" />
             </div>
             <p className="text-2xl font-bold">
@@ -234,50 +253,181 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          {/* Total Patients */}
+          {/* Medical Records Made */}
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Total Patients</p>
-              <Users className="w-5 h-5 text-primary" />
+              <p className="text-sm text-muted-foreground">Medical Records</p>
+              <FileText className="w-5 h-5 text-primary" />
             </div>
             <p className="text-2xl font-bold">
-              {patientData ? patientData.summary.totalPatients.toLocaleString() : '...'}
+              {comprehensiveData ? comprehensiveData.metrics.medicalRecords.total.toLocaleString() : '...'}
             </p>
-            <p className="text-sm text-primary mt-1">
-              {patientData ? `+${patientData.summary.newPatients} this period` : ''}
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
             </p>
           </div>
 
-          {/* Appointments */}
+          {/* Patients on Admission */}
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Appointments</p>
-              <Calendar className="w-5 h-5 text-amaranth" />
+              <p className="text-sm text-muted-foreground">On Admission</p>
+              <BedDouble className="w-5 h-5 text-red-ribbon" />
             </div>
             <p className="text-2xl font-bold">
-              {appointmentData
-                ? appointmentData.summary.totalAppointments.toLocaleString()
-                : '...'}
+              {comprehensiveData ? comprehensiveData.metrics.admissions.total.toLocaleString() : '...'}
             </p>
-            <p className="text-sm text-amaranth mt-1">
-              {appointmentData
-                ? `${appointmentData.summary.completionRate.toFixed(1)}% completion`
-                : ''}
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
             </p>
           </div>
 
-          {/* Inventory Value */}
+          {/* Total Invoices */}
           <div className="bg-white rounded-lg border border-border p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Inventory Value</p>
-              <Package className="w-5 h-5 text-saffron" />
+              <p className="text-sm text-muted-foreground">Invoices</p>
+              <FileText className="w-5 h-5 text-saffron" />
             </div>
             <p className="text-2xl font-bold">
-              {inventoryData ? formatCurrency(inventoryData.summary.totalValue) : '...'}
+              {comprehensiveData ? comprehensiveData.metrics.invoices.total.toLocaleString() : '...'}
             </p>
-            <p className="text-sm text-saffron mt-1">
-              {inventoryData ? `${inventoryData.summary.totalItems} items` : ''}
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
             </p>
+          </div>
+
+          {/* Total Prescriptions */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Prescriptions</p>
+              <Pill className="w-5 h-5 text-amaranth" />
+            </div>
+            <p className="text-2xl font-bold">
+              {comprehensiveData ? comprehensiveData.metrics.prescriptions.total.toLocaleString() : '...'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
+            </p>
+          </div>
+
+          {/* Total Investigations */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Investigations</p>
+              <TestTube className="w-5 h-5 text-danube" />
+            </div>
+            <p className="text-2xl font-bold">
+              {comprehensiveData ? comprehensiveData.metrics.investigations.total.toLocaleString() : '...'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {dateRange.startDate ? 'in period' : 'last 30 days'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Breakdown Cards - HMO/Self/Corporate & Pending/Completed */}
+      {!isSuperAdmin && comprehensiveData && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          {/* Revenue Breakdown */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Revenue Breakdown</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">HMO</span>
+                <span className="font-semibold">{comprehensiveData.metrics.medicalRecords.byType?.hmo || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Self</span>
+                <span className="font-semibold">{comprehensiveData.metrics.medicalRecords.byType?.self_pay || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Corporate</span>
+                <span className="font-semibold">{comprehensiveData.metrics.medicalRecords.byType?.corporate || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Medical Records Breakdown */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Medical Records</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">HMO</span>
+                <span className="font-semibold">{comprehensiveData.metrics.medicalRecords.byType?.hmo || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Self</span>
+                <span className="font-semibold">{comprehensiveData.metrics.medicalRecords.byType?.self_pay || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Corporate</span>
+                <span className="font-semibold">{comprehensiveData.metrics.medicalRecords.byType?.corporate || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Admissions Breakdown */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Admissions</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">HMO</span>
+                <span className="font-semibold">{comprehensiveData.metrics.admissions.byType?.hmo || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Self</span>
+                <span className="font-semibold">{comprehensiveData.metrics.admissions.byType?.self_pay || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Corporate</span>
+                <span className="font-semibold">{comprehensiveData.metrics.admissions.byType?.corporate || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Invoices Status */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Invoices Status</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">Pending</span>
+                <span className="font-semibold">{comprehensiveData.metrics.invoices.byStatus?.pending || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Paid</span>
+                <span className="font-semibold">{comprehensiveData.metrics.invoices.byStatus?.paid || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Prescriptions Status */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Prescriptions Status</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">Active</span>
+                <span className="font-semibold">{comprehensiveData.metrics.prescriptions.byStatus?.active || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Completed</span>
+                <span className="font-semibold">{comprehensiveData.metrics.prescriptions.byStatus?.completed || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Investigations Status */}
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <p className="text-xs font-semibold text-green-800 mb-3">Investigations Status</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">Pending</span>
+                <span className="font-semibold">{comprehensiveData.metrics.investigations.byStatus?.pending || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-700">Completed</span>
+                <span className="font-semibold">{comprehensiveData.metrics.investigations.byStatus?.completed || 0}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -446,6 +596,245 @@ export default function AnalyticsPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Large Analysis Cards - Top 5s and Percentages */}
+      {!isSuperAdmin && comprehensiveData && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Top 5 HMO Clients */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-primary" />
+              Top 5 HMO Clients
+            </h2>
+            <div className="space-y-3">
+              {comprehensiveData.analytics.topHMOClients && comprehensiveData.analytics.topHMOClients.length > 0 ? (
+                comprehensiveData.analytics.topHMOClients.map((client: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-muted/30 rounded">
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{client.hmo_name || 'Unknown HMO'}</p>
+                      <p className="text-xs text-muted-foreground">{client.invoice_count} invoices</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-sm">{formatCurrency(Number(client.total_revenue))}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No HMO data available</p>
+              )}
+            </div>
+          </div>
+
+          {/* Total Claims Submitted */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-green-haze" />
+              Total Claims Submitted
+            </h2>
+            <div className="space-y-4">
+              <div className="p-4 bg-green-50 rounded">
+                <p className="text-sm text-muted-foreground mb-1">Total Claims</p>
+                <p className="text-3xl font-bold text-green-800">
+                  {comprehensiveData.analytics.claims.total_claims?.toLocaleString() || '0'}
+                </p>
+              </div>
+              <div className="p-4 bg-primary/10 rounded">
+                <p className="text-sm text-muted-foreground mb-1">Total Revenue</p>
+                <p className="text-2xl font-bold text-primary">
+                  {formatCurrency(Number(comprehensiveData.analytics.claims.total_claimed_amount || 0))}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Top 5 Diagnosis */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-amaranth" />
+              Top 5 Diagnoses
+            </h2>
+            <div className="space-y-2">
+              {comprehensiveData.analytics.topDiagnoses && comprehensiveData.analytics.topDiagnoses.length > 0 ? (
+                comprehensiveData.analytics.topDiagnoses.map((diag: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded">
+                    <span className="text-sm truncate flex-1">{diag.diagnosis}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{diag.count}</span>
+                      <span className="text-sm font-semibold text-amaranth">{Number(diag.percentage).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No diagnosis data</p>
+              )}
+            </div>
+          </div>
+
+          {/* Payment Method Breakdown */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Percent className="w-5 h-5 text-danube" />
+              Payment Method %
+            </h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-pink-50 rounded">
+                <span className="text-sm">HMO</span>
+                <span className="text-lg font-semibold text-pink-600">
+                  {comprehensiveData.metrics.medicalRecords.byType?.hmo || 0}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
+                <span className="text-sm">Self Pay</span>
+                <span className="text-lg font-semibold text-blue-600">
+                  {comprehensiveData.metrics.medicalRecords.byType?.self_pay || 0}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded">
+                <span className="text-sm">Corporate</span>
+                <span className="text-lg font-semibold text-yellow-600">
+                  {comprehensiveData.metrics.medicalRecords.byType?.corporate || 0}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Top 5 Drug Categories */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Pill className="w-5 h-5 text-amaranth" />
+              Top 5 Drug Categories
+            </h2>
+            <div className="space-y-2">
+              {comprehensiveData.analytics.topDrugCategories && comprehensiveData.analytics.topDrugCategories.length > 0 ? (
+                comprehensiveData.analytics.topDrugCategories.map((drug: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded">
+                    <span className="text-sm truncate flex-1">{drug.drug_category || 'Unknown'}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{drug.count}</span>
+                      <span className="text-sm font-semibold text-amaranth">{Number(drug.percentage).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No drug data</p>
+              )}
+            </div>
+          </div>
+
+          {/* Top 5 Lab Test Areas */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <TestTube className="w-5 h-5 text-danube" />
+              Top 5 Lab Test Areas
+            </h2>
+            <div className="space-y-2">
+              {comprehensiveData.analytics.topLabTests && comprehensiveData.analytics.topLabTests.length > 0 ? (
+                comprehensiveData.analytics.topLabTests.map((test: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded">
+                    <span className="text-sm truncate flex-1">{test.order_type}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{test.count}</span>
+                      <span className="text-sm font-semibold text-danube">{Number(test.percentage).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No lab test data</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Patient Age Distribution & Time Tracking */}
+      {!isSuperAdmin && comprehensiveData && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Patient Age Distribution */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Patient Age Distribution
+            </h2>
+            <div className="space-y-3">
+              {comprehensiveData.analytics.patientAgeDistribution && comprehensiveData.analytics.patientAgeDistribution.length > 0 ? (
+                comprehensiveData.analytics.patientAgeDistribution.map((age: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-muted/30 rounded">
+                    <span className="text-sm font-medium">{age.age_group} years</span>
+                    <span className="text-lg font-bold text-primary">{Number(age.count)}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No age data available</p>
+              )}
+            </div>
+          </div>
+
+          {/* Average Time Per Section */}
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-saffron" />
+              Average Time Per Section
+            </h2>
+            <div className="space-y-3">
+              <div className="p-3 bg-blue-50 rounded">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Front Desk (Check-in to Vitals)</span>
+                  <span className="font-semibold text-blue-600">
+                    {comprehensiveData?.analytics.timeTracking?.frontDesk 
+                      ? `${comprehensiveData.analytics.timeTracking.frontDesk.toFixed(1)} min` 
+                      : 'No data'}
+                  </span>
+                </div>
+              </div>
+              <div className="p-3 bg-green-50 rounded">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Nursing Station (Vitals to Doctor)</span>
+                  <span className="font-semibold text-green-600">
+                    {comprehensiveData?.analytics.timeTracking?.nursing 
+                      ? `${comprehensiveData.analytics.timeTracking.nursing.toFixed(1)} min` 
+                      : 'No data'}
+                  </span>
+                </div>
+              </div>
+              <div className="p-3 bg-purple-50 rounded">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Doctor Consultation</span>
+                  <span className="font-semibold text-purple-600">
+                    {comprehensiveData?.analytics.timeTracking?.consultation 
+                      ? `${comprehensiveData.analytics.timeTracking.consultation.toFixed(1)} min` 
+                      : 'No data'}
+                  </span>
+                </div>
+              </div>
+              <div className="p-3 bg-yellow-50 rounded">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Investigation (Lab Tests)</span>
+                  <span className="font-semibold text-yellow-600">
+                    {comprehensiveData?.analytics.timeTracking?.investigation 
+                      ? `${comprehensiveData.analytics.timeTracking.investigation.toFixed(1)} min` 
+                      : 'No data'}
+                  </span>
+                </div>
+              </div>
+              <div className="p-3 bg-pink-50 rounded">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Pharmacy (Dispensing)</span>
+                  <span className="font-semibold text-pink-600">
+                    {comprehensiveData?.analytics.timeTracking?.pharmacy 
+                      ? `${comprehensiveData.analytics.timeTracking.pharmacy.toFixed(1)} min` 
+                      : 'No data'}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-muted/30 rounded">
+                <p className="text-xs text-muted-foreground text-center">
+                  Calculated from appointment timestamps (check-in to checkout)
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Revenue Breakdown - Only for Hospital Staff */}
