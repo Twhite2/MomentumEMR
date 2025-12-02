@@ -17,6 +17,7 @@ interface HospitalBranding {
   primaryColor: string;
   secondaryColor: string;
   tagline: string | null;
+  backgroundImageUrl: string | null;
 }
 
 export default function LoginPage() {
@@ -96,16 +97,28 @@ export default function LoginPage() {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center" 
+      className="min-h-screen flex items-center justify-center relative" 
       style={{
-        background: branding 
-          ? `linear-gradient(to bottom right, ${branding.primaryColor}10, ${branding.secondaryColor}20)`
-          : 'linear-gradient(to bottom right, rgba(15, 76, 129, 0.05), rgba(74, 144, 226, 0.2))'
+        backgroundImage: branding?.backgroundImageUrl 
+          ? `url(${branding.backgroundImageUrl})`
+          : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        background: !branding?.backgroundImageUrl 
+          ? (branding 
+              ? `linear-gradient(to bottom right, ${branding.primaryColor}10, ${branding.secondaryColor}20)`
+              : 'linear-gradient(to bottom right, rgba(15, 76, 129, 0.05), rgba(74, 144, 226, 0.2))')
+          : undefined,
       }}
     >
-      <div className="w-full max-w-md">
+      {/* Overlay for readability when background image exists */}
+      {branding?.backgroundImageUrl && (
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+      )}
+      
+      <div className="relative z-10 w-full max-w-md">
         {/* Login Card */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className={`rounded-xl shadow-2xl p-8 ${branding?.backgroundImageUrl ? 'bg-white/95 backdrop-blur-md' : 'bg-white'}`}>
           {/* Hospital Branding */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-3">

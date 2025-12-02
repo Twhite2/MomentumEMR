@@ -165,10 +165,11 @@ model Hospital {
   active            Boolean  @default(true)
   
   // Branding fields
-  logoUrl           String?  @map("logo_url")
-  primaryColor      String?  @default("#0F4C81") @map("primary_color")
-  secondaryColor    String?  @default("#4A90E2") @map("secondary_color")
-  tagline           String?
+  logoUrl              String?  @map("logo_url")
+  primaryColor         String?  @default("#0F4C81") @map("primary_color")
+  secondaryColor       String?  @default("#4A90E2") @map("secondary_color")
+  tagline              String?
+  backgroundImageUrl   String?  @map("background_image_url") // Login page background
   
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")

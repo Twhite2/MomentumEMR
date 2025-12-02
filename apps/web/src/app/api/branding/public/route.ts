@@ -56,6 +56,7 @@ export async function GET(request: Request) {
         primaryColor: true,
         secondaryColor: true,
         tagline: true,
+        backgroundImageUrl: true,
         active: true,
       },
     });
@@ -83,6 +84,7 @@ export async function GET(request: Request) {
         primaryColor: hospital.primaryColor || '#0F4C81',
         secondaryColor: hospital.secondaryColor || '#4A90E2',
         tagline: hospital.tagline,
+        backgroundImageUrl: hospital.backgroundImageUrl,
       },
     });
   } catch (error) {

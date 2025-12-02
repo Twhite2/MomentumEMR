@@ -21,6 +21,7 @@ interface Hospital {
   primaryColor?: string;
   secondaryColor?: string;
   tagline?: string;
+  backgroundImageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,6 +31,8 @@ export default function HospitalDetailPage() {
   const queryClient = useQueryClient();
   const hospitalId = params.id as string;
   const [isEditing, setIsEditing] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
 
   const { data: hospital, isLoading } = useQuery<Hospital>({
     queryKey: ['hospital', hospitalId],
@@ -50,6 +53,7 @@ export default function HospitalDetailPage() {
     primaryColor: hospital?.primaryColor || '#1253b2',
     secondaryColor: hospital?.secondaryColor || '#729ad2',
     tagline: hospital?.tagline || '',
+    backgroundImageUrl: hospital?.backgroundImageUrl || '',
   });
 
   // Update form data when hospital data loads
@@ -65,6 +69,7 @@ export default function HospitalDetailPage() {
       primaryColor: hospital.primaryColor || '#1253b2',
       secondaryColor: hospital.secondaryColor || '#729ad2',
       tagline: hospital.tagline || '',
+      backgroundImageUrl: hospital.backgroundImageUrl || '',
     });
   }
 

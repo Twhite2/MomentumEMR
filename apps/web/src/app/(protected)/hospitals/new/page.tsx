@@ -27,6 +27,7 @@ export default function NewHospitalPage() {
     primaryColor: '#1253b2', // Momentum tory-blue
     secondaryColor: '#729ad2', // Momentum danube
     tagline: '',
+    backgroundImageUrl: '',
   });
   
   // Auto-generate subdomain from hospital name
@@ -50,6 +51,7 @@ export default function NewHospitalPage() {
 
   const [creationResult, setCreationResult] = useState<any>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -106,6 +108,44 @@ export default function NewHospitalPage() {
       toast.error('Failed to upload logo');
     } finally {
       setUploadingLogo(false);
+    }
+  };
+
+  const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 10MB for backgrounds)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size must be less than 10MB');
+      return;
+    }
+
+    setUploadingBackground(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setFormData((prev) => ({ ...prev, backgroundImageUrl: response.data.url }));
+      toast.success('Background image uploaded successfully');
+    } catch (error) {
+      console.error('Background upload error:', error);
+      toast.error('Failed to upload background image');
+    } finally {
+      setUploadingBackground(false);
     }
   };
 
@@ -358,6 +398,42 @@ export default function NewHospitalPage() {
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2">
                     Recommended: 200x200px, PNG or SVG
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Background Image Upload */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Login Page Background Image</label>
+              <div className="flex items-center gap-4">
+                <div className="w-40 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-muted overflow-hidden">
+                  {formData.backgroundImageUrl ? (
+                    <img src={formData.backgroundImageUrl} alt="Background" className="w-full h-full object-cover rounded-lg" />
+                  ) : (
+                    <Image className="w-8 h-8 text-muted-foreground" />
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="file"
+                    id="background-upload"
+                    accept="image/*"
+                    onChange={handleBackgroundUpload}
+                    className="hidden"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => document.getElementById('background-upload')?.click()}
+                    disabled={uploadingBackground}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploadingBackground ? 'Uploading...' : 'Upload Background'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Recommended: 1920x1080px, JPG or PNG. Creates immersive login experience.
                   </p>
                 </div>
               </div>
