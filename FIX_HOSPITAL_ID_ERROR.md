@@ -32,7 +32,7 @@ ssh root@your-server-ip
 # Connect to PostgreSQL
 psql -U postgres -d momentum_emr
 # Or if using a specific connection string:
-psql "postgresql://username:password@localhost:5432/momentum_emr"
+psql "postgresql://momentum:@localhost:5432/momentum_emr"
 ```
 
 ---

@@ -227,7 +227,7 @@ export default function AdminDashboardComprehensive({ session }: AdminDashboardP
               Billing and invoices
             </Button>
           </Link>
-          <Link href="/queue">
+          <Link href="/patient-queue">
             <Button className="w-full bg-primary hover:bg-primary/90 text-white rounded-2xl py-6">
               <Users className="w-5 h-5 mr-2" />
               Patient's Queue

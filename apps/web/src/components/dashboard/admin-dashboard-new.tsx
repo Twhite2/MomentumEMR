@@ -250,7 +250,7 @@ export default function AdminDashboard({ session }: AdminDashboardProps) {
                 <p className="text-xs font-medium">Billing</p>
               </div>
             </Link>
-            <Link href="/queue">
+            <Link href="/patient-queue">
               <div className="p-4 border border-border rounded-lg hover:bg-muted transition-colors cursor-pointer text-center">
                 <Users className="w-6 h-6 mx-auto mb-2 text-primary" />
                 <p className="text-xs font-medium">Patient Queue</p>
