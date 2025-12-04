@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/inventory - List inventory items
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'pharmacist', 'doctor']);
+    const session = await requireRole(['admin', 'pharmacist', 'doctor', 'lab_tech']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const { searchParams } = new URL(request.url);
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
 // POST /api/inventory - Add new inventory item
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'pharmacist', 'nurse', 'lab_scientist']);
+    const session = await requireRole(['admin', 'pharmacist', 'nurse', 'lab_tech']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const body = await request.json();

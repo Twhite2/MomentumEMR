@@ -1,16 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Input } from '@momentum/ui';
-import { Plus, Search, TestTube, AlertTriangle } from 'lucide-react';
+import { Plus, Search, TestTube, AlertTriangle, X } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 
 export default function LabSuppliesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
+  const filterParam = searchParams.get('filter'); // 'low-stock' or 'expiring'
 
   // Fetch lab supplies (inventory with category="Lab")
   const { data: supplies, isLoading } = useQuery({
@@ -27,6 +29,32 @@ export default function LabSuppliesPage() {
       return response.data;
     },
   });
+
+  // Filter supplies based on URL parameter
+  const getFilteredSupplies = () => {
+    let items = supplies?.inventory || [];
+    
+    if (filterParam === 'low-stock') {
+      items = items.filter((s: any) => s.stockQuantity <= s.reorderLevel);
+    } else if (filterParam === 'expiring') {
+      const today = new Date();
+      const ninetyDaysFromNow = new Date(today);
+      ninetyDaysFromNow.setDate(today.getDate() + 90);
+      items = items.filter((s: any) => {
+        if (!s.expiryDate) return false;
+        const expiryDate = new Date(s.expiryDate);
+        return expiryDate <= ninetyDaysFromNow && expiryDate > today;
+      });
+    }
+    
+    return items;
+  };
+
+  const filteredSupplies = getFilteredSupplies();
+
+  const clearFilter = () => {
+    router.push('/lab/supplies');
+  };
 
   return (
     <div className="space-y-6">
@@ -47,7 +75,7 @@ export default function LabSuppliesPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-lg border border-border p-4">
           <div className="flex items-center gap-3">
             <TestTube className="w-8 h-8 text-purple-600" />
@@ -57,18 +85,53 @@ export default function LabSuppliesPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-border p-4">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="w-8 h-8 text-orange-600" />
-            <div>
-              <p className="text-sm text-muted-foreground">Low Stock</p>
-              <p className="text-2xl font-bold">
-                {supplies?.inventory?.filter((s: any) => s.stockQuantity <= s.reorderLevel).length || 0}
-              </p>
+        <Link href="/lab/supplies?filter=low-stock">
+          <div className="bg-white rounded-lg border-2 border-red-500 p-4 hover:border-red-600 transition-colors cursor-pointer">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Low Stock</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {supplies?.inventory?.filter((s: any) => s.stockQuantity <= s.reorderLevel).length || 0}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </Link>
+        <Link href="/lab/supplies?filter=expiring">
+          <div className="bg-white rounded-lg border-2 border-amber-500 p-4 hover:border-amber-600 transition-colors cursor-pointer">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-8 h-8 text-amber-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Expiring Soon (90 days)</p>
+                <p className="text-2xl font-bold text-amber-600">
+                  {supplies?.inventory?.filter((s: any) => {
+                    if (!s.expiryDate) return false;
+                    const today = new Date();
+                    const ninetyDaysFromNow = new Date(today);
+                    ninetyDaysFromNow.setDate(today.getDate() + 90);
+                    const expiryDate = new Date(s.expiryDate);
+                    return expiryDate <= ninetyDaysFromNow && expiryDate > today;
+                  }).length || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+        </Link>
       </div>
+
+      {/* Active Filter Badge */}
+      {filterParam && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Active filter:</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+            {filterParam === 'low-stock' ? 'Low Stock Items' : 'Expiring Soon (90 days)'}
+            <button onClick={clearFilter} className="hover:bg-primary/20 rounded-full p-0.5">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search */}
       <div className="bg-white rounded-lg border border-border p-4">
@@ -115,17 +178,24 @@ export default function LabSuppliesPage() {
                   Loading supplies...
                 </td>
               </tr>
-            ) : supplies?.inventory?.length === 0 ? (
+            ) : filteredSupplies.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                  No lab supplies found. Add your first supply!
+                  {filterParam 
+                    ? `No ${filterParam === 'low-stock' ? 'low stock' : 'expiring'} supplies found.`
+                    : 'No lab supplies found. Add your first supply!'}
                 </td>
               </tr>
             ) : (
-              supplies?.inventory?.map((supply: any) => {
+              filteredSupplies.map((supply: any) => {
                 const isLowStock = supply.stockQuantity <= supply.reorderLevel;
+                // Check if expiring within 90 days (matching dashboard calculation)
+                const today = new Date();
+                const ninetyDaysFromNow = new Date(today);
+                ninetyDaysFromNow.setDate(today.getDate() + 90);
                 const isExpiringSoon = supply.expiryDate && 
-                  new Date(supply.expiryDate) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                  new Date(supply.expiryDate) <= ninetyDaysFromNow &&
+                  new Date(supply.expiryDate) > today;
                 
                 return (
                   <tr key={supply.id} className="hover:bg-gray-50">

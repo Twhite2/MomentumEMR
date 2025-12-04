@@ -85,7 +85,7 @@ const navItems: NavItem[] = [
     label: 'Analytics',
     href: '/analytics',
     icon: BarChart3,
-    roles: ['super_admin', 'admin', 'doctor'],
+    roles: ['super_admin', 'admin'],
   },
   {
     label: 'Users & Staff',
@@ -166,6 +166,12 @@ const navItems: NavItem[] = [
     href: '/lab-results',
     icon: ClipboardList,
     roles: ['lab_tech', 'patient', 'pharmacist'],
+  },
+  {
+    label: 'Lab Inventory',
+    href: '/lab/supplies',
+    icon: ShoppingCart,
+    roles: ['lab_tech'],
   },
   {
     label: 'Allergies',

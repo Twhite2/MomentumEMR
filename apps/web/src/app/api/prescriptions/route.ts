@@ -170,6 +170,8 @@ export async function POST(request: NextRequest) {
             totalTablets: med.frequency && med.duration 
               ? calculateTotalTablets(med.frequency, med.duration)
               : null,
+            inventoryId: med.inventoryId ? parseInt(med.inventoryId) : null, // Link to inventory if provided
+            isCustomDrug: !med.inventoryId, // Mark as custom if not from inventory
           })),
         },
       },

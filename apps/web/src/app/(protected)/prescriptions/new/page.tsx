@@ -27,6 +27,7 @@ interface Medication {
   frequency: string;
   duration: string;
   notes: string;
+  inventoryId?: number | null; // Link to inventory for stock deduction
 }
 
 interface InventoryItem {
@@ -70,7 +71,7 @@ export default function NewPrescriptionPage() {
   const [doctorId, setDoctorId] = useState('');
   const [treatmentPlan, setTreatmentPlan] = useState('');
   const [medications, setMedications] = useState<Medication[]>([
-    { drugName: '', dosage: '', frequency: '', duration: '', notes: '' },
+    { drugName: '', dosage: '', frequency: '', duration: '', notes: '', inventoryId: null },
   ]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [customDurations, setCustomDurations] = useState<Record<number, string>>({});
@@ -131,7 +132,7 @@ export default function NewPrescriptionPage() {
   const addMedication = () => {
     setMedications([
       ...medications,
-      { drugName: '', dosage: '', frequency: '', duration: '', notes: '' },
+      { drugName: '', dosage: '', frequency: '', duration: '', notes: '', inventoryId: null },
     ]);
   };
 
@@ -141,7 +142,7 @@ export default function NewPrescriptionPage() {
     }
   };
 
-  const updateMedication = (index: number, field: keyof Medication, value: string) => {
+  const updateMedication = (index: number, field: keyof Medication, value: string | number | null) => {
     const updated = [...medications];
     updated[index] = { ...updated[index], [field]: value };
     setMedications(updated);
@@ -149,6 +150,7 @@ export default function NewPrescriptionPage() {
 
   const selectDrug = (index: number, item: InventoryItem) => {
     updateMedication(index, 'drugName', item.itemName);
+    updateMedication(index, 'inventoryId', item.id); // Capture inventory ID for stock deduction
     if (item.dosageStrength) {
       updateMedication(index, 'dosage', item.dosageStrength);
     }
@@ -159,6 +161,10 @@ export default function NewPrescriptionPage() {
   const handleDrugNameChange = (index: number, value: string) => {
     setSearchQueries({ ...searchQueries, [index]: value });
     updateMedication(index, 'drugName', value);
+    // Clear inventoryId when user manually types (custom drug)
+    if (medications[index].inventoryId) {
+      updateMedication(index, 'inventoryId', null);
+    }
     setShowDropdowns({ ...showDropdowns, [index]: value.length > 0 });
   };
 

@@ -73,35 +73,30 @@ export async function GET(request: NextRequest) {
       checkedOutAt: apt.checkedOutAt,
     }));
 
-    // Sort queue properly:
-    // 1. Emergency cases first (regardless of status)
-    // 2. Then by status: checked_in -> scheduled -> completed
-    // 3. Within each group, sort by time (checkedInAt for checked_in, startTime for scheduled, checkedOutAt for completed)
+    // Sort queue by time of entry (chronological order):
+    // 1. Emergency cases always first
+    // 2. Then by entry time:
+    //    - For checked-in patients: use checkedInAt (actual entry time)
+    //    - For scheduled patients (waiting): use startTime (expected entry time)
+    //    - For completed patients: use checkedOutAt (completion time)
     queue.sort((a, b) => {
       // Emergency cases always come first
       if (a.appointment.isEmergency && !b.appointment.isEmergency) return -1;
       if (!a.appointment.isEmergency && b.appointment.isEmergency) return 1;
 
-      // Group by status
-      const statusOrder = { 'checked_in': 1, 'scheduled': 2, 'completed': 3 };
-      const aOrder = statusOrder[a.appointment.status as keyof typeof statusOrder] || 4;
-      const bOrder = statusOrder[b.appointment.status as keyof typeof statusOrder] || 4;
-      
-      if (aOrder !== bOrder) return aOrder - bOrder;
+      // Determine entry time for each patient
+      const getEntryTime = (patient: typeof a) => {
+        if (patient.appointment.status === 'completed' && patient.checkedOutAt) {
+          return new Date(patient.checkedOutAt).getTime();
+        } else if (patient.appointment.status === 'checked_in' && patient.checkedInAt) {
+          return new Date(patient.checkedInAt).getTime();
+        } else {
+          // For scheduled patients (not yet checked in), use appointment time
+          return new Date(patient.appointment.startTime).getTime();
+        }
+      };
 
-      // Within same status group, sort by time
-      if (a.appointment.status === 'checked_in') {
-        const aTime = a.checkedInAt ? new Date(a.checkedInAt).getTime() : 0;
-        const bTime = b.checkedInAt ? new Date(b.checkedInAt).getTime() : 0;
-        return aTime - bTime;
-      } else if (a.appointment.status === 'scheduled') {
-        return new Date(a.appointment.startTime).getTime() - new Date(b.appointment.startTime).getTime();
-      } else if (a.appointment.status === 'completed') {
-        const aTime = a.checkedOutAt ? new Date(a.checkedOutAt).getTime() : 0;
-        const bTime = b.checkedOutAt ? new Date(b.checkedOutAt).getTime() : 0;
-        return aTime - bTime;
-      }
-      return 0;
+      return getEntryTime(a) - getEntryTime(b);
     });
 
     // Calculate stats

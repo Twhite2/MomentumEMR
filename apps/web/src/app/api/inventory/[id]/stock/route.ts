@@ -9,7 +9,7 @@ export async function POST(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'pharmacist']);
+    const session = await requireRole(['admin', 'pharmacist', 'lab_tech']);
     const hospitalId = parseInt(session.user.hospitalId);
     const itemId = parseInt(params.id);
 
