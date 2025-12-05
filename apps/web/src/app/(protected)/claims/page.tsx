@@ -73,6 +73,9 @@ export default function ClaimsPage() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('');
   const [hmoFilter, setHmoFilter] = useState('');
+  const [dateRange, setDateRange] = useState('thisMonth');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -85,13 +88,53 @@ export default function ClaimsPage() {
   const [denialReason, setDenialReason] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Calculate date range based on selection
+  const getDateRange = () => {
+    const now = new Date();
+    let startDate = '';
+    let endDate = '';
+
+    switch (dateRange) {
+      case 'thisMonth':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+        break;
+      case 'lastMonth':
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+        break;
+      case 'last3Months':
+        startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1).toISOString();
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+        break;
+      case 'last6Months':
+        startDate = new Date(now.getFullYear(), now.getMonth() - 6, 1).toISOString();
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+        break;
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          startDate = new Date(customStartDate).toISOString();
+          endDate = new Date(new Date(customEndDate).setHours(23, 59, 59)).toISOString();
+        }
+        break;
+      default:
+        break;
+    }
+
+    return { startDate, endDate };
+  };
+
   // Fetch claims
   const { data: claimsData, isLoading } = useQuery({
-    queryKey: ['claims', statusFilter, hmoFilter],
+    queryKey: ['claims', statusFilter, hmoFilter, dateRange, customStartDate, customEndDate],
     queryFn: async () => {
+      const { startDate, endDate } = getDateRange();
       let url = '/api/claims?';
       if (statusFilter) url += `status=${statusFilter}&`;
       if (hmoFilter) url += `hmoId=${hmoFilter}&`;
+      if (startDate && endDate) {
+        url += `startDate=${startDate}&endDate=${endDate}&`;
+      }
       const response = await axios.get(url);
       return response.data;
     },
@@ -339,7 +382,19 @@ export default function ClaimsPage() {
           <Filter className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold">Filters</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Select
+            label="Date Range"
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+          >
+            <option value="thisMonth">This Month</option>
+            <option value="lastMonth">Last Month</option>
+            <option value="last3Months">Last 3 Months</option>
+            <option value="last6Months">Last 6 Months</option>
+            <option value="custom">Custom Range</option>
+          </Select>
+
           <Select
             label="Status"
             value={statusFilter}
@@ -371,13 +426,71 @@ export default function ClaimsPage() {
               onClick={() => {
                 setStatusFilter('');
                 setHmoFilter('');
+                setDateRange('thisMonth');
+                setCustomStartDate('');
+                setCustomEndDate('');
               }}
             >
               Clear Filters
             </Button>
           </div>
         </div>
+
+        {/* Custom Date Range Inputs */}
+        {dateRange === 'custom' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <Input
+              label="Start Date"
+              type="date"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+            />
+            <Input
+              label="End Date"
+              type="date"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+            />
+          </div>
+        )}
       </div>
+
+      {/* Date Range Summary */}
+      {claimsData && (
+        <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20 p-4">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Viewing Claims For</p>
+              <p className="font-semibold text-primary">
+                {dateRange === 'thisMonth' && `This Month (${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })})`}
+                {dateRange === 'lastMonth' && `Last Month (${new Date(new Date().getFullYear(), new Date().getMonth() - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })})`}
+                {dateRange === 'last3Months' && 'Last 3 Months'}
+                {dateRange === 'last6Months' && 'Last 6 Months'}
+                {dateRange === 'custom' && customStartDate && customEndDate && 
+                  `${new Date(customStartDate).toLocaleDateString()} - ${new Date(customEndDate).toLocaleDateString()}`}
+              </p>
+            </div>
+            <div className="flex gap-6">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">Total Claims</p>
+                <p className="text-2xl font-bold text-primary">{claimsData.pagination?.total || 0}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">Unpaid</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {claimsData.claims?.filter((c: Claim) => c.status === 'pending').length || 0}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">Paid</p>
+                <p className="text-2xl font-bold text-green-haze">
+                  {claimsData.claims?.filter((c: Claim) => c.status === 'paid').length || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Claims List */}
       <div className="bg-white rounded-lg border border-border">
