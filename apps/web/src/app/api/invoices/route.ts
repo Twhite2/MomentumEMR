@@ -118,9 +118,17 @@ export async function POST(request: NextRequest) {
       return apiResponse({ error: 'Missing required fields' }, 400);
     }
 
-    // Verify patient belongs to hospital
+    // Verify patient belongs to hospital and get HMO info
     const patient = await prisma.patient.findFirst({
       where: { id: parseInt(patientId), hospitalId },
+      include: {
+        hmo: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!patient) {
@@ -139,6 +147,7 @@ export async function POST(request: NextRequest) {
         hospitalId,
         patientId: parseInt(patientId),
         appointmentId: appointmentId ? parseInt(appointmentId) : null,
+        hmoId: patient.patientType === 'hmo' && patient.insuranceId ? patient.insuranceId : null, // Save HMO ID for claims
         totalAmount,
         paidAmount: 0,
         status: 'pending',

@@ -144,6 +144,12 @@ const navItems: NavItem[] = [
     roles: ['admin', 'nurse'],
   },
   {
+    label: 'Nursing Supplies',
+    href: '/nursing/supplies',
+    icon: ShoppingCart,
+    roles: ['admin', 'nurse'],
+  },
+  {
     label: 'Admissions',
     href: '/admissions',
     icon: BedDouble,

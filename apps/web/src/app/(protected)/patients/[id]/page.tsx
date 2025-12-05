@@ -494,64 +494,66 @@ export default function PatientDetailPage() {
             {patient.vitals && patient.vitals.length > 0 ? (
               <div className="space-y-2">
                 {patient.vitals.map((vital: any) => (
-                  <div key={vital.id} className="p-3 border rounded-lg hover:bg-spindle transition-all">
-                    <div className="flex justify-between items-start mb-3">
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(vital.recordedAt).toLocaleDateString()} at {new Date(vital.recordedAt).toLocaleTimeString()}
-                      </p>
-                      <p className="text-xs text-muted-foreground">By: {vital.recordedByUser?.name}</p>
+                  <Link key={vital.id} href={`/vitals/${vital.id}`}>
+                    <div className="p-3 border rounded-lg hover:bg-spindle hover:border-primary transition-all cursor-pointer">
+                      <div className="flex justify-between items-start mb-3">
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(vital.recordedAt).toLocaleDateString()} at {new Date(vital.recordedAt).toLocaleTimeString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground">By: {vital.recordedByUser?.name}</p>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {vital.bloodPressure && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Blood Pressure</p>
+                            <p className="text-sm font-medium">{vital.bloodPressure} mmHg</p>
+                          </div>
+                        )}
+                        {vital.heartRate && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Heart Rate</p>
+                            <p className="text-sm font-medium">{vital.heartRate} bpm</p>
+                          </div>
+                        )}
+                        {vital.temperature && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Temperature</p>
+                            <p className="text-sm font-medium">{vital.temperature}°C</p>
+                          </div>
+                        )}
+                        {vital.oxygenSaturation && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">SpO2</p>
+                            <p className="text-sm font-medium">{vital.oxygenSaturation}%</p>
+                          </div>
+                        )}
+                        {vital.respiratoryRate && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Resp. Rate</p>
+                            <p className="text-sm font-medium">{vital.respiratoryRate} /min</p>
+                          </div>
+                        )}
+                        {vital.weight && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Weight</p>
+                            <p className="text-sm font-medium">{vital.weight} kg</p>
+                          </div>
+                        )}
+                        {vital.height && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Height</p>
+                            <p className="text-sm font-medium">{vital.height} cm</p>
+                          </div>
+                        )}
+                        {vital.bmi && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">BMI</p>
+                            <p className="text-sm font-medium">{vital.bmi}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {vital.bloodPressure && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">Blood Pressure</p>
-                          <p className="text-sm font-medium">{vital.bloodPressure} mmHg</p>
-                        </div>
-                      )}
-                      {vital.heartRate && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">Heart Rate</p>
-                          <p className="text-sm font-medium">{vital.heartRate} bpm</p>
-                        </div>
-                      )}
-                      {vital.temperature && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">Temperature</p>
-                          <p className="text-sm font-medium">{vital.temperature}°C</p>
-                        </div>
-                      )}
-                      {vital.oxygenSaturation && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">SpO2</p>
-                          <p className="text-sm font-medium">{vital.oxygenSaturation}%</p>
-                        </div>
-                      )}
-                      {vital.respiratoryRate && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">Resp. Rate</p>
-                          <p className="text-sm font-medium">{vital.respiratoryRate} /min</p>
-                        </div>
-                      )}
-                      {vital.weight && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">Weight</p>
-                          <p className="text-sm font-medium">{vital.weight} kg</p>
-                        </div>
-                      )}
-                      {vital.height && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">Height</p>
-                          <p className="text-sm font-medium">{vital.height} cm</p>
-                        </div>
-                      )}
-                      {vital.bmi && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">BMI</p>
-                          <p className="text-sm font-medium">{vital.bmi}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (

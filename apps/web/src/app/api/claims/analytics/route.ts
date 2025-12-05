@@ -13,54 +13,49 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
     const hmoId = searchParams.get('hmoId');
 
+    // Build where clause for HMO invoices
+    const where: any = {
+      hospitalId,
+      hmoId: { not: null }, // Only HMO invoices
+    };
+
     // Date filter
-    const dateFilter: any = {};
     if (startDate && endDate) {
-      dateFilter.submissionDate = {
+      where.createdAt = {
         gte: new Date(startDate),
         lte: new Date(endDate),
       };
     }
-
-    // HMO filter
-    const where: any = { 
-      claimBatch: { hospitalId } 
-    };
     
+    // HMO filter
     if (hmoId) {
       where.hmoId = parseInt(hmoId);
     }
 
-    if (Object.keys(dateFilter).length > 0) {
-      Object.assign(where, dateFilter);
-    }
-
-    // Get all claims with grouping by status
-    const claimsByStatus = await prisma.claimSubmission.groupBy({
+    // Get all HMO invoices with grouping by status
+    const claimsByStatus = await prisma.invoice.groupBy({
       by: ['status'],
       where,
       _count: { _all: true },
       _sum: { 
-        submittedAmount: true,
-        approvedAmount: true,
+        totalAmount: true,
         paidAmount: true,
       },
     });
 
-    // Get claims by HMO
-    const claimsByHmo = await prisma.claimSubmission.groupBy({
+    // Get HMO invoices by HMO
+    const claimsByHmo = await prisma.invoice.groupBy({
       by: ['hmoId', 'status'],
       where,
       _count: { _all: true },
       _sum: {
-        submittedAmount: true,
-        approvedAmount: true,
+        totalAmount: true,
         paidAmount: true,
       },
     });
 
     // Get HMO details for the grouped claims
-    const hmoIds = [...new Set(claimsByHmo.map(c => c.hmoId))];
+    const hmoIds = [...new Set(claimsByHmo.map(c => c.hmoId).filter(id => id !== null))] as number[];
     const hmos = await prisma.hmo.findMany({
       where: { id: { in: hmoIds } },
       select: { id: true, name: true },
@@ -72,34 +67,28 @@ export async function GET(request: NextRequest) {
     const summary = {
       totalClaims: 0,
       totalAmount: 0,
-      submitted: { count: 0, amount: 0 },
+      pending: { count: 0, amount: 0 },
       paid: { count: 0, amount: 0 },
-      denied: { count: 0, amount: 0 },
-      disputed: { count: 0, amount: 0 },
-      outstanding: { count: 0, amount: 0 },
-      queried: { count: 0, amount: 0 },
+      cancelled: { count: 0, amount: 0 },
+      refunded: { count: 0, amount: 0 },
     };
 
     claimsByStatus.forEach(group => {
       const count = group._count._all;
-      const amount = Number(group._sum.submittedAmount || 0);
+      const amount = Number(group._sum.totalAmount || 0);
       
       summary.totalClaims += count;
       summary.totalAmount += amount;
 
       const status = group.status;
-      if (status === 'submitted') {
-        summary.submitted = { count, amount };
+      if (status === 'pending') {
+        summary.pending = { count, amount };
       } else if (status === 'paid') {
         summary.paid = { count, amount: Number(group._sum.paidAmount || 0) };
-      } else if (status === 'denied') {
-        summary.denied = { count, amount };
-      } else if (status === 'disputed') {
-        summary.disputed = { count, amount };
-      } else if (status === 'outstanding') {
-        summary.outstanding = { count, amount };
-      } else if (status === 'queried') {
-        summary.queried = { count, amount };
+      } else if (status === 'cancelled') {
+        summary.cancelled = { count, amount };
+      } else if (status === 'refunded') {
+        summary.refunded = { count, amount };
       }
     });
 
@@ -108,45 +97,42 @@ export async function GET(request: NextRequest) {
     
     claimsByHmo.forEach(group => {
       const hmoId = group.hmoId;
-      const hmoName = hmoMap.get(hmoId) || `HMO ${hmoId}`;
+      if (!hmoId) return; // Skip if no HMO ID
       
-      if (!hmoBreakdown[hmoId]) {
-        hmoBreakdown[hmoId] = {
+      const hmoName = hmoMap.get(hmoId) || `HMO ${hmoId}`;
+      const hmoKey = hmoId.toString();
+      
+      if (!hmoBreakdown[hmoKey]) {
+        hmoBreakdown[hmoKey] = {
           hmoId,
           hmoName,
-          submitted: { count: 0, amount: 0 },
+          pending: { count: 0, amount: 0 },
           paid: { count: 0, amount: 0 },
-          denied: { count: 0, amount: 0 },
-          disputed: { count: 0, amount: 0 },
-          outstanding: { count: 0, amount: 0 },
-          queried: { count: 0, amount: 0 },
+          cancelled: { count: 0, amount: 0 },
+          refunded: { count: 0, amount: 0 },
           totalClaims: 0,
           totalAmount: 0,
         };
       }
 
       const count = group._count._all;
-      const amount = Number(group._sum.submittedAmount || 0);
+      const amount = Number(group._sum.totalAmount || 0);
       const status = group.status;
 
-      hmoBreakdown[hmoId].totalClaims += count;
-      hmoBreakdown[hmoId].totalAmount += amount;
+      hmoBreakdown[hmoKey].totalClaims += count;
+      hmoBreakdown[hmoKey].totalAmount += amount;
 
-      if (status === 'submitted') {
-        hmoBreakdown[hmoId].submitted = { count, amount };
+      if (status === 'pending') {
+        hmoBreakdown[hmoKey].pending = { count, amount };
       } else if (status === 'paid') {
-        hmoBreakdown[hmoId].paid = { 
+        hmoBreakdown[hmoKey].paid = { 
           count, 
           amount: Number(group._sum.paidAmount || 0) 
         };
-      } else if (status === 'denied') {
-        hmoBreakdown[hmoId].denied = { count, amount };
-      } else if (status === 'disputed') {
-        hmoBreakdown[hmoId].disputed = { count, amount };
-      } else if (status === 'outstanding') {
-        hmoBreakdown[hmoId].outstanding = { count, amount };
-      } else if (status === 'queried') {
-        hmoBreakdown[hmoId].queried = { count, amount };
+      } else if (status === 'cancelled') {
+        hmoBreakdown[hmoKey].cancelled = { count, amount };
+      } else if (status === 'refunded') {
+        hmoBreakdown[hmoKey].refunded = { count, amount };
       }
     });
 
@@ -156,40 +142,42 @@ export async function GET(request: NextRequest) {
       paymentRate: hmo.totalClaims > 0 
         ? Math.round((hmo.paid.count / hmo.totalClaims) * 100) 
         : 0,
-      outstandingAmount: hmo.submitted.amount - hmo.paid.amount,
+      outstandingAmount: hmo.pending.amount,
     }));
 
     // Get monthly trends (last 6 months)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const monthlyData = await prisma.claimSubmission.groupBy({
-      by: ['status'],
-      where: {
-        ...where,
-        submissionDate: {
-          gte: sixMonthsAgo,
-        },
-      },
-      _count: { _all: true },
-      _sum: { submittedAmount: true },
-    });
-
-    // Get month-by-month breakdown
-    const monthlyTrends = await prisma.$queryRaw<any[]>`
-      SELECT 
-        TO_CHAR(submission_date, 'YYYY-MM') as month,
-        status,
-        COUNT(*)::int as count,
-        SUM(submitted_amount)::numeric as amount
-      FROM claim_submissions cs
-      JOIN claim_batches cb ON cs.claim_batch_id = cb.id
-      WHERE cb.hospital_id = ${hospitalId}
-        ${hmoId ? Prisma.sql`AND cs.hmo_id = ${parseInt(hmoId)}` : Prisma.empty}
-        AND cs.submission_date >= ${sixMonthsAgo}
-      GROUP BY TO_CHAR(submission_date, 'YYYY-MM'), status
-      ORDER BY month DESC
-    `;
+    // Get month-by-month breakdown from invoices
+    const monthlyTrends = hmoId
+      ? await prisma.$queryRaw<any[]>`
+          SELECT 
+            TO_CHAR(created_at, 'YYYY-MM') as month,
+            status,
+            COUNT(*)::int as count,
+            SUM(total_amount)::numeric as amount
+          FROM invoices
+          WHERE hospital_id = ${hospitalId}
+            AND hmo_id IS NOT NULL
+            AND hmo_id = ${parseInt(hmoId)}
+            AND created_at >= ${sixMonthsAgo}
+          GROUP BY TO_CHAR(created_at, 'YYYY-MM'), status
+          ORDER BY month DESC
+        `
+      : await prisma.$queryRaw<any[]>`
+          SELECT 
+            TO_CHAR(created_at, 'YYYY-MM') as month,
+            status,
+            COUNT(*)::int as count,
+            SUM(total_amount)::numeric as amount
+          FROM invoices
+          WHERE hospital_id = ${hospitalId}
+            AND hmo_id IS NOT NULL
+            AND created_at >= ${sixMonthsAgo}
+          GROUP BY TO_CHAR(created_at, 'YYYY-MM'), status
+          ORDER BY month DESC
+        `;
 
     // Format monthly trends
     const monthlyGrouped: any = {};
@@ -197,7 +185,7 @@ export async function GET(request: NextRequest) {
       if (!monthlyGrouped[row.month]) {
         monthlyGrouped[row.month] = {
           month: row.month,
-          submitted: 0,
+          pending: 0,
           paid: 0,
           denied: 0,
           disputed: 0,
@@ -205,7 +193,9 @@ export async function GET(request: NextRequest) {
           queried: 0,
         };
       }
-      monthlyGrouped[row.month][row.status] = row.count;
+      // Map 'pending' status to 'pending' for consistency
+      const statusKey = row.status === 'pending' ? 'pending' : row.status;
+      monthlyGrouped[row.month][statusKey] = row.count;
     });
 
     return apiResponse({

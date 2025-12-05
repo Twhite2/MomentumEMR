@@ -7,23 +7,26 @@ import { FileText, Filter, Download, DollarSign, CheckCircle, XCircle, AlertTria
 import axios from 'axios';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import * as XLSX from 'xlsx';
 
 interface Claim {
   id: number;
+  invoiceId: number;
   status: string;
   submittedAmount: number;
-  approvedAmount: number | null;
   paidAmount: number | null;
   submissionDate: string;
-  responseDate: string | null;
-  paymentDate: string | null;
-  hmo: { id: number; name: string };
-  claimBatch: {
+  hmoId: number | null;
+  hmo?: { id: number; name: string; provider?: string };
+  patient: {
     id: number;
-    batchNumber: string;
-    batchDate: string;
-    encounterCount: number;
+    firstName: string;
+    lastName: string;
+    patientType: string;
   };
+  invoiceItems: any[];
+  totalAmount: number;
+  notes: string | null;
 }
 
 export default function ClaimsPage() {
@@ -57,7 +60,7 @@ export default function ClaimsPage() {
     queryKey: ['hmos-list'],
     queryFn: async () => {
       const response = await axios.get('/api/hmo');
-      return response.data;
+      return { hmos: response.data }; // Wrap in object for consistent access
     },
   });
 
@@ -103,7 +106,7 @@ export default function ClaimsPage() {
   const openUpdateModal = (claim: Claim) => {
     setSelectedClaim(claim);
     setUpdateStatus(claim.status);
-    setApprovedAmount(claim.approvedAmount?.toString() || '');
+    setApprovedAmount('');
     setPaidAmount(claim.paidAmount?.toString() || '');
     setShowUpdateModal(true);
   };
@@ -159,6 +162,89 @@ export default function ClaimsPage() {
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  // Export claims to Excel
+  const exportToExcel = () => {
+    if (!claimsData?.claims || claimsData.claims.length === 0) {
+      toast.error('No claims to export');
+      return;
+    }
+
+    try {
+      // Prepare data for Excel
+      const excelData = claimsData.claims.map((claim: Claim) => {
+        // Format invoice items details
+        const itemsDetails = claim.invoiceItems.map((item: any, index: number) => 
+          `${index + 1}. ${item.description} (Qty: ${item.quantity}) - ${formatCurrency(Number(item.amount))}`
+        ).join('\n');
+
+        return {
+          'Invoice Number': `INV-${claim.invoiceId.toString().padStart(6, '0')}`,
+          'Patient ID': `P-${claim.patient.id.toString().padStart(6, '0')}`,
+          'Patient Name': `${claim.patient.firstName} ${claim.patient.lastName}`,
+          'HMO Provider': claim.hmo?.name || 'N/A',
+          'HMO Provider Code': claim.hmo?.provider || 'N/A',
+          'Status': claim.status.replace('_', ' ').toUpperCase(),
+          'Invoice Date': formatDate(claim.submissionDate),
+          'Total Amount (NGN)': Number(claim.submittedAmount),
+          'Amount Paid (NGN)': Number(claim.paidAmount) || 0,
+          'Balance (NGN)': Number(claim.submittedAmount) - (Number(claim.paidAmount) || 0),
+          'Number of Items': claim.invoiceItems.length,
+          'Invoice Items': itemsDetails,
+          'Notes': claim.notes || '',
+        };
+      });
+
+      // Create worksheet
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+      // Set column widths
+      const columnWidths = [
+        { wch: 15 }, // Invoice Number
+        { wch: 12 }, // Patient ID
+        { wch: 25 }, // Patient Name
+        { wch: 20 }, // HMO Provider
+        { wch: 20 }, // HMO Provider Code
+        { wch: 15 }, // Status
+        { wch: 15 }, // Invoice Date
+        { wch: 18 }, // Total Amount
+        { wch: 18 }, // Amount Paid
+        { wch: 18 }, // Balance
+        { wch: 15 }, // Number of Items
+        { wch: 50 }, // Invoice Items
+        { wch: 30 }, // Notes
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'HMO Claims');
+
+      // Generate filename with date and filters
+      const date = new Date().toISOString().split('T')[0];
+      let filename = `HMO_Claims_${date}`;
+      
+      if (hmoFilter) {
+        const selectedHMO = hmosData?.hmos?.find((h: any) => h.id.toString() === hmoFilter);
+        if (selectedHMO) {
+          filename += `_${selectedHMO.name.replace(/\s+/g, '_')}`;
+        }
+      }
+      
+      if (statusFilter) {
+        filename += `_${statusFilter}`;
+      }
+      
+      filename += '.xlsx';
+
+      // Download file
+      XLSX.writeFile(workbook, filename);
+      toast.success('Claims exported successfully!');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export claims');
+    }
   };
 
   return (
@@ -228,12 +314,23 @@ export default function ClaimsPage() {
             <h2 className="text-lg font-semibold">
               Claims ({claimsData?.pagination?.total || 0})
             </h2>
-            <Link href="/claims/analytics">
-              <Button variant="outline" size="sm">
-                <DollarSign className="w-4 h-4 mr-2" />
-                View Analytics
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={exportToExcel}
+                disabled={!claimsData?.claims || claimsData.claims.length === 0}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export to Excel
               </Button>
-            </Link>
+              <Link href="/claims/analytics">
+                <Button variant="outline" size="sm">
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  View Analytics
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -253,7 +350,10 @@ export default function ClaimsPage() {
               <thead className="bg-spindle/30">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Batch
+                    Invoice #
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Patient
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     HMO
@@ -262,7 +362,7 @@ export default function ClaimsPage() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Submitted
+                    Amount
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Paid
@@ -279,13 +379,17 @@ export default function ClaimsPage() {
                 {claimsData?.claims?.map((claim: Claim) => (
                   <tr key={claim.id} className="hover:bg-spindle/20">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium">{claim.claimBatch.batchNumber}</div>
+                      <div className="text-sm font-medium">INV-{claim.invoiceId.toString().padStart(6, '0')}</div>
                       <div className="text-xs text-muted-foreground">
-                        {claim.claimBatch.encounterCount} encounters
+                        {claim.invoiceItems.length} item(s)
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm">{claim.hmo.name}</div>
+                      <div className="text-sm font-medium">{claim.patient.firstName} {claim.patient.lastName}</div>
+                      <div className="text-xs text-muted-foreground">ID: P-{claim.patient.id.toString().padStart(6, '0')}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm">{claim.hmo?.name || 'N/A'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(claim.status)}`}>
@@ -326,7 +430,7 @@ export default function ClaimsPage() {
             <div className="p-6 border-b border-border">
               <h3 className="text-lg font-semibold">Update Claim Status</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Batch: {selectedClaim.claimBatch.batchNumber} • {selectedClaim.hmo.name}
+                Invoice: INV-{selectedClaim.invoiceId.toString().padStart(6, '0')} • {selectedClaim.patient.firstName} {selectedClaim.patient.lastName} • {selectedClaim.hmo?.name || 'N/A'}
               </p>
             </div>
 

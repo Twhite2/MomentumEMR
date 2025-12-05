@@ -5,7 +5,7 @@ import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 // GET /api/inventory - List inventory items
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole(['admin', 'pharmacist', 'doctor', 'lab_tech']);
+    const session = await requireRole(['admin', 'pharmacist', 'doctor', 'lab_tech', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
 
     const { searchParams } = new URL(request.url);

@@ -51,6 +51,7 @@ interface InvoiceItem {
   inventoryPrice?: number;
   hmoTariffId?: number;
   hmoTariffPrice?: number;
+  paAuthCode?: string;
   isManualPriceOverride?: boolean;
   isManualHMOOverride?: boolean;
 }
@@ -154,11 +155,14 @@ export default function NewInvoicePage() {
     return item.unitPrice || 0;
   };
 
-  // Calculate final unit price (inventory price - HMO coverage)
+  // Calculate final unit price for HMO patients with PA code
   const calculateFinalPrice = (item: InvoiceItem): number => {
-    const inventoryPrice = item.inventoryPrice || parseFloat(item.unitPrice) || 0;
-    const hmoDiscount = item.hmoTariffPrice || 0;
-    return Math.max(0, inventoryPrice - hmoDiscount); // Never negative
+    // For HMO patients with PA authorization code, HMO pays the agreed price
+    if (item.paAuthCode && item.hmoTariffPrice) {
+      return item.hmoTariffPrice; // HMO pays this amount
+    }
+    // Otherwise, use inventory price or manual unit price
+    return item.inventoryPrice || parseFloat(item.unitPrice) || 0;
   };
 
   // Handle inventory item selection
@@ -175,7 +179,8 @@ export default function NewInvoicePage() {
       isManualPriceOverride: false,
     };
 
-    // Calculate final price (inventory - HMO coverage)
+    // For HMO patients, if no PA code, use inventory price
+    // If PA code exists, price will be the HMO tariff price
     const finalPrice = calculateFinalPrice(updated[index]);
     updated[index].unitPrice = finalPrice.toString();
 
@@ -195,13 +200,25 @@ export default function NewInvoicePage() {
     const updated = [...items];
     updated[index] = {
       ...updated[index],
+      description: updated[index].description || selectedTariff.name, // Use tariff name if no description
       hmoTariffId: selectedTariff.id,
       hmoTariffPrice: selectedTariff.basePrice,
       isManualHMOOverride: false,
     };
 
-    // Recalculate final price (inventory - HMO coverage)
-    const finalPrice = calculateFinalPrice(updated[index]);
+    // For HMO tariff without inventory item, start at 0 (will be filled with agreed price)
+    // If there's an inventory item, use inventory price
+    // If PA code exists, use HMO tariff price
+    let finalPrice = 0;
+    if (updated[index].paAuthCode && updated[index].hmoTariffPrice) {
+      // With PA code, use HMO agreed price
+      finalPrice = updated[index].hmoTariffPrice;
+    } else if (updated[index].inventoryItemId && updated[index].inventoryPrice) {
+      // With inventory item, use inventory price
+      finalPrice = updated[index].inventoryPrice;
+    }
+    // Otherwise default to 0 - user must enter agreed price
+    
     updated[index].unitPrice = finalPrice.toString();
 
     // Recalculate amount
@@ -228,7 +245,7 @@ export default function NewInvoicePage() {
     setActiveHMOSearchIndex(index);
   };
 
-  // Handle manual HMO price override
+  // Handle manual HMO price override (agreed price with PA)
   const handleManualHMOPriceChange = (index: number, value: string) => {
     const updated = [...items];
     updated[index] = {
@@ -238,6 +255,24 @@ export default function NewInvoicePage() {
     };
 
     // Recalculate final price
+    const finalPrice = calculateFinalPrice(updated[index]);
+    updated[index].unitPrice = finalPrice.toString();
+
+    const qty = parseFloat(updated[index].quantity) || 0;
+    updated[index].amount = qty * finalPrice;
+
+    setItems(updated);
+  };
+
+  // Handle PA authorization code change
+  const handlePACodeChange = (index: number, value: string) => {
+    const updated = [...items];
+    updated[index] = {
+      ...updated[index],
+      paAuthCode: value,
+    };
+
+    // Recalculate final price with PA code logic
     const finalPrice = calculateFinalPrice(updated[index]);
     updated[index].unitPrice = finalPrice.toString();
 
@@ -411,7 +446,7 @@ export default function NewInvoicePage() {
                       ref={(el) => { dropdownRefs.current[index] = el; }}
                     >
                       <Input
-                        label="Item Description"
+                        label={isHMOPatient ? "Item Description (Optional)" : "Item Description"}
                         value={item.description}
                         onChange={(e) => handleDescriptionChange(index, e.target.value)}
                         onFocus={() => {
@@ -420,8 +455,8 @@ export default function NewInvoicePage() {
                             setItemSearchTerms(prev => ({ ...prev, [index]: item.description }));
                           }
                         }}
-                        placeholder="Start typing to search inventory..."
-                        required
+                        placeholder={isHMOPatient ? "Optional - Start typing to search inventory..." : "Start typing to search inventory..."}
+                        required={!isHMOPatient || !item.hmoTariffId}
                         autoComplete="off"
                       />
                       
@@ -477,77 +512,93 @@ export default function NewInvoicePage() {
 
                     {/* HMO Coverage Field - Only for HMO Patients */}
                     {isHMOPatient && (
-                      <div className="relative">
-                        <label className="block text-sm font-medium mb-2">
-                          HMO Coverage (Optional)
-                        </label>
-                        <input
-                          type="text"
-                          value={hmoSearchTerms[index] || ''}
-                          onChange={(e) => handleHMOCoverageChange(index, e.target.value)}
-                          onFocus={() => setActiveHMOSearchIndex(index)}
-                          placeholder="Search HMO tariff coverage..."
-                          className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                          autoComplete="off"
-                        />
-                        
-                        {/* HMO Tariff Autocomplete Dropdown */}
-                        {activeHMOSearchIndex === index && currentHMOSearchTerm.length >= 2 && (
-                          <div className="absolute z-50 w-full mt-1 bg-white border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                            {hmoTariffLoading ? (
-                              <div className="p-4 text-center text-muted-foreground">
-                                <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                                Searching HMO tariff...
-                              </div>
-                            ) : hmoTariffData && hmoTariffData.length > 0 ? (
-                              <ul className="py-1">
-                                {hmoTariffData.map((tariff: any) => (
-                                  <li
-                                    key={tariff.id}
-                                    onClick={() => handleHMOTariffSelect(index, tariff)}
-                                    className="px-4 py-2 hover:bg-primary/10 cursor-pointer transition-colors border-b border-border last:border-b-0"
-                                  >
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex-1">
-                                        <p className="font-medium text-sm">{tariff.name}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                          Code: {tariff.code} • {tariff.category}
-                                        </p>
+                      <>
+                        <div className="relative">
+                          <label className="block text-sm font-medium mb-2">
+                            HMO Coverage
+                          </label>
+                          <input
+                            type="text"
+                            value={hmoSearchTerms[index] || ''}
+                            onChange={(e) => handleHMOCoverageChange(index, e.target.value)}
+                            onFocus={() => setActiveHMOSearchIndex(index)}
+                            placeholder="Search HMO tariff coverage..."
+                            className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                            autoComplete="off"
+                          />
+                          
+                          {/* HMO Tariff Autocomplete Dropdown */}
+                          {activeHMOSearchIndex === index && currentHMOSearchTerm.length >= 2 && (
+                            <div className="absolute z-50 w-full mt-1 bg-white border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                              {hmoTariffLoading ? (
+                                <div className="p-4 text-center text-muted-foreground">
+                                  <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                                  Searching HMO tariff...
+                                </div>
+                              ) : hmoTariffData && hmoTariffData.length > 0 ? (
+                                <ul className="py-1">
+                                  {hmoTariffData.map((tariff: any) => (
+                                    <li
+                                      key={tariff.id}
+                                      onClick={() => handleHMOTariffSelect(index, tariff)}
+                                      className="px-4 py-2 hover:bg-primary/10 cursor-pointer transition-colors border-b border-border last:border-b-0"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                          <p className="font-medium text-sm">{tariff.name}</p>
+                                          <p className="text-xs text-muted-foreground">
+                                            Code: {tariff.code} • {tariff.category}
+                                          </p>
+                                        </div>
+                                        <div className="text-right ml-4">
+                                          <p className="font-semibold text-primary">
+                                            {formatCurrency(tariff.basePrice)}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">HMO Rate</p>
+                                        </div>
                                       </div>
-                                      <div className="text-right ml-4">
-                                        <p className="font-semibold text-primary">
-                                          {formatCurrency(tariff.basePrice)}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">HMO Covers</p>
-                                      </div>
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <div className="p-4 text-center text-muted-foreground">
-                                <AlertCircle className="w-5 h-5 mx-auto mb-2 text-saffron" />
-                                <p className="text-sm">No tariffs found matching &quot;{currentHMOSearchTerm}&quot;</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {item.hmoTariffId && (
-                          <div className="mt-1 flex items-center gap-2">
-                            <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary">
-                              HMO Tariff Applied
-                            </span>
-                            {item.isManualHMOOverride && (
-                              <span className="text-xs px-2 py-0.5 rounded bg-saffron/10 text-saffron">
-                                Manual Override
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <div className="p-4 text-center text-muted-foreground">
+                                  <AlertCircle className="w-5 h-5 mx-auto mb-2 text-saffron" />
+                                  <p className="text-sm">No tariffs found matching &quot;{currentHMOSearchTerm}&quot;</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {item.hmoTariffId && (
+                            <div className="mt-1 flex items-center gap-2">
+                              <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary">
+                                HMO Tariff Applied
                               </span>
-                            )}
-                          </div>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-1">
-                          This amount will be deducted from the inventory price
-                        </p>
-                      </div>
+                              {item.isManualHMOOverride && (
+                                <span className="text-xs px-2 py-0.5 rounded bg-saffron/10 text-saffron">
+                                  Manual Override
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Select the HMO-approved service/procedure
+                          </p>
+                        </div>
+
+                        {/* PA Authorization Code Field */}
+                        <div>
+                          <Input
+                            label="PA Authorization Code"
+                            value={item.paAuthCode || ''}
+                            onChange={(e) => handlePACodeChange(index, e.target.value)}
+                            placeholder="Enter PA code from HMO..."
+                            autoComplete="off"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Enter the Prior Authorization code from the HMO
+                          </p>
+                        </div>
+                      </>
                     )}
 
                     {/* Price Breakdown */}
@@ -562,44 +613,35 @@ export default function NewInvoicePage() {
                         required
                       />
 
-                      {isHMOPatient && item.inventoryPrice ? (
+                      {isHMOPatient && item.hmoTariffId ? (
                         <>
-                          <div>
+                          {/* HMO Patient with PA Authorization */}
+                          <div className="md:col-span-2">
                             <Input
-                              label="Inventory Price (₦)"
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={item.inventoryPrice}
-                              onChange={(e) => updateItem(index, 'inventoryPrice', parseFloat(e.target.value))}
-                              placeholder="0.00"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">Hospital price</p>
-                          </div>
-
-                          <div>
-                            <Input
-                              label="HMO Coverage (₦)"
+                              label="Agreed HMO Price (₦)"
                               type="number"
                               min="0"
                               step="0.01"
                               value={item.hmoTariffPrice || 0}
                               onChange={(e) => handleManualHMOPriceChange(index, e.target.value)}
                               placeholder="0.00"
+                              required
                             />
-                            <p className="text-xs text-muted-foreground mt-1">HMO pays</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {item.paAuthCode ? `HMO pays this amount (PA: ${item.paAuthCode})` : 'Enter negotiated price with HMO'}
+                            </p>
                           </div>
 
                           <div>
                             <Input
-                              label="Patient Pays (₦)"
+                              label="Invoice Amount (₦)"
                               type="number"
                               value={item.unitPrice}
                               disabled
                               placeholder="0.00"
                             />
                             <p className="text-xs text-primary font-medium mt-1">
-                              = {formatCurrency(item.inventoryPrice || 0)} - {formatCurrency(item.hmoTariffPrice || 0)}
+                              {item.paAuthCode ? '✓ HMO will pay this amount' : 'Enter PA code and price'}
                             </p>
                           </div>
                         </>

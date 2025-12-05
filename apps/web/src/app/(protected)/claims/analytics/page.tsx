@@ -175,27 +175,27 @@ export default function ClaimsAnalyticsPage() {
 
             <div className="bg-white rounded-lg border border-border p-6">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-red-ribbon/10 rounded-lg flex items-center justify-center">
-                  <XCircle className="w-5 h-5 text-red-ribbon" />
+                <div className="w-10 h-10 bg-danube/10 rounded-lg flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-danube" />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground mb-1">Denied Claims</p>
-              <p className="text-2xl font-bold text-red-ribbon">{summary.denied?.count || 0}</p>
+              <p className="text-sm text-muted-foreground mb-1">Pending Invoices</p>
+              <p className="text-2xl font-bold text-danube">{summary.pending?.count || 0}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {formatCurrency(summary.denied?.amount || 0)}
+                {formatCurrency(summary.pending?.amount || 0)}
               </p>
             </div>
 
             <div className="bg-white rounded-lg border border-border p-6">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-danube/10 rounded-lg flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-danube" />
+                <div className="w-10 h-10 bg-red-ribbon/10 rounded-lg flex items-center justify-center">
+                  <XCircle className="w-5 h-5 text-red-ribbon" />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground mb-1">Outstanding</p>
-              <p className="text-2xl font-bold text-danube">{summary.outstanding?.count || 0}</p>
+              <p className="text-sm text-muted-foreground mb-1">Cancelled</p>
+              <p className="text-2xl font-bold text-red-ribbon">{summary.cancelled?.count || 0}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {formatCurrency(summary.outstanding?.amount || 0)}
+                {formatCurrency(summary.cancelled?.amount || 0)}
               </p>
             </div>
           </div>
@@ -203,38 +203,38 @@ export default function ClaimsAnalyticsPage() {
           {/* Status Breakdown */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg border border-border p-6">
-              <h2 className="text-lg font-semibold mb-4">Claims by Status</h2>
+              <h2 className="text-lg font-semibold mb-4">Invoices by Status</h2>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-tory-blue/5 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-danube/5 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-tory-blue" />
-                    <span className="text-sm font-medium">Submitted</span>
+                    <Clock className="w-4 h-4 text-danube" />
+                    <span className="text-sm font-medium">Pending</span>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">{summary.submitted?.count || 0}</p>
-                    <p className="text-xs text-muted-foreground">{formatCurrency(summary.submitted?.amount || 0)}</p>
+                    <p className="text-sm font-bold">{summary.pending?.count || 0}</p>
+                    <p className="text-xs text-muted-foreground">{formatCurrency(summary.pending?.amount || 0)}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-saffron/5 rounded-lg">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-saffron" />
-                    <span className="text-sm font-medium">Disputed</span>
+                    <span className="text-sm font-medium">Refunded</span>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">{summary.disputed?.count || 0}</p>
-                    <p className="text-xs text-muted-foreground">{formatCurrency(summary.disputed?.amount || 0)}</p>
+                    <p className="text-sm font-bold">{summary.refunded?.count || 0}</p>
+                    <p className="text-xs text-muted-foreground">{formatCurrency(summary.refunded?.amount || 0)}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-red-ribbon/5 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-purple-600" />
-                    <span className="text-sm font-medium">Queried</span>
+                    <XCircle className="w-4 h-4 text-red-ribbon" />
+                    <span className="text-sm font-medium">Cancelled</span>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">{summary.queried?.count || 0}</p>
-                    <p className="text-xs text-muted-foreground">{formatCurrency(summary.queried?.amount || 0)}</p>
+                    <p className="text-sm font-bold">{summary.cancelled?.count || 0}</p>
+                    <p className="text-xs text-muted-foreground">{formatCurrency(summary.cancelled?.amount || 0)}</p>
                   </div>
                 </div>
               </div>
@@ -280,10 +280,10 @@ export default function ClaimsAnalyticsPage() {
                       Paid
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                      Denied
+                      Pending
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                      Outstanding
+                      Cancelled
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                       Payment Rate
@@ -301,16 +301,16 @@ export default function ClaimsAnalyticsPage() {
                         <div className="text-xs text-muted-foreground">{formatCurrency(hmo.totalAmount)}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-green-haze">{hmo.paid.count}</div>
-                        <div className="text-xs text-muted-foreground">{formatCurrency(hmo.paid.amount)}</div>
+                        <div className="text-sm text-green-haze">{hmo.paid?.count || 0}</div>
+                        <div className="text-xs text-muted-foreground">{formatCurrency(hmo.paid?.amount || 0)}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-red-ribbon">{hmo.denied.count}</div>
-                        <div className="text-xs text-muted-foreground">{formatCurrency(hmo.denied.amount)}</div>
+                        <div className="text-sm text-danube">{hmo.pending?.count || 0}</div>
+                        <div className="text-xs text-muted-foreground">{formatCurrency(hmo.pending?.amount || 0)}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-danube">{hmo.outstanding.count}</div>
-                        <div className="text-xs text-muted-foreground">{formatCurrency(hmo.outstandingAmount)}</div>
+                        <div className="text-sm text-red-ribbon">{hmo.cancelled?.count || 0}</div>
+                        <div className="text-xs text-muted-foreground">{formatCurrency(hmo.cancelled?.amount || 0)}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">

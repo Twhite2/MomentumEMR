@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'pharmacist', 'doctor', 'lab_tech']);
+    const session = await requireRole(['admin', 'pharmacist', 'doctor', 'lab_tech', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
     const itemId = parseInt(params.id);
 
@@ -57,7 +57,7 @@ export async function PUT(
 ) {
   try {
     const params = await context.params;
-    const session = await requireRole(['admin', 'pharmacist', 'lab_tech']);
+    const session = await requireRole(['admin', 'pharmacist', 'lab_tech', 'nurse']);
     const hospitalId = parseInt(session.user.hospitalId);
     const itemId = parseInt(params.id);
 
