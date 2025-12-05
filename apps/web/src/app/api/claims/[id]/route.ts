@@ -46,7 +46,7 @@ export async function GET(
   }
 }
 
-// PATCH /api/claims/[id] - Update claim status
+// PATCH /api/claims/[id] - Update claim (invoice) status
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -55,30 +55,25 @@ export async function PATCH(
     const params = await context.params;
     const session = await requireRole(['admin', 'cashier']);
     const hospitalId = parseInt(session.user.hospitalId);
-    const claimId = parseInt(params.id);
+    const invoiceId = parseInt(params.id);
     const body = await request.json();
 
     const {
       status,
-      approvedAmount,
       paidAmount,
-      responseDate,
-      paymentDate,
-      denialReason,
-      queryReason,
-      queryResponse,
       notes,
     } = body;
 
-    // Verify claim belongs to hospital
-    const existingClaim = await prisma.claimSubmission.findFirst({
+    // Verify invoice belongs to hospital and is an HMO invoice
+    const existingInvoice = await prisma.invoice.findFirst({
       where: {
-        id: claimId,
-        claimBatch: { hospitalId },
+        id: invoiceId,
+        hospitalId,
+        hmoId: { not: null }, // Must be an HMO invoice
       },
     });
 
-    if (!existingClaim) {
+    if (!existingInvoice) {
       return apiResponse({ error: 'Claim not found' }, 404);
     }
 
@@ -87,70 +82,60 @@ export async function PATCH(
       updatedAt: new Date(),
     };
 
+    // Update invoice status (map to valid InvoiceStatus)
     if (status) {
-      updateData.status = status;
+      // Map claim statuses to invoice statuses
+      if (status === 'submitted' || status === 'pending') {
+        updateData.status = 'pending';
+      } else if (status === 'paid') {
+        updateData.status = 'paid';
+      } else if (status === 'denied' || status === 'cancelled') {
+        updateData.status = 'cancelled';
+      } else if (status === 'refunded') {
+        updateData.status = 'refunded';
+      } else {
+        updateData.status = status; // Use as-is if it's already valid
+      }
     }
 
-    if (approvedAmount !== undefined) {
-      updateData.approvedAmount = approvedAmount;
-    }
-
+    // Update paid amount
     if (paidAmount !== undefined) {
-      updateData.paidAmount = paidAmount;
+      const paidAmountNum = parseFloat(paidAmount);
+      updateData.paidAmount = paidAmountNum;
+      
+      // Auto-set status to paid if paid amount equals total
+      const totalAmount = Number(existingInvoice.totalAmount);
+      if (paidAmountNum >= totalAmount && !status) {
+        updateData.status = 'paid';
+      }
     }
 
-    if (responseDate) {
-      updateData.responseDate = new Date(responseDate);
-    }
-
-    if (paymentDate) {
-      updateData.paymentDate = new Date(paymentDate);
-    }
-
-    if (denialReason) {
-      updateData.denialReason = denialReason;
-    }
-
-    if (queryReason) {
-      updateData.queryReason = queryReason;
-    }
-
-    if (queryResponse) {
-      updateData.queryResponse = queryResponse;
-    }
-
+    // Update notes field if available, otherwise skip
     if (notes) {
       updateData.notes = notes;
     }
 
-    // Auto-set dates based on status
-    if (status === 'paid' && !paymentDate) {
-      updateData.paymentDate = new Date();
-    }
-
-    if (status === 'denied' || status === 'queried' || status === 'disputed') {
-      if (!responseDate) {
-        updateData.responseDate = new Date();
-      }
-    }
-
-    // Update claim
-    const updatedClaim = await prisma.claimSubmission.update({
-      where: { id: claimId },
+    // Update invoice
+    const updatedInvoice = await prisma.invoice.update({
+      where: { id: invoiceId },
       data: updateData,
       include: {
-        hmo: {
-          select: { id: true, name: true },
-        },
-        claimBatch: {
-          select: { batchNumber: true },
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            hmo: {
+              select: { id: true, name: true },
+            },
+          },
         },
       },
     });
 
     return apiResponse({
       message: 'Claim updated successfully',
-      claim: updatedClaim,
+      claim: updatedInvoice,
     });
   } catch (error) {
     return handleApiError(error);

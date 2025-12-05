@@ -32,6 +32,15 @@ export default function BillingPage() {
     },
   });
 
+  // Fetch recent invoices
+  const { data: recentInvoices, isLoading: invoicesLoading } = useQuery({
+    queryKey: ['recent-invoices'],
+    queryFn: async () => {
+      const response = await axios.get('/api/invoices?limit=5');
+      return response.data;
+    },
+  });
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -305,20 +314,69 @@ export default function BillingPage() {
           </Link>
         </div>
         <div className="p-6">
-          <div className="text-center text-muted-foreground py-8">
-            <FileText className="w-12 h-12 mx-auto mb-4 opacity-20" />
-            <p>{isPatient ? 'No bills to display' : 'No invoices to display'}</p>
-            <p className="text-sm mt-2">
-              {isPatient 
-                ? 'Your medical bills will appear here'
-                : 'Invoices will appear here as they are created'}
-            </p>
-            {!isPatient && (
-              <Link href="/invoices/new">
-                <Button className="mt-4">Create Your First Invoice</Button>
-              </Link>
-            )}
-          </div>
+          {invoicesLoading ? (
+            <div className="text-center text-muted-foreground py-8">
+              <p>Loading invoices...</p>
+            </div>
+          ) : recentInvoices?.invoices && recentInvoices.invoices.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Invoice #</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Patient</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Amount</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentInvoices.invoices.map((invoice: any) => (
+                    <tr key={invoice.id} className="border-b border-border hover:bg-spindle/30">
+                      <td className="py-3 px-4 text-sm">
+                        <Link href={`/invoices/${invoice.id}`} className="text-primary hover:underline">
+                          INV-{invoice.id.toString().padStart(6, '0')}
+                        </Link>
+                      </td>
+                      <td className="py-3 px-4 text-sm">
+                        {invoice.patient?.firstName} {invoice.patient?.lastName}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-muted-foreground">
+                        {new Date(invoice.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 px-4 text-sm font-medium">
+                        ₦{Number(invoice.totalAmount).toLocaleString()}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          invoice.status === 'paid' ? 'bg-green-haze/10 text-green-haze' :
+                          invoice.status === 'pending' ? 'bg-orange-600/10 text-orange-600' :
+                          'bg-gray-500/10 text-gray-500'
+                        }`}>
+                          {invoice.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground py-8">
+              <FileText className="w-12 h-12 mx-auto mb-4 opacity-20" />
+              <p>{isPatient ? 'No bills to display' : 'No invoices to display'}</p>
+              <p className="text-sm mt-2">
+                {isPatient 
+                  ? 'Your medical bills will appear here'
+                  : 'Invoices will appear here as they are created'}
+              </p>
+              {!isPatient && (
+                <Link href="/invoices/new">
+                  <Button className="mt-4">Create Your First Invoice</Button>
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
