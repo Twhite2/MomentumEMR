@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const headers = [
       'First Name*',
       'Last Name*',
-      'Hospital Number',
+      'Hospital Number (Family/Household)',
       'Date of Birth* (MM/DD/YYYY)',
       'Gender* (Male/Female/Other)',
       'Phone Number',
@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
       'Home Address',
       'Emergency Contact Name',
       'Emergency Contact Phone',
+      'Emergency Contact Relationship',
       'Blood Group (A+/A-/B+/B-/O+/O-/AB+/AB-)',
       'Allergies (comma-separated)',
       'Patient Type* (self_pay/hmo/corporate)',
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
       {
         'First Name*': 'John',
         'Last Name*': 'Doe',
-        'Hospital Number': 'HN-2024-001',
+        'Hospital Number (Family/Household)': 'FAM-2024-001',
         'Date of Birth* (MM/DD/YYYY)': '05/15/1990',
         'Gender* (Male/Female/Other)': 'Male',
         'Phone Number': '08012345678',
@@ -43,17 +44,37 @@ export async function GET(request: NextRequest) {
         'Home Address': '123 Main Street, Lagos',
         'Emergency Contact Name': 'Jane Doe',
         'Emergency Contact Phone': '08098765432',
+        'Emergency Contact Relationship': 'Spouse',
         'Blood Group (A+/A-/B+/B-/O+/O-/AB+/AB-)': 'O+',
         'Allergies (comma-separated)': 'Penicillin, Peanuts',
         'Patient Type* (self_pay/hmo/corporate)': 'self_pay',
         'HMO Provider (if HMO)': '',
         'Corporate Client (if corporate)': '',
-        'Notes': 'Example patient record',
+        'Notes': 'Family head',
+      },
+      {
+        'First Name*': 'Jane',
+        'Last Name*': 'Doe',
+        'Hospital Number (Family/Household)': 'FAM-2024-001',
+        'Date of Birth* (MM/DD/YYYY)': '03/22/1992',
+        'Gender* (Male/Female/Other)': 'Female',
+        'Phone Number': '08098765432',
+        'Email Address': 'jane.doe@example.com',
+        'Home Address': '123 Main Street, Lagos',
+        'Emergency Contact Name': 'John Doe',
+        'Emergency Contact Phone': '08012345678',
+        'Emergency Contact Relationship': 'Spouse',
+        'Blood Group (A+/A-/B+/B-/O+/O-/AB+/AB-)': 'A+',
+        'Allergies (comma-separated)': '',
+        'Patient Type* (self_pay/hmo/corporate)': 'self_pay',
+        'HMO Provider (if HMO)': '',
+        'Corporate Client (if corporate)': '',
+        'Notes': 'Same family as John Doe',
       },
       {
         'First Name*': 'Amina',
         'Last Name*': 'Ibrahim',
-        'Hospital Number': 'HN-2024-002',
+        'Hospital Number (Family/Household)': 'FAM-2024-002',
         'Date of Birth* (MM/DD/YYYY)': '12/20/1985',
         'Gender* (Male/Female/Other)': 'Female',
         'Phone Number': '08087654321',
@@ -61,6 +82,7 @@ export async function GET(request: NextRequest) {
         'Home Address': '45 Victoria Island, Lagos',
         'Emergency Contact Name': 'Hassan Ibrahim',
         'Emergency Contact Phone': '08011112222',
+        'Emergency Contact Relationship': 'Sibling',
         'Blood Group (A+/A-/B+/B-/O+/O-/AB+/AB-)': 'A+',
         'Allergies (comma-separated)': 'Latex',
         'Patient Type* (self_pay/hmo/corporate)': 'hmo',
@@ -85,6 +107,7 @@ export async function GET(request: NextRequest) {
       { wch: 30 }, // Address
       { wch: 25 }, // Emergency Contact Name
       { wch: 20 }, // Emergency Contact Phone
+      { wch: 25 }, // Emergency Contact Relationship
       { wch: 15 }, // Blood Group
       { wch: 25 }, // Allergies
       { wch: 20 }, // Patient Type
@@ -116,26 +139,30 @@ export async function GET(request: NextRequest) {
       },
       {
         'Step': '5',
-        'Instruction': 'Blood Group must be: A+, A-, B+, B-, O+, O-, AB+, or AB-',
+        'Instruction': 'Hospital Number can be shared by family members (e.g., FAM-2024-001 for entire family)',
       },
       {
         'Step': '6',
-        'Instruction': 'Patient Type must be: self_pay, hmo, or corporate',
+        'Instruction': 'Blood Group must be: A+, A-, B+, B-, O+, O-, AB+, or AB-',
       },
       {
         'Step': '7',
-        'Instruction': 'Delete the example rows before uploading',
+        'Instruction': 'Patient Type must be: self_pay, hmo, or corporate',
       },
       {
         'Step': '8',
-        'Instruction': 'Save the file and upload it through the system',
+        'Instruction': 'Delete the example rows before uploading',
       },
       {
         'Step': '9',
-        'Instruction': 'System will validate and import all valid records',
+        'Instruction': 'Save the file and upload it through the system',
       },
       {
         'Step': '10',
+        'Instruction': 'System will validate and import all valid records',
+      },
+      {
+        'Step': '11',
         'Instruction': 'Any errors will be reported for correction',
       },
     ];

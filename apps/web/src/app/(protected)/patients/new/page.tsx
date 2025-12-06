@@ -252,11 +252,11 @@ export default function NewPatientPage() {
                 placeholder="Doe"
               />
               <Input
-                label="Hospital Number"
+                label="Hospital Number (Family/Household)"
                 name="hospitalNumber"
                 value={formData.hospitalNumber}
                 onChange={handleInputChange}
-                placeholder="e.g., HN-2024-001"
+                placeholder="e.g., FAM-2024-001 (can be shared by family members)"
               />
               <Input
                 label="Date of Birth"

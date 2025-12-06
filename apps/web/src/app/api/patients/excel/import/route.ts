@@ -15,6 +15,7 @@ interface PatientRow {
   address?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
+  emergencyContactRelationship?: string;
   bloodGroup?: string;
   allergies?: string[];
   patientType: 'self_pay' | 'hmo' | 'corporate';
@@ -96,7 +97,7 @@ function validatePatientRow(row: any, rowIndex: number): PatientRow {
   return {
     firstName: firstName || '',
     lastName: lastName || '',
-    hospitalNumber: row['Hospital Number']?.toString().trim() || undefined,
+    hospitalNumber: row['Hospital Number (Family/Household)']?.toString().trim() || undefined,
     dob,
     gender: gender || '',
     phone: row['Phone Number']?.toString().trim() || undefined,
@@ -104,6 +105,7 @@ function validatePatientRow(row: any, rowIndex: number): PatientRow {
     address: row['Home Address']?.toString().trim() || undefined,
     emergencyContactName: row['Emergency Contact Name']?.toString().trim() || undefined,
     emergencyContactPhone: row['Emergency Contact Phone']?.toString().trim() || undefined,
+    emergencyContactRelationship: row['Emergency Contact Relationship']?.toString().trim() || undefined,
     bloodGroup: bloodGroup || undefined,
     allergies: allergies.length > 0 ? allergies : undefined,
     patientType: patientType as any || 'self_pay',
@@ -196,12 +198,13 @@ export async function POST(request: NextRequest) {
         if (row.phone) contactInfo.phone = row.phone;
         if (row.email) contactInfo.email = row.email;
 
-        // Combine emergency contact name and phone
+        // Combine emergency contact name, phone, and relationship
         let emergencyContact = undefined;
-        if (row.emergencyContactName || row.emergencyContactPhone) {
+        if (row.emergencyContactName || row.emergencyContactPhone || row.emergencyContactRelationship) {
           const parts = [];
           if (row.emergencyContactName) parts.push(row.emergencyContactName);
           if (row.emergencyContactPhone) parts.push(row.emergencyContactPhone);
+          if (row.emergencyContactRelationship) parts.push(`(${row.emergencyContactRelationship})`);
           emergencyContact = parts.join(' - ');
         }
 
