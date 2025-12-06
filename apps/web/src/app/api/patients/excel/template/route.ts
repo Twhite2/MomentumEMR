@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     const headers = [
       'First Name*',
       'Last Name*',
+      'Hospital Number',
       'Date of Birth* (MM/DD/YYYY)',
       'Gender* (Male/Female/Other)',
       'Phone Number',
@@ -34,6 +35,7 @@ export async function GET(request: NextRequest) {
       {
         'First Name*': 'John',
         'Last Name*': 'Doe',
+        'Hospital Number': 'HN-2024-001',
         'Date of Birth* (MM/DD/YYYY)': '05/15/1990',
         'Gender* (Male/Female/Other)': 'Male',
         'Phone Number': '08012345678',
@@ -51,6 +53,7 @@ export async function GET(request: NextRequest) {
       {
         'First Name*': 'Amina',
         'Last Name*': 'Ibrahim',
+        'Hospital Number': 'HN-2024-002',
         'Date of Birth* (MM/DD/YYYY)': '12/20/1985',
         'Gender* (Male/Female/Other)': 'Female',
         'Phone Number': '08087654321',
@@ -74,6 +77,7 @@ export async function GET(request: NextRequest) {
     worksheet['!cols'] = [
       { wch: 15 }, // First Name
       { wch: 15 }, // Last Name
+      { wch: 20 }, // Hospital Number
       { wch: 20 }, // Date of Birth
       { wch: 20 }, // Gender
       { wch: 15 }, // Phone

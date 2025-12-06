@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs';
 interface PatientRow {
   firstName: string;
   lastName: string;
+  hospitalNumber?: string;
   dob: string;
   gender: string;
   phone?: string;
@@ -95,6 +96,7 @@ function validatePatientRow(row: any, rowIndex: number): PatientRow {
   return {
     firstName: firstName || '',
     lastName: lastName || '',
+    hospitalNumber: row['Hospital Number']?.toString().trim() || undefined,
     dob,
     gender: gender || '',
     phone: row['Phone Number']?.toString().trim() || undefined,
@@ -209,6 +211,7 @@ export async function POST(request: NextRequest) {
             userId: user.id,
             firstName: row.firstName,
             lastName: row.lastName,
+            hospitalNumber: row.hospitalNumber || undefined,
             dob: new Date(row.dob),
             gender: row.gender,
             contactInfo: Object.keys(contactInfo).length > 0 ? contactInfo : undefined,
