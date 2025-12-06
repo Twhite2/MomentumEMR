@@ -85,3 +85,4 @@ Create `.env` files in both `apps/web` and `apps/api` directories. See `.env.exa
 ## License
 
 Proprietary - Momentum Healthcare Solutions
+@momentumhealthcare.io
