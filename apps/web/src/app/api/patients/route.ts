@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { firstName: { contains: search, mode: 'insensitive' } },
         { lastName: { contains: search, mode: 'insensitive' } },
+        { hospitalNumber: { contains: search, mode: 'insensitive' } },
         { 
           contactInfo: { 
             path: ['email'], 
@@ -148,6 +149,7 @@ export async function POST(request: NextRequest) {
     const {
       firstName,
       lastName,
+      hospitalNumber,
       dob,
       gender,
       patientType,
@@ -268,6 +270,7 @@ export async function POST(request: NextRequest) {
           userId: userToLink!.id,
           firstName,
           lastName,
+          hospitalNumber: hospitalNumber || null,
           dob: new Date(dob),
           gender,
           patientType,

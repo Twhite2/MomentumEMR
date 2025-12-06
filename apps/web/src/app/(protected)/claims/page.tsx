@@ -249,6 +249,16 @@ export default function ClaimsPage() {
     });
   };
 
+  // Format date for Excel with / separator (e.g., 6/12/2025)
+  const formatDateForExcel = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const month = date.getMonth() + 1; // Months are 0-indexed
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
   // Export claims to Excel
   const exportToExcel = () => {
     if (!claimsData?.claims || claimsData.claims.length === 0) {
@@ -297,7 +307,7 @@ export default function ClaimsPage() {
           'HMO Provider': claim.hmo?.name || 'N/A',
           'HMO Provider Code': claim.hmo?.provider || 'N/A',
           'Status': claim.status.replace('_', ' ').toUpperCase(),
-          'Invoice Date': formatDate(claim.submissionDate),
+          'Invoice Date': formatDateForExcel(claim.submissionDate),
           'Diagnosis': diagnosis,
           'Clinical Notes': clinicalNotes,
           'Prescriptions': prescriptionsDetails,

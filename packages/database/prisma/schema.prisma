@@ -267,6 +267,7 @@ model Patient {
   corporateClientId   Int?         @map("corporate_client_id")
   firstName           String       @map("first_name")
   lastName            String       @map("last_name")
+  hospitalNumber      String?      @unique @map("hospital_number") // Unique hospital identification number
   dob                 DateTime     @db.Date
   gender              String?
   tribe               String?      // Patient's tribe/ethnicity

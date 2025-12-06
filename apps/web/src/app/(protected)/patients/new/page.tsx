@@ -58,6 +58,7 @@ export default function NewPatientPage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    hospitalNumber: '',
     dob: '',
     gender: '',
     patientType: 'self_pay',
@@ -176,6 +177,7 @@ export default function NewPatientPage() {
     const payload: any = {
       firstName: formData.firstName,
       lastName: formData.lastName,
+      hospitalNumber: formData.hospitalNumber || null,
       dob: formData.dob,
       gender: formData.gender,
       patientType: formData.patientType,
@@ -248,6 +250,13 @@ export default function NewPatientPage() {
                 onChange={handleInputChange}
                 required
                 placeholder="Doe"
+              />
+              <Input
+                label="Hospital Number"
+                name="hospitalNumber"
+                value={formData.hospitalNumber}
+                onChange={handleInputChange}
+                placeholder="e.g., HN-2024-001"
               />
               <Input
                 label="Date of Birth"

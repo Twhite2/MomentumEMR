@@ -12,7 +12,8 @@ interface PatientRow {
   phone?: string;
   email?: string;
   address?: string;
-  emergencyContact?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
   bloodGroup?: string;
   allergies?: string[];
   patientType: 'self_pay' | 'hmo' | 'corporate';
@@ -29,23 +30,33 @@ function validatePatientRow(row: any, rowIndex: number): PatientRow {
   // Required fields
   const firstName = row['First Name*']?.toString().trim();
   const lastName = row['Last Name*']?.toString().trim();
-  const dobStr = row['Date of Birth* (YYYY-MM-DD)']?.toString().trim();
+  const dobStr = row['Date of Birth* (MM/DD/YYYY)']?.toString().trim();
   const gender = row['Gender* (Male/Female/Other)']?.toString().trim();
   const patientType = row['Patient Type* (self_pay/hmo/corporate)']?.toString().trim().toLowerCase();
 
   if (!firstName) errors.push('First Name is required');
   if (!lastName) errors.push('Last Name is required');
   
-  // Validate date of birth
+  // Validate date of birth - parse MM/DD/YYYY format
   let dob = '';
   if (!dobStr) {
     errors.push('Date of Birth is required');
   } else {
-    const dobDate = new Date(dobStr);
-    if (isNaN(dobDate.getTime())) {
-      errors.push('Invalid Date of Birth format (use YYYY-MM-DD)');
+    // Parse MM/DD/YYYY format
+    const parts = dobStr.split('/');
+    if (parts.length === 3) {
+      const month = parseInt(parts[0]);
+      const day = parseInt(parts[1]);
+      const year = parseInt(parts[2]);
+      const dobDate = new Date(year, month - 1, day);
+      
+      if (isNaN(dobDate.getTime()) || month < 1 || month > 12 || day < 1 || day > 31) {
+        errors.push('Invalid Date of Birth format (use MM/DD/YYYY)');
+      } else {
+        dob = dobDate.toISOString().split('T')[0];
+      }
     } else {
-      dob = dobDate.toISOString().split('T')[0];
+      errors.push('Invalid Date of Birth format (use MM/DD/YYYY)');
     }
   }
 
@@ -89,7 +100,8 @@ function validatePatientRow(row: any, rowIndex: number): PatientRow {
     phone: row['Phone Number']?.toString().trim() || undefined,
     email: email || undefined,
     address: row['Home Address']?.toString().trim() || undefined,
-    emergencyContact: row['Emergency Contact']?.toString().trim() || undefined,
+    emergencyContactName: row['Emergency Contact Name']?.toString().trim() || undefined,
+    emergencyContactPhone: row['Emergency Contact Phone']?.toString().trim() || undefined,
     bloodGroup: bloodGroup || undefined,
     allergies: allergies.length > 0 ? allergies : undefined,
     patientType: patientType as any || 'self_pay',
@@ -182,6 +194,15 @@ export async function POST(request: NextRequest) {
         if (row.phone) contactInfo.phone = row.phone;
         if (row.email) contactInfo.email = row.email;
 
+        // Combine emergency contact name and phone
+        let emergencyContact = undefined;
+        if (row.emergencyContactName || row.emergencyContactPhone) {
+          const parts = [];
+          if (row.emergencyContactName) parts.push(row.emergencyContactName);
+          if (row.emergencyContactPhone) parts.push(row.emergencyContactPhone);
+          emergencyContact = parts.join(' - ');
+        }
+
         const patient = await prisma.patient.create({
           data: {
             hospitalId,
@@ -192,7 +213,7 @@ export async function POST(request: NextRequest) {
             gender: row.gender,
             contactInfo: Object.keys(contactInfo).length > 0 ? contactInfo : undefined,
             address: row.address || undefined,
-            emergencyContact: row.emergencyContact || undefined,
+            emergencyContact: emergencyContact,
             bloodGroup: row.bloodGroup || undefined,
             allergies: row.allergies ? (JSON.stringify(row.allergies) as any) : undefined,
             patientType: row.patientType,

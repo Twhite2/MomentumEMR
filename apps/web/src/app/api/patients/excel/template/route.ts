@@ -14,12 +14,13 @@ export async function GET(request: NextRequest) {
     const headers = [
       'First Name*',
       'Last Name*',
-      'Date of Birth* (YYYY-MM-DD)',
+      'Date of Birth* (MM/DD/YYYY)',
       'Gender* (Male/Female/Other)',
       'Phone Number',
       'Email Address',
       'Home Address',
-      'Emergency Contact',
+      'Emergency Contact Name',
+      'Emergency Contact Phone',
       'Blood Group (A+/A-/B+/B-/O+/O-/AB+/AB-)',
       'Allergies (comma-separated)',
       'Patient Type* (self_pay/hmo/corporate)',
@@ -33,12 +34,13 @@ export async function GET(request: NextRequest) {
       {
         'First Name*': 'John',
         'Last Name*': 'Doe',
-        'Date of Birth* (YYYY-MM-DD)': '1990-05-15',
+        'Date of Birth* (MM/DD/YYYY)': '05/15/1990',
         'Gender* (Male/Female/Other)': 'Male',
         'Phone Number': '08012345678',
         'Email Address': 'john.doe@example.com',
         'Home Address': '123 Main Street, Lagos',
-        'Emergency Contact': 'Jane Doe - 08098765432',
+        'Emergency Contact Name': 'Jane Doe',
+        'Emergency Contact Phone': '08098765432',
         'Blood Group (A+/A-/B+/B-/O+/O-/AB+/AB-)': 'O+',
         'Allergies (comma-separated)': 'Penicillin, Peanuts',
         'Patient Type* (self_pay/hmo/corporate)': 'self_pay',
@@ -49,12 +51,13 @@ export async function GET(request: NextRequest) {
       {
         'First Name*': 'Amina',
         'Last Name*': 'Ibrahim',
-        'Date of Birth* (YYYY-MM-DD)': '1985-12-20',
+        'Date of Birth* (MM/DD/YYYY)': '12/20/1985',
         'Gender* (Male/Female/Other)': 'Female',
         'Phone Number': '08087654321',
         'Email Address': 'amina.ibrahim@example.com',
         'Home Address': '45 Victoria Island, Lagos',
-        'Emergency Contact': 'Hassan Ibrahim - 08011112222',
+        'Emergency Contact Name': 'Hassan Ibrahim',
+        'Emergency Contact Phone': '08011112222',
         'Blood Group (A+/A-/B+/B-/O+/O-/AB+/AB-)': 'A+',
         'Allergies (comma-separated)': 'Latex',
         'Patient Type* (self_pay/hmo/corporate)': 'hmo',
@@ -76,7 +79,8 @@ export async function GET(request: NextRequest) {
       { wch: 15 }, // Phone
       { wch: 25 }, // Email
       { wch: 30 }, // Address
-      { wch: 25 }, // Emergency Contact
+      { wch: 25 }, // Emergency Contact Name
+      { wch: 20 }, // Emergency Contact Phone
       { wch: 15 }, // Blood Group
       { wch: 25 }, // Allergies
       { wch: 20 }, // Patient Type
@@ -100,7 +104,7 @@ export async function GET(request: NextRequest) {
       },
       {
         'Step': '3',
-        'Instruction': 'Date format must be YYYY-MM-DD (e.g., 1990-05-15)',
+        'Instruction': 'Date format must be MM/DD/YYYY (e.g., 05/15/1990)',
       },
       {
         'Step': '4',
