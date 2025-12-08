@@ -13,7 +13,8 @@ interface Invoice {
   totalAmount: number;
   paidAmount: number;
   status: string;
-  patient: {
+  customPatientName?: string;
+  patient?: {
     id: number;
     firstName: string;
     lastName: string;
@@ -210,20 +211,26 @@ export default function InvoicesPage() {
                               Invoice #{invoice.id.toString().padStart(6, '0')}
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                              {invoice.patient.firstName} {invoice.patient.lastName}
+                              {invoice.patient ? `${invoice.patient.firstName} ${invoice.patient.lastName}` : invoice.customPatientName}
                             </p>
                           </div>
                         </div>
 
                         <div className="ml-15 space-y-2">
                           <div className="flex items-center gap-2">
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full ${getPatientTypeBadge(
-                                invoice.patient.patientType
-                              )}`}
-                            >
-                              {invoice.patient.patientType.replace('_', ' ').toUpperCase()}
-                            </span>
+                            {invoice.patient ? (
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${getPatientTypeBadge(
+                                  invoice.patient.patientType
+                                )}`}
+                              >
+                                {invoice.patient.patientType.replace('_', ' ').toUpperCase()}
+                              </span>
+                            ) : (
+                              <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                                WALK-IN
+                              </span>
+                            )}
                             <span className="text-xs text-muted-foreground">
                               • {invoice.invoiceItems.length} item(s)
                             </span>
@@ -271,7 +278,7 @@ export default function InvoicesPage() {
                         >
                           {invoice.status.toUpperCase()}
                         </span>
-                        {session?.user?.role !== 'patient' && (
+                        {session?.user?.role !== 'patient' && invoice.patient && (
                           <Link
                             href={`/patients/${invoice.patient.id}`}
                             onClick={(e) => e.stopPropagation()}

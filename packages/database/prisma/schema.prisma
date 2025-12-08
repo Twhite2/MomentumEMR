@@ -527,22 +527,23 @@ model Inventory {
 }
 
 model Invoice {
-  id            Int            @id @default(autoincrement())
-  hospitalId    Int            @map("hospital_id")
-  patientId     Int            @map("patient_id")
-  appointmentId Int?           @map("appointment_id")
-  totalAmount   Decimal        @map("total_amount") @db.Decimal(10, 2)
-  paidAmount    Decimal        @default(0) @map("paid_amount") @db.Decimal(10, 2)
-  status        InvoiceStatus
-  paymentMethod String?        @map("payment_method")
-  hmoId         Int?           @map("hmo_id")
-  notes         String?        @db.Text
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
+  id                Int            @id @default(autoincrement())
+  hospitalId        Int            @map("hospital_id")
+  patientId         Int?           @map("patient_id") // Optional for walk-in/casual patients
+  customPatientName String?        @map("custom_patient_name") // Name for non-registered patients
+  appointmentId     Int?           @map("appointment_id")
+  totalAmount       Decimal        @map("total_amount") @db.Decimal(10, 2)
+  paidAmount        Decimal        @default(0) @map("paid_amount") @db.Decimal(10, 2)
+  status            InvoiceStatus
+  paymentMethod     String?        @map("payment_method")
+  hmoId             Int?           @map("hmo_id")
+  notes             String?        @db.Text
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
 
   // Relations
   hospital      Hospital       @relation(fields: [hospitalId], references: [id])
-  patient       Patient        @relation(fields: [patientId], references: [id])
+  patient       Patient?       @relation(fields: [patientId], references: [id])
   payments      Payment[]
   invoiceItems  InvoiceItem[]
   prescriptions Prescription[] // Prescriptions linked to this invoice

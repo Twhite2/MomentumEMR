@@ -17,7 +17,8 @@ interface Invoice {
   paidAmount: number;
   status: string;
   notes: string | null;
-  patient: {
+  customPatientName?: string;
+  patient?: {
     id: number;
     firstName: string;
     lastName: string;
@@ -384,32 +385,53 @@ export default function InvoiceDetailPage() {
           {/* Patient Information */}
           <div className="bg-white rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Patient</h2>
-            <div className="flex items-start gap-3 mb-4">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold text-primary">
-                  {invoice.patient.firstName.charAt(0)}
-                  {invoice.patient.lastName.charAt(0)}
-                </span>
+            {invoice.patient ? (
+              <>
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                    <span className="text-xl font-bold text-primary">
+                      {invoice.patient.firstName.charAt(0)}
+                      {invoice.patient.lastName.charAt(0)}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">
+                      {invoice.patient.firstName} {invoice.patient.lastName}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {calculateAge(invoice.patient.dob)} years • {invoice.patient.gender}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 capitalize">
+                      {invoice.patient.patientType.replace('_', ' ')}
+                    </p>
+                  </div>
+                </div>
+                {!isPatient && (
+                  <Link href={`/patients/${invoice.patient.id}`}>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <User className="w-4 h-4 mr-2" />
+                      View Patient Profile
+                    </Button>
+                  </Link>
+                )}
+              </>
+            ) : (
+              <div className="flex items-start gap-3">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                  <User className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold">
+                    {invoice.customPatientName}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Walk-in / Quick Service
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Patient not registered in system
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold">
-                  {invoice.patient.firstName} {invoice.patient.lastName}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {calculateAge(invoice.patient.dob)} years • {invoice.patient.gender}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1 capitalize">
-                  {invoice.patient.patientType.replace('_', ' ')}
-                </p>
-              </div>
-            </div>
-            {!isPatient && (
-              <Link href={`/patients/${invoice.patient.id}`}>
-                <Button variant="outline" size="sm" className="w-full">
-                  <User className="w-4 h-4 mr-2" />
-                  View Patient Profile
-                </Button>
-              </Link>
             )}
           </div>
 

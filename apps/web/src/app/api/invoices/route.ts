@@ -111,28 +111,39 @@ export async function POST(request: NextRequest) {
     const hospitalId = parseInt(session.user.hospitalId);
 
     const body = await request.json();
-    const { patientId, appointmentId, items, notes } = body;
+    const { patientId, customPatientName, appointmentId, items, notes } = body;
 
-    // Validation
-    if (!patientId || !items || items.length === 0) {
-      return apiResponse({ error: 'Missing required fields' }, 400);
+    // Validation - either patientId or customPatientName must be provided
+    if (!items || items.length === 0) {
+      return apiResponse({ error: 'Missing invoice items' }, 400);
     }
 
-    // Verify patient belongs to hospital and get HMO info
-    const patient = await prisma.patient.findFirst({
-      where: { id: parseInt(patientId), hospitalId },
-      include: {
-        hmo: {
-          select: {
-            id: true,
-            name: true,
+    if (!patientId && !customPatientName) {
+      return apiResponse({ error: 'Either patient or custom patient name is required' }, 400);
+    }
+
+    let patient = null;
+    let hmoId = null;
+
+    // If patientId is provided, verify patient belongs to hospital and get HMO info
+    if (patientId) {
+      patient = await prisma.patient.findFirst({
+        where: { id: parseInt(patientId), hospitalId },
+        include: {
+          hmo: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!patient) {
-      return apiResponse({ error: 'Patient not found' }, 404);
+      if (!patient) {
+        return apiResponse({ error: 'Patient not found' }, 404);
+      }
+
+      hmoId = patient.patientType === 'hmo' && patient.insuranceId ? patient.insuranceId : null;
     }
 
     // Calculate totals (no VAT)
@@ -145,9 +156,10 @@ export async function POST(request: NextRequest) {
     const invoice = await prisma.invoice.create({
       data: {
         hospitalId,
-        patientId: parseInt(patientId),
+        patientId: patientId ? parseInt(patientId) : null,
+        customPatientName: customPatientName || null,
         appointmentId: appointmentId ? parseInt(appointmentId) : null,
-        hmoId: patient.patientType === 'hmo' && patient.insuranceId ? patient.insuranceId : null, // Save HMO ID for claims
+        hmoId: hmoId,
         totalAmount,
         paidAmount: 0,
         status: 'pending',
@@ -162,14 +174,14 @@ export async function POST(request: NextRequest) {
         },
       },
       include: {
-        patient: {
+        patient: patientId ? {
           select: {
             id: true,
             firstName: true,
             lastName: true,
             patientType: true,
           },
-        },
+        } : undefined,
         invoiceItems: true,
         payments: true,
       },

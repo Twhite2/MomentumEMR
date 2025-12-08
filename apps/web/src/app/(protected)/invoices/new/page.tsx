@@ -63,6 +63,8 @@ export default function NewInvoicePage() {
   const appointmentId = searchParams.get('appointmentId');
 
   const [patientId, setPatientId] = useState(preSelectedPatientId || '');
+  const [useCustomName, setUseCustomName] = useState(false);
+  const [customPatientName, setCustomPatientName] = useState('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<InvoiceItem[]>([
     { description: '', quantity: '1', unitPrice: '', amount: 0 },
@@ -333,8 +335,20 @@ export default function NewInvoicePage() {
       return;
     }
 
+    // Validate that either patient is selected or custom name is provided
+    if (!useCustomName && !patientId) {
+      toast.error('Please select a patient');
+      return;
+    }
+
+    if (useCustomName && !customPatientName.trim()) {
+      toast.error('Please enter patient name');
+      return;
+    }
+
     const payload = {
-      patientId,
+      patientId: useCustomName ? null : patientId,
+      customPatientName: useCustomName ? customPatientName.trim() : null,
       appointmentId: appointmentId || null,
       notes: notes || null,
       items: validItems,
@@ -366,43 +380,83 @@ export default function NewInvoicePage() {
         <div className="space-y-6">
           {/* Patient Selection */}
           <div className="bg-white rounded-lg border border-border p-6">
-            <h2 className="text-lg font-semibold mb-4">Patient Information</h2>
-            <Select
-              label="Patient"
-              value={patientId}
-              onChange={(e) => setPatientId(e.target.value)}
-              required
-              disabled={!!preSelectedPatientId}
-            >
-              <option value="">Select patient</option>
-              {patients?.patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.firstName} {patient.lastName} (ID: P-
-                  {patient.id.toString().padStart(6, '0')})
-                </option>
-              ))}
-            </Select>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Patient Information</h2>
+              {!preSelectedPatientId && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={useCustomName}
+                    onChange={(e) => {
+                      setUseCustomName(e.target.checked);
+                      if (e.target.checked) {
+                        setPatientId('');
+                      } else {
+                        setCustomPatientName('');
+                      }
+                    }}
+                    className="w-4 h-4 text-primary border-border rounded focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    Walk-in / Quick Service
+                  </span>
+                </label>
+              )}
+            </div>
 
-            {/* Patient Type Badge */}
-            {patient && (
-              <div className="mt-4 flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Patient Type:</span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  patient.patientType === 'hmo' ? 'bg-primary/10 text-primary' :
-                  patient.patientType === 'corporate' ? 'bg-danube/10 text-danube' :
-                  'bg-green-haze/10 text-green-haze'
-                }`}>
-                  {patient.patientType === 'hmo' && patient.hmo ? `HMO: ${patient.hmo.name}` :
-                   patient.patientType === 'corporate' ? 'Corporate' :
-                   'Self-Pay'}
-                </span>
-                {patient.patientType === 'hmo' && (
-                  <span className="text-xs text-muted-foreground">(Invoice = Inventory Price - HMO Coverage)</span>
-                )}
-                {patient.patientType !== 'hmo' && (
-                  <span className="text-xs text-muted-foreground">(Prices from Inventory)</span>
-                )}
+            {useCustomName ? (
+              <div className="space-y-2">
+                <Input
+                  label="Patient Name"
+                  value={customPatientName}
+                  onChange={(e) => setCustomPatientName(e.target.value)}
+                  required
+                  placeholder="Enter patient name..."
+                />
+                <p className="text-xs text-muted-foreground">
+                  For walk-in patients who don't need full registration (quick tests, one-time services)
+                </p>
               </div>
+            ) : (
+              <>
+                <Select
+                  label="Patient"
+                  value={patientId}
+                  onChange={(e) => setPatientId(e.target.value)}
+                  required
+                  disabled={!!preSelectedPatientId}
+                >
+                  <option value="">Select patient</option>
+                  {patients?.patients.map((patient) => (
+                    <option key={patient.id} value={patient.id}>
+                      {patient.firstName} {patient.lastName} (ID: P-
+                      {patient.id.toString().padStart(6, '0')})
+                    </option>
+                  ))}
+                </Select>
+
+                {/* Patient Type Badge */}
+                {patient && (
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Patient Type:</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      patient.patientType === 'hmo' ? 'bg-primary/10 text-primary' :
+                      patient.patientType === 'corporate' ? 'bg-danube/10 text-danube' :
+                      'bg-green-haze/10 text-green-haze'
+                    }`}>
+                      {patient.patientType === 'hmo' && patient.hmo ? `HMO: ${patient.hmo.name}` :
+                       patient.patientType === 'corporate' ? 'Corporate' :
+                       'Self-Pay'}
+                    </span>
+                    {patient.patientType === 'hmo' && (
+                      <span className="text-xs text-muted-foreground">(Invoice = Inventory Price - HMO Coverage)</span>
+                    )}
+                    {patient.patientType !== 'hmo' && (
+                      <span className="text-xs text-muted-foreground">(Prices from Inventory)</span>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
