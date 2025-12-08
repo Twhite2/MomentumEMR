@@ -1,0 +1,116 @@
+====================================================================
+VULTR CONSOLE COMMANDS - Kill npm Malware & Restore Website
+====================================================================
+
+QUICK START (ONE COMMAND):
+--------------------------
+cd ~/Momentum_EMR/scripts && chmod +x quick-fix.sh && ./quick-fix.sh
+
+This will:
+✓ Kill all "npm start 1G" malware processes
+✓ Clean malware binaries from /tmp/
+✓ Remove malicious cron jobs
+✓ Restart Momentum EMR properly
+✓ Start continuous monitoring to prevent reinfection
+
+====================================================================
+
+MANUAL COMMANDS (if you prefer step-by-step):
+----------------------------------------------
+
+1. Navigate to scripts directory:
+   cd ~/Momentum_EMR/scripts
+
+2. Make scripts executable:
+   chmod +x kill-malware-protect-app.sh
+   chmod +x monitor-and-kill-malware.sh
+
+3. Run the cleanup script:
+   sudo ./kill-malware-protect-app.sh
+
+4. Start continuous monitoring (prevents reinfection):
+   nohup sudo ./monitor-and-kill-malware.sh > /var/log/malware-monitor.log 2>&1 &
+
+5. Check PM2 status:
+   pm2 status
+
+6. Check website:
+   curl -I http://localhost:3000
+
+7. Monitor CPU:
+   htop
+
+8. View logs:
+   tail -f /var/log/malware-cleanup.log
+   tail -f /var/log/malware-monitor.log
+
+====================================================================
+
+STOP THE MONITOR:
+-----------------
+sudo pkill -f monitor-and-kill-malware
+
+====================================================================
+ENHANCED MALWARE DETECTION:
+====================================================================
+
+The script uses 8 detection methods to find hidden malware:
+
+1. ✓ "npm start 1G" signature detection (exact match)
+2. ✓ High CPU usage (>20% for non-whitelisted processes)
+3. ✓ Running from /tmp/, /var/tmp/, or /dev/shm/
+4. ✓ Working directory in temp locations
+5. ✓ UPX packed binaries (crypto miners)
+6. ✓ Fake npm/node binaries (not from /usr/bin/)
+7. ✓ npm/node NOT running from Momentum_EMR directory
+8. ✓ Known crypto miner patterns (xmrig, stratum, etc.)
+
+====================================================================
+WHAT GETS PROTECTED:
+====================================================================
+
+✓ PM2 God Daemon (the main PM2 process)
+✓ Your momentum-emr app (verified by directory check)
+✓ All child processes of legitimate apps
+✓ pnpm processes running from Momentum_EMR directory
+
+Everything else gets killed!
+
+====================================================================
+WHAT GETS CLEANED:
+====================================================================
+
+✓ Malicious processes killed with SIGKILL (-9)
+✓ Malware binaries removed from /tmp/, /var/tmp/, /dev/shm/
+✓ UPX packed executables deleted
+✓ Suspicious cron jobs removed
+✓ Port 3000 cleared if blocked
+✓ Momentum EMR restarted fresh
+
+====================================================================
+CONTINUOUS MONITORING:
+====================================================================
+
+The monitor script runs every 30 seconds and:
+✓ Detects new malware immediately
+✓ Kills it before it causes damage
+✓ Logs all activity to /var/log/malware-monitor.log
+✓ Prevents reinfection
+
+====================================================================
+TROUBLESHOOTING:
+====================================================================
+
+If website still shows 502:
+  1. Check PM2 logs: pm2 logs momentum-emr
+  2. Check nginx: sudo systemctl status nginx
+  3. Restart nginx: sudo systemctl restart nginx
+  4. Check database: sudo systemctl status postgresql
+
+If malware keeps coming back:
+  1. Check cron jobs: crontab -l
+  2. Check systemd timers: systemctl list-timers
+  3. Patch Apache: sudo apt update && sudo apt upgrade apache2
+  4. Review SSH access logs: sudo last
+
+====================================================================
