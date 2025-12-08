@@ -1,0 +1,228 @@
+=================================================================
+DIGITAL OCEAN CONSOLE - QUICK SECURITY SETUP
+Momentum EMR - Node.js 24.11.1
+=================================================================
+
+PART 1: CREATE DROPLET
+-----------------------
+1. Login: https://cloud.digitalocean.com
+2. Create → Droplets
+3. Ubuntu 22.04 LTS
+4. 2 GB RAM / 2 vCPU ($18/month)
+5. Add YOUR SSH key
+6. Enable backups + monitoring
+7. Hostname: momentum-emr-production
+8. Create Droplet
+
+PART 2: INITIAL SETUP (Copy into DO Console)
+---------------------------------------------
+
+# Step 1: Update system
+apt update && apt upgrade -y
+
+# Step 2: Install essentials
+apt install -y curl wget git ufw fail2ban htop nano
+
+# Step 3: Create user
+adduser momentum
+# Enter strong password when prompted
+
+# Step 4: Give sudo access
+usermod -aG sudo momentum
+
+# Step 5: Copy SSH keys
+mkdir -p /home/momentum/.ssh
+cp ~/.ssh/authorized_keys /home/momentum/.ssh/
+chown -R momentum:momentum /home/momentum/.ssh
+chmod 700 /home/momentum/.ssh
+chmod 600 /home/momentum/.ssh/authorized_keys
+
+# Step 6: Setup firewall
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow 2222/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw enable
+
+# Step 7: Configure SSH
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+nano /etc/ssh/sshd_config
+
+# CHANGE THESE LINES:
+# Port 2222
+# PermitRootLogin no
+# PasswordAuthentication no
+# PubkeyAuthentication yes
+# AllowUsers momentum
+
+# Save (Ctrl+X, Y, Enter)
+
+# Step 8: Test and restart SSH
+sshd -t
+systemctl restart sshd
+
+=================================================================
+⚠️  STOP! Test SSH from Windows BEFORE closing console!
+=================================================================
+
+Open PowerShell and run:
+ssh -i ~/.ssh/digitalocean_emr -p 2222 momentum@YOUR_DROPLET_IP
+
+If successful, continue below. If not, use console to fix.
+
+=================================================================
+
+PART 3: INSTALL FAIL2BAN (Back in SSH as momentum)
+---------------------------------------------------
+
+sudo apt install fail2ban -y
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo nano /etc/fail2ban/jail.local
+
+# Find [sshd] section and add:
+[sshd]
+enabled = true
+port = 2222
+maxretry = 3
+bantime = 3600
+
+# Save and exit
+
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+sudo fail2ban-client status sshd
+
+=================================================================
+
+PART 4: INSTALL NODE.JS 24
+---------------------------
+
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo bash -
+sudo apt install nodejs -y
+node --version
+# Should show: v24.11.1
+
+sudo npm install -g pnpm@9.15.0
+sudo npm install -g pm2
+
+=================================================================
+
+PART 5: INSTALL POSTGRESQL
+---------------------------
+
+sudo apt install postgresql postgresql-contrib -y
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+sudo -u postgres psql
+# In PostgreSQL prompt, run:
+CREATE DATABASE momentum_emr;
+CREATE USER momentum_user WITH ENCRYPTED PASSWORD 'ChangeThisPassword123!';
+GRANT ALL PRIVILEGES ON DATABASE momentum_emr TO momentum_user;
+ALTER DATABASE momentum_emr OWNER TO momentum_user;
+\q
+
+=================================================================
+
+PART 6: SECURITY HARDENING
+---------------------------
+
+# Automatic security updates
+sudo apt install unattended-upgrades -y
+sudo dpkg-reconfigure -plow unattended-upgrades
+# Select Yes
+
+# Kernel hardening
+sudo tee -a /etc/sysctl.conf > /dev/null <<EOF
+net.ipv4.ip_forward = 0
+net.ipv4.tcp_syncookies = 1
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv6.conf.all.disable_ipv6 = 1
+EOF
+
+sudo sysctl -p
+
+=================================================================
+
+VERIFICATION COMMANDS
+---------------------
+
+# Check firewall
+sudo ufw status verbose
+
+# Check SSH port
+sudo netstat -tlnp | grep :2222
+
+# Check Fail2Ban
+sudo fail2ban-client status
+
+# Check Node version
+node --version
+
+# Check services
+sudo systemctl status postgresql
+sudo systemctl status fail2ban
+
+# Check listening ports
+sudo netstat -tulpn
+
+=================================================================
+
+SECURITY CHECKLIST
+------------------
+
+✅ SSH on port 2222 (not 22)
+✅ Root login disabled
+✅ Password authentication disabled
+✅ Firewall enabled (2222, 80, 443 only)
+✅ Fail2Ban running
+✅ PostgreSQL installed
+✅ Node.js 24.11.1 installed
+✅ Non-root user created
+✅ Automatic updates enabled
+
+=================================================================
+
+NEXT STEPS
+----------
+
+1. Upload malware protection scripts from Windows:
+
+scp -i ~/.ssh/digitalocean_emr -P 2222 scripts/cpu-watchdog.sh momentum@YOUR_IP:~/
+scp -i ~/.ssh/digitalocean_emr -P 2222 scripts/watchdog-install.sh momentum@YOUR_IP:~/
+
+2. Install watchdog:
+sudo ./watchdog-install.sh
+
+3. Deploy Momentum EMR application
+4. Setup nginx reverse proxy
+5. Configure SSL certificate
+
+=================================================================
+
+EMERGENCY ACCESS
+----------------
+
+If locked out, use Digital Ocean web console:
+Droplets → Your Droplet → Access → Launch Droplet Console
+Login as: momentum
+Use the password you set earlier
+
+=================================================================
+
+SSH CONFIG FOR WINDOWS (Optional - Easier Connection)
+------------------------------------------------------
+
+Create file: C:\Users\PC\.ssh\config
+
+Add:
+Host momentum-do
+    HostName YOUR_DROPLET_IP
+    User momentum
+    Port 2222
+    IdentityFile ~/.ssh/digitalocean_emr
+
+Then connect with: ssh momentum-do
+
+=================================================================
