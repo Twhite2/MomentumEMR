@@ -106,54 +106,58 @@ export async function GET(request: NextRequest) {
         const startOfDay = new Date(invoiceDate.setHours(0, 0, 0, 0));
         const endOfDay = new Date(invoiceDate.setHours(23, 59, 59, 999));
 
-        const medicalRecords = await prisma.medicalRecord.findMany({
-          where: {
-            patientId: invoice.patientId,
-            visitDate: {
-              gte: startOfDay,
-              lte: endOfDay,
-            },
-          },
-          include: {
-            doctor: {
-              select: {
-                id: true,
-                name: true,
+        const medicalRecords = invoice.patientId
+          ? await prisma.medicalRecord.findMany({
+              where: {
+                patientId: invoice.patientId,
+                visitDate: {
+                  gte: startOfDay,
+                  lte: endOfDay,
+                },
               },
-            },
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-          take: 1, // Get the most recent one for that day
-        });
+              include: {
+                doctor: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'desc',
+              },
+              take: 1, // Get the most recent one for that day
+            })
+          : [];
 
         // Get lab orders for the same day and patient
-        const labOrders = await prisma.labOrder.findMany({
-          where: {
-            patientId: invoice.patientId,
-            createdAt: {
-              gte: startOfDay,
-              lte: endOfDay,
-            },
-          },
-          include: {
-            doctor: {
-              select: {
-                id: true,
-                name: true,
+        const labOrders = invoice.patientId
+          ? await prisma.labOrder.findMany({
+              where: {
+                patientId: invoice.patientId,
+                createdAt: {
+                  gte: startOfDay,
+                  lte: endOfDay,
+                },
               },
-            },
-            labResults: {
-              select: {
-                id: true,
-                fileUrl: true,
-                resultNotes: true,
-                createdAt: true,
+              include: {
+                doctor: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+                labResults: {
+                  select: {
+                    id: true,
+                    fileUrl: true,
+                    resultNotes: true,
+                    createdAt: true,
+                  },
+                },
               },
-            },
-          },
-        });
+            })
+          : [];
 
         return {
           id: invoice.id,
@@ -164,7 +168,7 @@ export async function GET(request: NextRequest) {
           submissionDate: invoice.createdAt,
           hmoId: invoice.hmoId,
           patient: invoice.patient,
-          hmo: invoice.patient.hmo, // Include HMO from patient
+          hmo: invoice.patient?.hmo || null, // Include HMO from patient
           invoiceItems: invoice.invoiceItems,
           totalAmount: invoice.totalAmount,
           notes: invoice.notes,

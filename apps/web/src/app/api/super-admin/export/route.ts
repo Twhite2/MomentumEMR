@@ -314,7 +314,7 @@ export async function GET(request: NextRequest) {
     // Sheet 5: All Invoices (Anonymized)
     const invoicesData = allInvoices.map((invoice) => ({
       'Invoice ID': `INV_${invoice.id}`,
-      'Anonymized Patient ID': getAnonymizedPatientId(invoice.patientId),
+      'Anonymized Patient ID': invoice.patientId ? getAnonymizedPatientId(invoice.patientId) : 'NO_PATIENT',
       'Total Amount (NGN)': invoice.totalAmount ? parseFloat(invoice.totalAmount.toString()) : 0,
       'Paid Amount (NGN)': invoice.paidAmount ? parseFloat(invoice.paidAmount.toString()) : 0,
       'Balance (NGN)': invoice.totalAmount && invoice.paidAmount 
@@ -330,7 +330,7 @@ export async function GET(request: NextRequest) {
     // Sheet 6: All Lab Orders (Anonymized)
     const labOrdersData = allLabOrders.map((order) => ({
       'Lab Order ID': `LAB_${order.id}`,
-      'Anonymized Patient ID': getAnonymizedPatientId(order.patientId),
+      'Anonymized Patient ID': order.patientId ? getAnonymizedPatientId(order.patientId) : 'NO_PATIENT',
       'Order Type': order.orderType || 'Not specified',
       'Description': order.description || 'Not specified',
       'Status': order.status,
@@ -344,7 +344,7 @@ export async function GET(request: NextRequest) {
       const hospital = hospitals.find(h => h.id === admission.hospitalId);
       return {
         'Admission ID': `ADM_${admission.id}`,
-        'Anonymized Patient ID': getAnonymizedPatientId(admission.patientId),
+        'Anonymized Patient ID': admission.patientId ? getAnonymizedPatientId(admission.patientId) : 'NO_PATIENT',
         'Ward': admission.ward || 'Not specified',
         'Bed Number': admission.bedNumber || 'Not assigned',
         'Admission Reason': admission.admissionReason || 'Not specified',
