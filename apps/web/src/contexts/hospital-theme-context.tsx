@@ -47,11 +47,20 @@ export function HospitalThemeProvider({ children }: { children: ReactNode }) {
             
             // Convert B2 direct URL to proxied URL for private buckets
             let logoUrl = hospitalTheme.logoUrl;
-            if (logoUrl && logoUrl.includes('backblazeb2.com')) {
-              // Extract the key from the B2 URL
-              const urlParts = logoUrl.split('/file/emr-uploads/');
-              if (urlParts.length > 1) {
-                logoUrl = `/api/images/${urlParts[1]}`;
+            if (logoUrl) {
+              try {
+                const parsedUrl = new URL(logoUrl);
+                // Validate hostname exactly matches allowed B2 domains
+                const allowedHosts = ['backblazeb2.com', 's3.us-west-004.backblazeb2.com'];
+                if (allowedHosts.includes(parsedUrl.hostname)) {
+                  // Extract the key from the B2 URL
+                  const urlParts = logoUrl.split('/file/emr-uploads/');
+                  if (urlParts.length > 1) {
+                    logoUrl = `/api/images/${urlParts[1]}`;
+                  }
+                }
+              } catch (e) {
+                // Invalid URL, leave as is
               }
             }
             

@@ -213,13 +213,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate random password (8-12 characters, alphanumeric)
+    // Uses rejection sampling to avoid modulo bias
     const generatePassword = () => {
       const length = 10;
       const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let password = '';
-      const randomBytes = crypto.randomBytes(length);
-      for (let i = 0; i < length; i++) {
-        password += charset[randomBytes[i] % charset.length];
+      const charsetLength = charset.length;
+      const maxValidValue = 256 - (256 % charsetLength); // Avoid bias
+      
+      while (password.length < length) {
+        const randomBytes = crypto.randomBytes(length - password.length);
+        for (let i = 0; i < randomBytes.length && password.length < length; i++) {
+          const byte = randomBytes[i];
+          // Rejection sampling: discard values that would cause bias
+          if (byte < maxValidValue) {
+            password += charset[byte % charsetLength];
+          }
+        }
       }
       return password;
     };

@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import { prisma } from '@momentum/database';
 import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 interface PatientRow {
   firstName: string;
@@ -178,8 +179,8 @@ export async function POST(request: NextRequest) {
 
     for (const row of validRows) {
       try {
-        // Generate password for patient portal
-        const temporaryPassword = Math.random().toString(36).slice(-10);
+        // Generate password for patient portal using crypto.randomBytes
+        const temporaryPassword = crypto.randomBytes(8).toString('base64').slice(0, 12);
         const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
 
         // Create user account
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
           data: {
             hospitalId,
             name: `${row.firstName} ${row.lastName}`,
-            email: row.email || `patient${Date.now()}${Math.random().toString(36).slice(2)}@placeholder.com`,
+            email: row.email || `patient${Date.now()}_${crypto.randomBytes(6).toString('hex')}@placeholder.com`,
             hashedPassword: hashedPassword,
             role: 'patient',
           },

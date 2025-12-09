@@ -6,11 +6,17 @@ on:
   pull_request:
     branches: [main, develop]
 
+# Default permissions for all jobs (principle of least privilege)
+permissions:
+  contents: read
+
 jobs:
   # Lint and Type Check
   lint:
     name: Lint & Type Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,6 +48,8 @@ jobs:
     name: Build Application
     runs-on: ubuntu-latest
     needs: lint
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -83,6 +91,8 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     needs: lint
+    permissions:
+      contents: read
     services:
       postgres:
         image: postgres:15
@@ -136,6 +146,8 @@ jobs:
   database:
     name: Database Schema Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     services:
       postgres:
         image: postgres:15
@@ -186,6 +198,8 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -214,6 +228,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, test, database]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

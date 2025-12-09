@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import { prisma } from '@momentum/database';
 import { requireRole, apiResponse, handleApiError } from '@/lib/api-utils';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 interface StaffRow {
   name: string;
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Generate or use provided password
-        const password = row.password || Math.random().toString(36).slice(-12);
+        const password = row.password || crypto.randomBytes(9).toString('base64').slice(0, 12);
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create user

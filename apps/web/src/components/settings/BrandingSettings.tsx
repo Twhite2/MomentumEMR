@@ -28,11 +28,18 @@ export default function BrandingSettings({ hospitalId, initialData }: BrandingSe
   // Convert B2 URL to proxy URL for initial preview
   const getProxiedLogoUrl = (url: string | null | undefined) => {
     if (!url) return null;
-    if (url.includes('backblazeb2.com')) {
-      const urlParts = url.split('/file/emr-uploads/');
-      if (urlParts.length > 1) {
-        return `/api/images/${urlParts[1]}`;
+    try {
+      const parsedUrl = new URL(url);
+      // Validate hostname exactly matches allowed B2 domains
+      const allowedHosts = ['backblazeb2.com', 's3.us-west-004.backblazeb2.com'];
+      if (allowedHosts.includes(parsedUrl.hostname)) {
+        const urlParts = url.split('/file/emr-uploads/');
+        if (urlParts.length > 1) {
+          return `/api/images/${urlParts[1]}`;
+        }
       }
+    } catch (e) {
+      // Invalid URL, return as is
     }
     return url;
   };
