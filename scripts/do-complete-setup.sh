@@ -280,8 +280,9 @@ print_status "PostgreSQL installed and started"
 # Create database and user
 echo ""
 echo "Creating database 'momentum_emr' and user 'momentum_user'..."
-echo "Please enter a secure password for the PostgreSQL user:"
-read -s DB_PASSWORD
+
+# Use same password as user account for simplicity
+DB_PASSWORD="Baridueh2025@"
 
 sudo -u postgres psql << EOF
 CREATE DATABASE momentum_emr;
@@ -292,7 +293,7 @@ ALTER DATABASE momentum_emr OWNER TO momentum_user;
 EOF
 
 print_status "Database 'momentum_emr' created"
-print_status "User 'momentum_user' created with provided password"
+print_status "User 'momentum_user' created with password"
 
 # Save database info to file (readable only by root)
 cat > /root/database_credentials.txt << EOF
@@ -481,13 +482,16 @@ echo "DATABASE CREDENTIALS:"
 echo "---------------------"
 echo "• Database:    momentum_emr"
 echo "• User:        momentum_user"
-echo "• Password:    (saved in /root/database_credentials.txt)"
+echo "• Password:    Baridueh2025@"
+echo "• Connection:  postgresql://momentum_user:Baridueh2025@@localhost:5432/momentum_emr"
 echo ""
 echo "USER CREDENTIALS:"
 echo "-----------------"
 echo "• Username:    momentum"
 echo "• Password:    Baridueh2025@"
 echo "• Purpose:     sudo commands only (NOT for SSH login)"
+echo ""
+echo "NOTE: Same password used for both user and database for simplicity"
 echo ""
 echo "SSH ACCESS:"
 echo "-----------"
@@ -503,9 +507,9 @@ echo "   ssh -i ~/.ssh/digitalocean_emr momentum@$(curl -s ifconfig.me)"
 echo ""
 echo "2. If SSH works, you can safely close this console"
 echo ""
-echo "3. Copy database credentials to your local machine:"
-echo "   sudo cat /root/database_credentials.txt"
-echo "   (Password: Baridueh2025@)"
+echo "3. Database credentials (for your .env file):"
+echo "   DATABASE_URL=postgresql://momentum_user:Baridueh2025@@localhost:5432/momentum_emr"
+echo "   (Also saved in /root/database_credentials.txt)"
 echo ""
 echo "4. Deploy your application:"
 echo "   - Clone repository to /home/momentum/Momentum_EMR"
